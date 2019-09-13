@@ -127,7 +127,7 @@ class NumberValidator(IValidator):
                 ok = False
                 messages.append(f'this instance: {instance} is less than the minimum: {self.minimum}')
         if self.exclusiveMinimum:
-            if instance < self.exclusiveMinimum:
+            if instance <= self.exclusiveMinimum:
                 ok = False
                 messages.append(f'this instance: {instance} is less than or equal to the exclusiveMinimum: {self.exclusiveMinimum}')
 
@@ -165,14 +165,16 @@ class ItemsArrayValidator(IValidator):
     def validate(self, instance):
         children = []
         ok = True
-        for i, validator in enumerate(self.item_validators):
+        i = 0
+        while i < len(self.item_validators):
             if i >= len(instance):
                 break
 
-            res = validator.validate(instance[i])
+            res = self.item_validators[i].validate(instance[i])
             if not res.ok:
                 ok = False
                 children.append(res)
+            i += 1
 
         # additionalItem for the rest of the items in the instance
         if self.additional_item_validator:
