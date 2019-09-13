@@ -276,7 +276,6 @@ class RejectAllValidator(IValidator):
 
 
 def build_validator(schema: typing.Union[dict, bool]) -> IValidator:
-    # TODO(ope): let this accept booleans to generate a schema that accept everything or nothing
     if schema is True or schema == {}:
         return AcceptAllValidator()
     elif schema is False:
