@@ -83,3 +83,25 @@ Need to understand how Json Pointers are used in schemas - have this be a ticket
 * Support comments
 
 I can see myself doing this halfway too instead of implementing the entire spec. Good thing or bad thing to be always doing this?
+
+
+So I got back to this after a while when a new idea occurred to me on how best to approach this.
+Implemented an MVP for Primitive Types and it was so fast to implement that I'm wondering why I used to be so confused.
+
+Next step is to add tests for what I have so far.
+Why didn't I start with tests? Because I am trying out a new architechure and I need to get a feel for it first. I could arguably have
+written the test first though. At least the tests of the public interface. - save a helper validate method and whether it validated correctly
+or not.
+
+Next steps
+* add tests for work so far
+* implement the ArrayValidator - take care that it might contain cycles - though that's impossible right now since I don't support references
+* implement the ObjectValidator - same comment as above
+* implement support for $ref (uses fragment identifiers)
+    * plain names
+    * json pointer
+* deal with cycles - how to detect cycles? - useful to give each instance a "location"?
+* What else? more tests? add annotations? valid schema against metaschema as a first step? add support for more drafts
+* add support for string formatting
+* refactor
+* improve the performance - perform experiments
