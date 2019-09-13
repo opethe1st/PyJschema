@@ -110,7 +110,28 @@ class NumberValidator(IValidator):
         if not isinstance(instance, numbers.Number):
             messages.append('instance is not a number')
             ok = False
-        return ValidationResult(ok=ok)
+        if self.multipleOf:
+            if (instance % self.multipleOf) != 0:
+                ok = False
+                messages.append(f"This instance: {instance} is not a multipleOf {self.multipleOf}")
+        if self.maximum:
+            if self.maximum < instance:
+                ok = False
+                messages.append(f'This instance: {instance} is more than the maximum: {self.maximum}')
+        if self.exclusiveMaximum:
+            if self.exclusiveMaximum <= instance:
+                ok = False
+                messages.append(f'This instance: {instance} is more than or equal the exclusiveMaximum: {self.maximum}')
+        if self.minimum:
+            if instance < self.minimum:
+                ok = False
+                messages.append(f'this instance: {instance} is less than the minimum: {self.minimum}')
+        if self.exclusiveMinimum:
+            if instance < self.exclusiveMinimum:
+                ok = False
+                messages.append(f'this instance: {instance} is less than or equal to the exclusiveMinimum: {self.exclusiveMinimum}')
+
+        return ValidationResult(ok=ok, messages=messages)
 
 
 class BooleanValidator(IValidator):
