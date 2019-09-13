@@ -8,7 +8,6 @@ def validate(schema, instance) -> bool:
     return build_validator(schema=schema).validate(instance).ok
 
 
-# Test that the enumValidator works
 class TestEnum(unittest.TestCase):
     def test_instance_in_enum(self):
         ok = validate(schema={"enum": ["Abc", 1224, ]}, instance="Abc",)
@@ -19,7 +18,6 @@ class TestEnum(unittest.TestCase):
         self.assertFalse(ok)
 
 
-# test that the constValidator works
 class TestConst(unittest.TestCase):
     def test_instance_equal_const(self):
         ok = validate(schema={"const": "ABC"}, instance="ABC",)
@@ -85,9 +83,9 @@ class TestBoolean(unittest.TestCase):
         self.assertFalse(ok)
 
 
-# test that the numberValidator works - success and failure - not implemented yet
 class TestNumber(unittest.TestCase):
 
+    # TODO(ope): add missing tests for (exclusive)maxi(mini)mum
     @parameterized.parameterized.expand(
         [
             ("is number", {"type": "number"}, 123),
@@ -104,6 +102,42 @@ class TestNumber(unittest.TestCase):
             ("multipleOf", {"type": "number", "multipleOf": 4}, 123),
         ]
 
+    )
+    def test_false(self, name, schema, instance):
+        self.assertFalse(validate(schema=schema, instance=instance))
+
+
+class TestArrayValidation(unittest.TestCase):
+
+    @parameterized.parameterized.expand(
+        [
+            ('items', {"type": "array", "items": {"type": "string"}}, ['blah', 'balh2']),
+            ('nested array', {"type": "array", "items": {"type": "array", "items": {"type": "string"}}}, [["s1", "s2"]]),
+            ('items array', {"type": "array", "items": [{"type": "string"}]}, ["s1", "s2", 123]),
+            (
+                'items array with different types',
+                {"type": "array", "items": [{"type": "string"}, {"type": "string"}, {"type": "number"}]},
+                ["s1", "s2", 123]
+            ),
+            ('minItems', {"type": "array", "minItems": 1}, ["blah"]),
+            ('maxItems', {"type": "array", "maxItems": 1}, ["blah"]),
+            ('uniqueItems true', {"type": "array", "uniqueItems": True}, ["bakh", "blahs"]),
+            ('uniqueItems true with empty array', {"type": "array", "uniqueItems": True}, []),
+            ('uniqueItems false', {"type": "array", "uniqueItems": False}, ["aa", "aa"]),
+        ]
+    )
+    def test_true(self, name, schema, instance):
+        self.assertTrue(validate(schema=schema, instance=instance))
+
+    @parameterized.parameterized.expand(
+        [
+            ('is list', {"type": "array"}, "not an array"),
+            ('items', {"type": "array", "items": {"type": "string"}}, ['blah', 123]),
+            ('minItems', {"type": "array", "minItems": 1}, []),
+            ('maxItems', {"type": "array", "maxItems": 1}, ["balh", "blah2"]),
+            ('uniqueItems with arrays since arrays are not hashable', {"type": "array", "uniqueItems": True}, [["k1", "v1"], ["k1", "v1"]]),
+            ('uniqueItems with objects since objects are not hashable', {"type": "array", "uniqueItems": True}, [{"k1": "v1"}, {"k1": "v1"}]),
+        ]
     )
     def test_false(self, name, schema, instance):
         self.assertFalse(validate(schema=schema, instance=instance))

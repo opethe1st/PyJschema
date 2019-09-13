@@ -157,7 +157,107 @@ class NullValidator(IValidator):
             return ValidationResult(ok=False)
 
 
+class ItemsArrayValidator(IValidator):
+    def __init__(self, **kwargs):
+        self.item_validators = [build_validator(value) for value in kwargs.get("items", [])]
+        self.additional_item_validator = build_validator(kwargs['additionalItems']) if kwargs.get('additionalItems') else None
+
+    def validate(self, instance):
+        children = []
+        ok = True
+        for i, validator in enumerate(self.item_validators):
+            if i >= len(instance):
+                break
+
+            res = validator.validate(instance[i])
+            if not res.ok:
+                ok = False
+                children.append(res)
+
+        # additionalItem for the rest of the items in the instance
+        if self.additional_item_validator:
+            while i < len(instance):
+                res = self.additional_item_validator.validate(instance[i])
+                if not res.ok:
+                    ok = False
+                    children.append(res)
+                i += 1
+
+        return ValidationResult(ok=ok, children=children)
+
+
+class ItemsValidator(IValidator):
+    def __init__(self, **kwargs):
+        self.values_validator = build_validator(kwargs.get("items"))
+
+    def validate(self, instance):
+        children = []
+        ok = True
+        for value in instance:
+            res = self.values_validator.validate(value)
+            if not res.ok:
+                ok = False
+                children.append(res)
+
+        return ValidationResult(ok=ok, children=children)
+
+
+class ArrayValidator(IValidator):
+    def __init__(self, **kwargs):
+        self.items_validator = None
+        if 'items' in kwargs:
+            if isinstance(kwargs['items'], list):
+                self.items_validator = ItemsArrayValidator(items=kwargs['items'], additionalItems=kwargs.get('additionalItems'))
+            else:
+                self.items_validator = ItemsValidator(items=kwargs['items'])
+        self.minItems = None
+        if 'minItems' in kwargs:
+            self.minItems = kwargs.pop('minItems')
+
+        self.maxItems = None
+        if 'maxItems' in kwargs:
+            # does modifying like this lead to weird side-effects?
+            self.maxItems = kwargs.pop('maxItems')
+
+        self.uniqueItems = None
+        if 'uniqueItems' in kwargs:
+            # should probably make this, such that if not true, no need to save.
+            self.uniqueItems = kwargs.pop('uniqueItems')
+
+    def validate(self, instance):
+        messages = []
+        children = []
+        ok = True
+        if not isinstance(instance, list):
+            ok = False
+            messages.append("instance is not an instance of a list")
+
+        if self.items_validator:
+            res = self.items_validator.validate(instance)
+            if not res.ok:
+                ok = False
+                children.append(res)
+        if self.minItems:
+            if len(instance) < self.minItems:
+                ok = False
+                messages.append(f"length {len(instance)} is less than minItems {self.minItems}")
+        if self.maxItems:
+            if self.maxItems < len(instance):
+                ok = False
+                messages.append(f"length {len(instance)} is greater than maxItems {self.maxItems}")
+
+        if self.uniqueItems:
+            # this should work well enough I think but who knows
+            itemsset = set([str(value) for value in instance])
+            if len(itemsset) != len(instance):
+                ok = False
+                messages.append(f"Not all items in this instance: {instance} are unique")
+
+        return ValidationResult(ok=ok, messages=messages, children=children)
+
+
 def build_validator(schema: dict) -> IValidator:
+    # TODO(ope): let this accept booleans to generate a schema that accept everything or nothing
     instance_validator = InstanceValidator()
     if 'const' in schema:
         instance_validator.add_validator(ConstValidator(value=schema['const']))
@@ -168,7 +268,8 @@ def build_validator(schema: dict) -> IValidator:
             'string': StringValidator,
             'number': NumberValidator,
             'boolean': BooleanValidator,
-            'null': NullValidator
+            'null': NullValidator,
+            "array": ArrayValidator,
         }
 
         if schema['type'] in schema_type_to_validator:
