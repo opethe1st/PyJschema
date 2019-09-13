@@ -11,48 +11,22 @@ def validate(schema, instance) -> bool:
 # Test that the enumValidator works
 class TestEnum(unittest.TestCase):
     def test_instance_in_enum(self):
-        ok = validate(
-            schema={
-                "enum": [
-                    "Abc",
-                    1224,
-                ]
-            },
-            instance="Abc",
-        )
+        ok = validate(schema={"enum": ["Abc", 1224, ]}, instance="Abc",)
         self.assertTrue(ok)
 
     def test_instance_not_in_enum(self):
-        ok = validate(
-            schema={
-                "enum": [
-                    "Abc",
-                    1244
-                ]
-            },
-            instance=123,
-        )
+        ok = validate(schema={"enum": ["Abc", 1244]}, instance=123,)
         self.assertFalse(ok)
 
 
 # test that the constValidator works
 class TestConst(unittest.TestCase):
     def test_instance_equal_const(self):
-        ok = validate(
-            schema={
-                "const": "ABC"
-            },
-            instance="ABC",
-        )
+        ok = validate(schema={"const": "ABC"}, instance="ABC",)
         self.assertTrue(ok)
 
     def test_instance_not_equal_const(self):
-        ok = validate(
-            schema={
-                "const": "DEF"
-            },
-            instance=123,
-        )
+        ok = validate(schema={"const": "DEF"}, instance=123,)
         self.assertFalse(ok)
 
 
@@ -67,96 +41,47 @@ class TestNull(unittest.TestCase):
         self.assertTrue(ok)
 
     def test_instance_not_null(self):
-        ok = validate(
-            schema={
-                "type": "null"
-            },
-            instance=123,
-        )
+        ok = validate(schema={"type": "null"}, instance=123,)
         self.assertFalse(ok)
 
 
 class TestString(unittest.TestCase):
-    def test_is_a_string(self):
-        ok = validate(
-            schema={
-                "type": "string"
-            },
-            instance="abc",
-        )
-        self.assertTrue(ok)
 
-    def test_not_a_string(self):
-        ok = validate(
-            schema={
-                "type": "string"
-            },
-            instance=123,
-        )
-        self.assertFalse(ok)
+    @parameterized.parameterized.expand(
+        [
+            ('is a string', {'type': "string"}, "abc"),
+            ('pattern', {'type': "string", "pattern": "abc"}, "abcmatch"),
+            ('all keywords', {'type': "string", "pattern": "abc", "minLength": 1, "maxLength": 10}, "abcmatch"),
+        ]
+    )
+    def test_true(self, name, schema, instance):
+        self.assertTrue(validate(schema=schema, instance=instance))
 
-    def test_less_than_minimum(self):
-        ok = validate(
-            schema={'type': "string", "minLength": 100},
-            instance="tooshort"
-        )
-        self.assertFalse(ok)
-
-    def test_more_than_minimum(self):
-        ok = validate(
-            schema={'type': "string", "maxLength": 1},
-            instance="tooslong"
-        )
-        self.assertFalse(ok)
-
-    def test_not_matching_pattern(self):
-        ok = validate(
-            schema={'type': "string", "pattern": "abc"},
-            instance="123match"
-        )
-        self.assertFalse(ok)
-
-    def test_matching_pattern(self):
-        ok = validate(
-            schema={'type': "string", "pattern": "abc"},
-            instance="abcmatch"
-        )
-        self.assertTrue(ok)
-
-    def test_all_keyword_valid(self):
-        ok = validate(
-            schema={'type': "string", "pattern": "abc", "minLength": 1, "maxLength": 10},
-            instance="abcmatch"
-        )
-        self.assertTrue(ok)
+    @parameterized.parameterized.expand(
+        [
+            ('not a string', {'type': "string"}, 123),
+            ("mininum", {'type': "string", "minLength": 100}, "tooshort"),
+            ("maximum", {'type': "string", "maxLength": 1}, "toolong"),
+            ("pattern", {'type': "string", "pattern": "abc"}, "123match"),
+        ]
+    )
+    def test_false(self, name, schema, instance):
+        self.assertFalse(validate(schema=schema, instance=instance))
 
 
 class TestBoolean(unittest.TestCase):
-    def test_instance_true(self):
-        ok = validate(
-            schema={
-                "type": "boolean"
-            },
-            instance=True,
-        )
-        self.assertTrue(ok)
+    @parameterized.parameterized.expand(
+        [
+            ("true", {"type": "boolean"}, True),
+            ("boolean", {"type": "boolean"}, False),
+        ]
 
-    def test_instance_false(self):
-        ok = validate(
-            schema={
-                "type": "boolean"
-            },
-            instance=False,
-        )
-        self.assertTrue(ok)
+    )
+    def test_instance_true(self, name, schema, instance):
+        self.assertTrue(validate(schema=schema, instance=instance))
 
     def test_instance_not_boolean(self):
-        ok = validate(
-            schema={
-                "type": "boolean"
-            },
-            instance=123,
-        )
+        ok = validate(schema={"type": "boolean"}, instance=123,)
         self.assertFalse(ok)
 
 
