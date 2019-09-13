@@ -90,6 +90,10 @@ class TestNumber(unittest.TestCase):
         [
             ("is number", {"type": "number"}, 123),
             ("multipleOf", {"type": "number", "multipleOf": 3}, 123),
+            ("minimum", {"type": "number", "minimum": 3}, 3),
+            ("exclusiveMinimum", {"type": "number", "exclusiveMinimum": 3}, 4),
+            ("maximum", {"type": "number", "maximum": 3}, 3),
+            ("exclusiveMaximum", {"type": "number", "exclusiveMaximum": 5}, 4),
         ]
 
     )
@@ -100,6 +104,10 @@ class TestNumber(unittest.TestCase):
         [
             ("is not number", {"type": "number"}, '123'),
             ("multipleOf", {"type": "number", "multipleOf": 4}, 123),
+            ("minimum", {"type": "number", "minimum": 124}, 123),
+            ("exclusiveMinimum", {"type": "number", "exclusiveMinimum": 124}, 124),
+            ("maximum", {"type": "number", "maximum": 123}, 124),
+            ("exclusiveMaximum", {"type": "number", "exclusiveMaximum": 124}, 124),
         ]
 
     )
@@ -114,10 +122,20 @@ class TestArrayValidation(unittest.TestCase):
             ('items', {"type": "array", "items": {"type": "string"}}, ['blah', 'balh2']),
             ('nested array', {"type": "array", "items": {"type": "array", "items": {"type": "string"}}}, [["s1", "s2"]]),
             ('items array', {"type": "array", "items": [{"type": "string"}]}, ["s1", "s2", 123]),
+            ('items array', {"type": "array", "items": [{"type": "string"}, {"type": "string"}]}, ["s1"]),
             (
                 'items array with different types',
                 {"type": "array", "items": [{"type": "string"}, {"type": "string"}, {"type": "number"}]},
                 ["s1", "s2", 123]
+            ),
+            (
+                'items array with additionalItems',
+                {
+                    "type": "array",
+                    "items": [{"type": "string"}],
+                    "additionalItems": {"type": "number"}
+                },
+                ["s1", 123, 123]
             ),
             ('minItems', {"type": "array", "minItems": 1}, ["blah"]),
             ('maxItems', {"type": "array", "maxItems": 1}, ["blah"]),
@@ -133,8 +151,18 @@ class TestArrayValidation(unittest.TestCase):
         [
             ('is list', {"type": "array"}, "not an array"),
             ('items', {"type": "array", "items": {"type": "string"}}, ['blah', 123]),
+            ('items', {"type": "array", "items": [{"type": "string"}]}, [123]),
             ('minItems', {"type": "array", "minItems": 1}, []),
             ('maxItems', {"type": "array", "maxItems": 1}, ["balh", "blah2"]),
+            (
+                'items array with additionalItems',
+                {
+                    "type": "array",
+                    "items": [{"type": "string"}],
+                    "additionalItems": {"type": "number"}
+                },
+                ["s1", '123', 123]
+            ),
             ('uniqueItems with arrays since arrays are not hashable', {"type": "array", "uniqueItems": True}, [["k1", "v1"], ["k1", "v1"]]),
             ('uniqueItems with objects since objects are not hashable', {"type": "array", "uniqueItems": True}, [{"k1": "v1"}, {"k1": "v1"}]),
         ]
