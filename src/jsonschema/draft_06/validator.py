@@ -242,7 +242,6 @@ class ArrayValidator(IValidator):
         if 'uniqueItems' in kwargs:
             # should probably make this, such that if not true, no need to save.
             self.uniqueItems = kwargs.pop('uniqueItems')
-        # TODO(ope) - add support for the contains keyword
         self.contains_validator = None
         if 'contains' in kwargs:
             self.contains_validator = ContainsValidator(value=kwargs.pop('contains'))
