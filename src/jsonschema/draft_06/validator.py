@@ -11,7 +11,6 @@ JsonType = typing.Union[str, numbers.Number, bool, None, ca.Mapping, ca.Sequence
 
 class IValidator(abc.ABC):
 
-    @abc.abstractmethod
     def __init__(self, **kwargs):
         pass
 
@@ -52,7 +51,7 @@ class ConstValidator(IValidator):
         if instance == self.value:
             return ValidationResult(ok=True)
         else:
-            # I should add message
+            # TODO I should add message
             return ValidationResult(ok=False)
 
 
@@ -64,7 +63,7 @@ class EnumValidator(IValidator):
         if instance in self.values:
             return ValidationResult(ok=True)
         else:
-            # I should add message
+            # TODO I should add message
             return ValidationResult(ok=False)
 
 
@@ -135,8 +134,6 @@ class NumberValidator(IValidator):
 
 
 class BooleanValidator(IValidator):
-    def __init__(self, **kwargs):
-        pass
 
     def validate(self, instance):
         # is this faster than an isinstance check?
@@ -147,8 +144,6 @@ class BooleanValidator(IValidator):
 
 
 class NullValidator(IValidator):
-    def __init__(self, **kwargs):
-        pass
 
     def validate(self, instance):
         if instance is None:
@@ -285,16 +280,12 @@ class ArrayValidator(IValidator):
 
 
 class AcceptAllValidator(IValidator):
-    def __init__(self, **kwargs):
-        pass
 
     def validate(self, instance):
         return ValidationResult(ok=True)
 
 
 class RejectAllValidator(IValidator):
-    def __init__(self, **kwargs):
-        pass
 
     def validate(self, instance):
         return ValidationResult(ok=False, messages=["This fails for every value"])
