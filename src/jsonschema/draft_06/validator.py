@@ -190,6 +190,7 @@ class ItemsArrayValidator(IValidator):
 
 class ItemsValidator(IValidator):
     def __init__(self, **kwargs):
+        #  TODO should this be -> build_validator(kwargs["items"])
         self.values_validator = build_validator(kwargs.get("items"))
 
     def validate(self, instance):
@@ -202,6 +203,22 @@ class ItemsValidator(IValidator):
                 children.append(res)
 
         return ValidationResult(ok=ok, children=children)
+
+
+class ContainsValidator(IValidator):
+    def __init__(self, **kwargs):
+        self.value_validator = build_validator(kwargs['value'])
+
+    def validate(self, instance):
+        ok = False
+        for value in instance:
+            res = self.value_validator.validate(value)
+            if res.ok:
+                ok = True
+        if ok:
+            return ValidationResult(ok=True)
+        else:
+            return ValidationResult(ok=False, messages=["No item in this array matches the schema in the contains keyword"])
 
 
 class ArrayValidator(IValidator):
@@ -225,7 +242,9 @@ class ArrayValidator(IValidator):
         if 'uniqueItems' in kwargs:
             # should probably make this, such that if not true, no need to save.
             self.uniqueItems = kwargs.pop('uniqueItems')
-        # TODO(ope) - add support for the contains keyword
+        self.contains_validator = None
+        if 'contains' in kwargs:
+            self.contains_validator = ContainsValidator(value=kwargs.pop('contains'))
 
     def validate(self, instance):
         messages = []
@@ -255,6 +274,12 @@ class ArrayValidator(IValidator):
             if len(itemsset) != len(instance):
                 ok = False
                 messages.append(f"Not all items in this instance: {instance} are unique")
+
+        if self.contains_validator:
+            res = self.contains_validator.validate(instance)
+            if not res.ok:
+                ok = False
+                children.append(res)
 
         return ValidationResult(ok=ok, messages=messages, children=children)
 
