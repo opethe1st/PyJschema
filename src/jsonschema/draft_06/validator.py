@@ -210,6 +210,19 @@ class ArrayValidator(IValidator):
                 self.items_validator = ItemsArrayValidator(items=kwargs['items'], additionalItems=kwargs.get('additionalItems'))
             else:
                 self.items_validator = ItemsValidator(items=kwargs['items'])
+        self.minItems = None
+        if 'minItems' in kwargs:
+            self.minItems = kwargs.pop('minItems')
+
+        self.maxItems = None
+        if 'maxItems' in kwargs:
+            # does modifying like this lead to weird side-effects?
+            self.maxItems = kwargs.pop('maxItems')
+
+        self.uniqueItems = None
+        if 'uniqueItems' in kwargs:
+            # should probably make this, such that if not true, no need to save.
+            self.uniqueItems = kwargs.pop('uniqueItems')
 
     def validate(self, instance):
         messages = []
@@ -224,6 +237,21 @@ class ArrayValidator(IValidator):
             if not res.ok:
                 ok = False
                 children.append(res)
+        if self.minItems:
+            if len(instance) < self.minItems:
+                ok = False
+                messages.append(f"length {len(instance)} is less than minItems {self.minItems}")
+        if self.maxItems:
+            if self.maxItems < len(instance):
+                ok = False
+                messages.append(f"length {len(instance)} is greater than maxItems {self.maxItems}")
+
+        if self.uniqueItems:
+            # this should work well enough I think but who knows
+            itemsset = set([str(value) for value in instance])
+            if len(itemsset) != len(instance):
+                ok = False
+                messages.append(f"Not all items in this instance: {instance} are unique")
 
         return ValidationResult(ok=ok, messages=messages, children=children)
 
