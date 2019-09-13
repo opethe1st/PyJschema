@@ -1,5 +1,7 @@
-from jsonschema.draft_06.validator import build_validator
 import unittest
+
+import parameterized
+from jsonschema.draft_06.validator import build_validator
 
 
 def validate(schema, instance) -> bool:
@@ -159,4 +161,24 @@ class TestBoolean(unittest.TestCase):
 
 
 # test that the numberValidator works - success and failure - not implemented yet
-# test that the instanceValidator works - success and failure
+class TestNumber(unittest.TestCase):
+
+    @parameterized.parameterized.expand(
+        [
+            ("is number", {"type": "number"}, 123),
+            ("multipleOf", {"type": "number", "multipleOf": 3}, 123),
+        ]
+
+    )
+    def test_true(self, name, schema, instance):
+        self.assertTrue(validate(schema=schema, instance=instance))
+
+    @parameterized.parameterized.expand(
+        [
+            ("is not number", {"type": "number"}, '123'),
+            ("multipleOf", {"type": "number", "multipleOf": 4}, 123),
+        ]
+
+    )
+    def test_false(self, name, schema, instance):
+        self.assertFalse(validate(schema=schema, instance=instance))
