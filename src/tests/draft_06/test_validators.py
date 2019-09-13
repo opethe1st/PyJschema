@@ -85,7 +85,6 @@ class TestBoolean(unittest.TestCase):
 
 class TestNumber(unittest.TestCase):
 
-    # TODO(ope): add missing tests for (exclusive)maxi(mini)mum
     @parameterized.parameterized.expand(
         [
             ("is number", {"type": "number"}, 123),
@@ -168,4 +167,49 @@ class TestArrayValidation(unittest.TestCase):
         ]
     )
     def test_false(self, name, schema, instance):
+        self.assertFalse(validate(schema=schema, instance=instance))
+
+
+class TestTrue(unittest.TestCase):
+
+    @parameterized.parameterized.expand(
+        [
+            ("random int", True, 1234),
+            ("random string", True, "1234"),
+            ("null", True, None),
+            ("false", True, False),
+            ("array with different stuff", True, [False, 1, "1224"]),
+            ("object with different stuff", True, {"k1": 123, "k2": "v1"}),
+        ]
+    )
+    def test_true(self, name, schema, instance):
+        self.assertTrue(validate(schema=schema, instance=instance))
+
+    @parameterized.parameterized.expand(
+        [
+            ("random int", {}, 1234),
+            ("random string", {}, "1234"),
+            ("null", {}, None),
+            ("false", {}, False),
+            ("array with different stuff", {}, [False, 1, "1224"]),
+            ("object with different stuff", {}, {"k1": 123, "k2": "v1"}),
+        ]
+    )
+    def test_empty_schema(self, name, schema, instance):
+        self.assertTrue(validate(schema=schema, instance=instance))
+
+
+class TestFalse(unittest.TestCase):
+
+    @parameterized.parameterized.expand(
+        [
+            ("random int", False, 1234),
+            ("random string", False, "1234"),
+            ("null", False, None),
+            ("false", False, False),
+            ("array with different stuff", False, [False, 1, "1224"]),
+            ("object with different stuff", False, {"k1": 123, "k2": "v1"}),
+        ]
+    )
+    def test_true(self, name, schema, instance):
         self.assertFalse(validate(schema=schema, instance=instance))

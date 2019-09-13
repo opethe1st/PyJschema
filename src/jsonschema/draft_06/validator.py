@@ -259,8 +259,30 @@ class ArrayValidator(IValidator):
         return ValidationResult(ok=ok, messages=messages, children=children)
 
 
-def build_validator(schema: dict) -> IValidator:
-    # TODO(ope): let this accept booleans to generate a schema that accept everything or nothing
+class AcceptAllValidator(IValidator):
+    def __init__(self, **kwargs):
+        pass
+
+    def validate(self, instance):
+        return ValidationResult(ok=True)
+
+
+class RejectAllValidator(IValidator):
+    def __init__(self, **kwargs):
+        pass
+
+    def validate(self, instance):
+        return ValidationResult(ok=False, messages=["This fails for every value"])
+
+
+def build_validator(schema: typing.Union[dict, bool]) -> IValidator:
+    if schema is True or schema == {}:
+        return AcceptAllValidator()
+    elif schema is False:
+        return RejectAllValidator()
+    if not isinstance(schema, dict):
+        raise Exception("schema must be either a boolean or a dictionary")
+
     instance_validator = InstanceValidator()
     if 'const' in schema:
         instance_validator.add_validator(ConstValidator(value=schema['const']))
