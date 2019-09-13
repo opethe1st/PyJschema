@@ -107,3 +107,84 @@ class TestNumber(unittest.TestCase):
     )
     def test_false(self, name, schema, instance):
         self.assertFalse(validate(schema=schema, instance=instance))
+
+
+# test that basic itemsValidation
+class TestArrayValidation(unittest.TestCase):
+
+    def test_instance_not_list(self):
+        ok = validate(
+            schema={
+                "type": "array"
+            },
+            instance='blah',
+        )
+        self.assertFalse(ok)
+
+    def test_instance_is_list(self):
+        ok = validate(
+            schema={
+                "type": "array"
+            },
+            instance=['blah'],
+        )
+        self.assertTrue(ok)
+
+    def test_instance_with_items_valid(self):
+        ok = validate(
+            schema={
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            },
+            instance=['blah', 'balh2'],
+        )
+        self.assertTrue(ok)
+
+    def test_instance_with_items_invalid(self):
+        ok = validate(
+            schema={
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            },
+            instance=['blah', 124],
+        )
+        self.assertFalse(ok)
+
+    def test_instance_with_nested_array_valid(self):
+        ok = validate(
+            schema={
+                "type": "array",
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            },
+            instance=[["s1", "s2"]],
+        )
+        self.assertTrue(ok)
+
+    def test_with_items_array(self):
+        ok = validate(
+            schema={
+                "type": "array",
+                "items": [{"type": "string"}]
+            },
+            instance=["s1", "s2", 123],
+        )
+        self.assertTrue(ok)
+
+    def test_with_additional_items_array(self):
+        ok = validate(
+            schema={
+                "type": "array",
+                "items": [{"type": "string"}, {"type": "string"}, {"type": "number"}]
+            },
+            instance=["s1", "s2", 123],
+        )
+        self.assertTrue(ok)
