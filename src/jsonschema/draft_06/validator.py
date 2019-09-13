@@ -3,7 +3,8 @@ import collections.abc as ca
 import numbers
 import typing
 
-from common import ValidationResult
+from jsonschema.common import ValidationResult
+
 
 JsonType = typing.Union[str, numbers.Number, bool, None, ca.Mapping, ca.Sequence]
 
@@ -21,8 +22,7 @@ class IValidator(abc.ABC):
 
 class InstanceValidator(IValidator):
 
-    def __init__(self, schema=None):
-        self._validator = build_validator(schema)
+    def __init__(self):
         self._sub_validators = []
 
     def add_validator(self, validator):
@@ -77,6 +77,9 @@ class StringValidator(IValidator):
     def validate(self, instance):
         messages = []
         ok = True
+        if not isinstance(instance, str):
+            messages.append('instance is not a string')
+            ok = False
         if self.minLength:
             if len(instance) < self.minLength:
                 messages.append('instance is too short')
@@ -102,7 +105,12 @@ class NumberValidator(IValidator):
         self.exclusiveMinimum = kwargs.get('exclusiveMinimum')
 
     def validate(self, instance):
-        return ValidationResult(ok=True)
+        messages = []
+        ok = True
+        if not isinstance(instance, numbers.Number):
+            messages.append('instance is not a number')
+            ok = False
+        return ValidationResult(ok=ok)
 
 
 class BooleanValidator(IValidator):
@@ -114,7 +122,7 @@ class BooleanValidator(IValidator):
         if (instance is True) or (instance is False):
             return ValidationResult(ok=True)
         else:
-            return ValidationResult(ok=False)
+            return ValidationResult(ok=False, messages=['instance is not a valid boolean'])
 
 
 class NullValidator(IValidator):
