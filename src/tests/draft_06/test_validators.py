@@ -141,6 +141,7 @@ class TestArrayValidation(unittest.TestCase):
             ('uniqueItems true', {"type": "array", "uniqueItems": True}, ["bakh", "blahs"]),
             ('uniqueItems true with empty array', {"type": "array", "uniqueItems": True}, []),
             ('uniqueItems false', {"type": "array", "uniqueItems": False}, ["aa", "aa"]),
+            ('contains', {"type": "array", "contains": {"type": "string"}}, [123, 124, "aa"]),
         ]
     )
     def test_true(self, name, schema, instance):
@@ -164,6 +165,7 @@ class TestArrayValidation(unittest.TestCase):
             ),
             ('uniqueItems with arrays since arrays are not hashable', {"type": "array", "uniqueItems": True}, [["k1", "v1"], ["k1", "v1"]]),
             ('uniqueItems with objects since objects are not hashable', {"type": "array", "uniqueItems": True}, [{"k1": "v1"}, {"k1": "v1"}]),
+            ('contains', {"type": "array", "contains": {"type": "string"}}, [123, 124, 1234]),
         ]
     )
     def test_false(self, name, schema, instance):
