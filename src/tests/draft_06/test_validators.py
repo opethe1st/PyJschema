@@ -85,6 +85,7 @@ class TestBoolean(unittest.TestCase):
 
 class TestNumber(unittest.TestCase):
 
+    # TODO(ope): add missing tests for (exclusive)maxi(mini)mum
     @parameterized.parameterized.expand(
         [
             ("is number", {"type": "number"}, 123),
