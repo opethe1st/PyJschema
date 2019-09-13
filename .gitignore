@@ -1,0 +1,17 @@
+# build
+*egg-info*
+**/*.pyc
+**/__pycache__
+
+# code quality
+.pytest*
+.coverage
+htmlcov
+.mypy*
+
+# environment
+.venv
+.tox
+
+# editor
+.vscode
