@@ -347,8 +347,7 @@ class Object(AValidator):
             )
 
 
-# TODO(ope); rename this to Validator?
-class InstanceValidator(AValidator):
+class Validator(AValidator):
 
     def __init__(self):
         self._validators = []
@@ -374,7 +373,7 @@ class InstanceValidator(AValidator):
             )
 
 
-def build_validator(schema: typing.Union[dict, bool]) -> AValidator:
+def build_validator(schema: typing.Union[dict, bool]) -> typing.Union[AcceptAll, RejectAll, Validator]:
     if schema is True or schema == {}:
         return AcceptAll()
     elif schema is False:
@@ -382,11 +381,11 @@ def build_validator(schema: typing.Union[dict, bool]) -> AValidator:
     if not isinstance(schema, dict):
         raise Exception("schema must be either a boolean or a dictionary")
 
-    instance_validator = InstanceValidator()
+    validator = Validator()
     if 'const' in schema:
-        instance_validator.add_validator(Const(value=schema['const']))
+        validator.add_validator(Const(value=schema['const']))
     if 'enum' in schema:
-        instance_validator.add_validator(Enum(values=schema['enum']))
+        validator.add_validator(Enum(values=schema['enum']))
     if 'type' in schema:
         schema_type_to_validator: typing.Dict[str, typing.Type[AValidator]] = {
             'string': String,
@@ -398,14 +397,14 @@ def build_validator(schema: typing.Union[dict, bool]) -> AValidator:
         }
 
         if schema['type'] in schema_type_to_validator:
-            instance_validator.add_validator(
+            validator.add_validator(
                 schema_type_to_validator[schema['type']](**schema)
             )
 
-    return instance_validator
+    return validator
 
 
-# TODO(ope); add validate_once that's a convenient function
+# TODO(ope); add validate_once that's a convenience function
 # def validate_once(schema, instance):
 #     validator = build_validator(schema)
 #     return validator.validate(instance)
