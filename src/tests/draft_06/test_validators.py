@@ -1,45 +1,42 @@
 import unittest
 
 import parameterized
-from jsonschema.draft_06.validator import build_validator
 
-
-def validate(schema, instance) -> bool:
-    return build_validator(schema=schema).validate(instance).ok
+from jsonschema.draft_06.validator import validate_once
 
 
 class TestEnum(unittest.TestCase):
     def test_instance_in_enum(self):
-        ok = validate(schema={"enum": ["Abc", 1224, ]}, instance="Abc",)
+        ok = validate_once(schema={"enum": ["Abc", 1224, ]}, instance="Abc",).ok
         self.assertTrue(ok)
 
     def test_instance_not_in_enum(self):
-        ok = validate(schema={"enum": ["Abc", 1244]}, instance=123,)
+        ok = validate_once(schema={"enum": ["Abc", 1244]}, instance=123,).ok
         self.assertFalse(ok)
 
 
 class TestConst(unittest.TestCase):
     def test_instance_equal_const(self):
-        ok = validate(schema={"const": "ABC"}, instance="ABC",)
+        ok = validate_once(schema={"const": "ABC"}, instance="ABC",).ok
         self.assertTrue(ok)
 
     def test_instance_not_equal_const(self):
-        ok = validate(schema={"const": "DEF"}, instance=123,)
+        ok = validate_once(schema={"const": "DEF"}, instance=123,).ok
         self.assertFalse(ok)
 
 
 class TestNull(unittest.TestCase):
     def test_instance_null(self):
-        ok = validate(
+        ok = validate_once(
             schema={
                 "type": "null"
             },
             instance=None,
-        )
+        ).ok
         self.assertTrue(ok)
 
     def test_instance_not_null(self):
-        ok = validate(schema={"type": "null"}, instance=123,)
+        ok = validate_once(schema={"type": "null"}, instance=123,).ok
         self.assertFalse(ok)
 
 
@@ -53,7 +50,7 @@ class TestString(unittest.TestCase):
         ]
     )
     def test_true(self, name, schema, instance):
-        self.assertTrue(validate(schema=schema, instance=instance))
+        self.assertTrue(validate_once(schema=schema, instance=instance).ok)
 
     @parameterized.parameterized.expand(
         [
@@ -64,7 +61,7 @@ class TestString(unittest.TestCase):
         ]
     )
     def test_false(self, name, schema, instance):
-        self.assertFalse(validate(schema=schema, instance=instance))
+        self.assertFalse(validate_once(schema=schema, instance=instance).ok)
 
 
 class TestBoolean(unittest.TestCase):
@@ -76,10 +73,10 @@ class TestBoolean(unittest.TestCase):
 
     )
     def test_instance_true(self, name, schema, instance):
-        self.assertTrue(validate(schema=schema, instance=instance))
+        self.assertTrue(validate_once(schema=schema, instance=instance).ok)
 
     def test_instance_not_boolean(self):
-        ok = validate(schema={"type": "boolean"}, instance=123,)
+        ok = validate_once(schema={"type": "boolean"}, instance=123,).ok
         self.assertFalse(ok)
 
 
@@ -97,7 +94,7 @@ class TestNumber(unittest.TestCase):
 
     )
     def test_true(self, name, schema, instance):
-        self.assertTrue(validate(schema=schema, instance=instance))
+        self.assertTrue(validate_once(schema=schema, instance=instance).ok)
 
     @parameterized.parameterized.expand(
         [
@@ -111,7 +108,7 @@ class TestNumber(unittest.TestCase):
 
     )
     def test_false(self, name, schema, instance):
-        self.assertFalse(validate(schema=schema, instance=instance))
+        self.assertFalse(validate_once(schema=schema, instance=instance).ok)
 
 
 class TestArrayValidation(unittest.TestCase):
@@ -145,7 +142,7 @@ class TestArrayValidation(unittest.TestCase):
         ]
     )
     def test_true(self, name, schema, instance):
-        self.assertTrue(validate(schema=schema, instance=instance))
+        self.assertTrue(validate_once(schema=schema, instance=instance).ok)
 
     @parameterized.parameterized.expand(
         [
@@ -169,7 +166,7 @@ class TestArrayValidation(unittest.TestCase):
         ]
     )
     def test_false(self, name, schema, instance):
-        self.assertFalse(validate(schema=schema, instance=instance))
+        self.assertFalse(validate_once(schema=schema, instance=instance).ok)
 
 
 class TestObject(unittest.TestCase):
@@ -261,7 +258,7 @@ class TestObject(unittest.TestCase):
         ]
     )
     def test_true(self, name, schema, instance):
-        self.assertTrue(validate(schema=schema, instance=instance))
+        self.assertTrue(validate_once(schema=schema, instance=instance).ok)
 
     @parameterized.parameterized.expand(
         [
@@ -353,7 +350,7 @@ class TestObject(unittest.TestCase):
         ]
     )
     def test_false(self, name, schema, instance):
-        self.assertFalse(validate(schema=schema, instance=instance))
+        self.assertFalse(validate_once(schema=schema, instance=instance).ok)
 
 
 class TestTrue(unittest.TestCase):
@@ -369,7 +366,7 @@ class TestTrue(unittest.TestCase):
         ]
     )
     def test_true(self, name, schema, instance):
-        self.assertTrue(validate(schema=schema, instance=instance))
+        self.assertTrue(validate_once(schema=schema, instance=instance).ok)
 
     @parameterized.parameterized.expand(
         [
@@ -382,7 +379,7 @@ class TestTrue(unittest.TestCase):
         ]
     )
     def test_empty_schema(self, name, schema, instance):
-        self.assertTrue(validate(schema=schema, instance=instance))
+        self.assertTrue(validate_once(schema=schema, instance=instance).ok)
 
 
 class TestFalse(unittest.TestCase):
@@ -398,4 +395,4 @@ class TestFalse(unittest.TestCase):
         ]
     )
     def test_true(self, name, schema, instance):
-        self.assertFalse(validate(schema=schema, instance=instance))
+        self.assertFalse(validate_once(schema=schema, instance=instance).ok)
