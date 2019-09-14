@@ -250,6 +250,14 @@ class TestObject(unittest.TestCase):
                 },
                 {"S_25": "This is a string", "I_0": 42}
             ),
+            (
+                'additionalProperties false with empty object',
+                {
+                    "type": "object",
+                    "additionalProperties": False
+                },
+                {}
+            ),
         ]
     )
     def test_true(self, name, schema, instance):
@@ -334,7 +342,14 @@ class TestObject(unittest.TestCase):
                 },
                 {"S_0": 42}
             ),
-            # add test where there is additionalProperties and no properties keyword
+            (
+                'just AdditionalProperties false',
+                {
+                    "type": "object",
+                    "additionalProperties": False
+                },
+                {"key": "no properties allowed"}
+            ),
         ]
     )
     def test_false(self, name, schema, instance):

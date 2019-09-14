@@ -102,7 +102,10 @@ class Contains(IValidator):
         if ok:
             return ValidationResult(ok=True)
         else:
-            return ValidationResult(ok=False, messages=["No item in this array matches the schema in the contains keyword"])
+            return ValidationResult(
+                ok=False,
+                messages=["No item in this array matches the schema in the contains keyword"]
+            )
 
 
 class MinItems(IValidator):
@@ -194,8 +197,10 @@ class Property(IValidator):
     def __init__(self, value=None, additionalProperties=None, patternProperties=None):
         import re
         self._validators = {key: build_validator(value) for key, value in value.items()} if value else {}
-        self._additional_validator = build_validator(additionalProperties) if additionalProperties else None
-        self._pattern_validators = {re.compile(key): build_validator(value) for key, value in patternProperties.items()} if patternProperties else {}
+        self._additional_validator = build_validator(additionalProperties) if additionalProperties is not None else None
+        self._pattern_validators = {
+            re.compile(key): build_validator(value) for key, value in patternProperties.items()
+        } if patternProperties else {}
 
     def validate(self, instance):
         results = []
@@ -210,18 +215,22 @@ class Property(IValidator):
 
         additionalProperties = set(instance.keys()) - set(self._validators.keys())
 
+        properties_validated_by_pattern = set()
+        for regex in self._pattern_validators:
+            for key in additionalProperties:
+                if regex.match(key):
+                    properties_validated_by_pattern.add(key)
+                    result = self._pattern_validators[regex].validate(instance[key])
+                    if not result.ok:
+                        results.append(result)
+
+        # additionalProperties only applies to properties not in properties or patternProperties
+        additionalProperties -= properties_validated_by_pattern
         if self._additional_validator:
             for key in additionalProperties:
                 result = self._additional_validator.validate(instance[key])
                 if not result.ok:
                     results.append(result)
-
-        for regex in self._pattern_validators:
-            for key in additionalProperties:
-                if regex.match(key):
-                    result = self._pattern_validators[regex].validate(instance[key])
-                    if not result.ok:
-                        results.append(result)
 
         if not results and not messages:
             return ValidationResult(ok=True)
@@ -298,9 +307,17 @@ class Object(IValidator):
                     self.keyword_to_validator[keyword](value=kwargs.get(keyword))
                 )
 
-        if kwargs.get("properties") is not None or kwargs.get("patternProperties") is not None:
+        if (
+            kwargs.get("properties") is not None
+            or kwargs.get("patternProperties") is not None
+            or kwargs.get("additionalProperties") is not None
+        ):
             self._validators.append(
-                Property(value=kwargs.get("properties"), additionalProperties=kwargs.get("additionalProperties"), patternProperties=kwargs.get("patternProperties"))
+                Property(
+                    value=kwargs.get("properties"),
+                    additionalProperties=kwargs.get("additionalProperties"),
+                    patternProperties=kwargs.get("patternProperties")
+                )
             )
 
     def validate(self, instance):
@@ -310,9 +327,9 @@ class Object(IValidator):
             messages.append('instance is not a dictionary')
 
         keyTypes = set(type(key) for key in instance)
-
-        if len(keyTypes) != 1 or not (str in keyTypes):
-            messages.append('all the keys of the object need to be strings')
+        if keyTypes:
+            if len(keyTypes) != 1 or not (str in keyTypes):
+                messages.append('all the keys of the object need to be strings')
 
         for validator in self._validators:
             result = validator.validate(instance)
