@@ -22,6 +22,30 @@ class Null(AValidator):
             return ValidationResult(ok=False)
 
 
+class Const(AValidator):
+    def __init__(self, value):
+        self.value = value
+
+    def validate(self, instance):
+        if instance == self.value:
+            return ValidationResult(ok=True)
+        else:
+            # TODO I should add message
+            return ValidationResult(ok=False)
+
+
+class Enum(AValidator):
+    def __init__(self, values):
+        self.values = values
+
+    def validate(self, instance):
+        if instance in self.values:
+            return ValidationResult(ok=True)
+        else:
+            # TODO I should add message
+            return ValidationResult(ok=False)
+
+
 class AcceptAll(AValidator):
 
     def validate(self, instance):
