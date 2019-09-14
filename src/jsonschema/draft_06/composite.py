@@ -14,7 +14,7 @@ __all__ = [
 ]
 
 
-def validate_once(schema: typing.Union[dict, bool], instance: dict):
+def validate_once(schema: typing.Union[dict, bool], instance: dict) -> ValidationResult:
     validator = build_validator(schema)
     return validator.validate(instance)
 
