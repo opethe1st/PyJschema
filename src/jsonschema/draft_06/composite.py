@@ -52,9 +52,9 @@ def build_validator(schema: typing.Union[dict, bool]) -> typing.Union[AcceptAll,
 
 
 class ItemsArray(AValidator):
-    def __init__(self, items, additionalItems=None, **kwargs):
-        self.item_validators = [build_validator(value) for value in items]
-        self.additional_item_validator = build_validator(additionalItems) if additionalItems else None
+    def __init__(self, itemSchemas, additionalItemsSchema=None, **kwargs):
+        self.item_validators = [build_validator(schema) for schema in itemSchemas]
+        self.additional_item_validator = build_validator(additionalItemsSchema) if additionalItemsSchema else None
 
     def validate(self, instance):
         children = []
@@ -84,8 +84,8 @@ class ItemsArray(AValidator):
 
 
 class Items(AValidator):
-    def __init__(self, items, **kwargs):
-        self._validator = build_validator(items)
+    def __init__(self, itemSchema, **kwargs):
+        self._validator = build_validator(itemSchema)
 
     def validate(self, instance):
         children = []
@@ -102,8 +102,8 @@ class Items(AValidator):
 
 
 class Contains(AValidator):
-    def __init__(self, value, **kwargs):
-        self._validator = build_validator(value)
+    def __init__(self, schema, **kwargs):
+        self._validator = build_validator(schema)
 
     def validate(self, instance):
 
@@ -157,15 +157,15 @@ class Array(AValidator):
 
             if kwargs.get(keyword) is not None:
                 self._validators.append(
-                    self.keyword_to_validator[keyword](value=kwargs.get(keyword))
+                    self.keyword_to_validator[keyword](kwargs.get(keyword))
                 )
 
         if 'items' in kwargs:
 
             if isinstance(kwargs['items'], list):
-                items_validator = ItemsArray(items=kwargs['items'], additionalItems=kwargs.get('additionalItems'))
+                items_validator = ItemsArray(itemSchemas=kwargs['items'], additionalItemsSchema=kwargs.get('additionalItems'))
             else:
-                items_validator = Items(items=kwargs['items'])
+                items_validator = Items(itemSchema=kwargs['items'])
             self._validators.append(items_validator)
 
     def validate(self, instance):
@@ -192,7 +192,7 @@ class Array(AValidator):
 
 class Property(AValidator):
 
-    def __init__(self, value=None, additionalProperties=None, patternProperties=None):
+    def __init__(self, value=None, additionalProperties=None, patternProperties=None, **kwargs):
         import re
         self._validators = {key: build_validator(value) for key, value in value.items()} if value else {}
         self._additional_validator = build_validator(additionalProperties) if additionalProperties is not None else None
@@ -256,15 +256,11 @@ class Required(AValidator):
 
 
 class PropertyNames(AValidator):
-    # TODO(ope) rename to value to schema whenever a schema is expected.
-    # need to change this line below to - self.keyword_to_validator[keyword](value=kwargs.get(keyword))
-    # to self.keyword_to_validator[keyword](kwargs.get(keyword)) pass by position since the keyword args
-    # might be different
-    def __init__(self, value):
+    def __init__(self, schema):
         # add this to make sure that the type is string - I have seen it missing from
         # examples in the documentation so can only assume it's allowed
-        value["type"] = "string"
-        self._validator = build_validator(value)
+        schema["type"] = "string"
+        self._validator = build_validator(schema)
 
     def validate(self, instance):
         children = []
@@ -302,7 +298,7 @@ class Object(AValidator):
 
             if kwargs.get(keyword) is not None:
                 self._validators.append(
-                    self.keyword_to_validator[keyword](value=kwargs.get(keyword))
+                    self.keyword_to_validator[keyword](kwargs.get(keyword))
                 )
 
         if (

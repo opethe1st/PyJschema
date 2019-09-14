@@ -55,7 +55,6 @@ class ExclusiveMaximum(AValidator):
         return ValidationResult(ok=True)
 
 
-# TODO add integer type - probably just subclass this and add an integer check in the validator
 class NumberOrInteger(AValidator):
     def __init__(self, **kwargs):
         self._validators = []
