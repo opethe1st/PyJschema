@@ -8,30 +8,6 @@ from .primitives import AcceptAll, Boolean, Null, RejectAll
 from .string import String
 
 
-class InstanceValidator(IValidator):
-
-    def __init__(self):
-        self._validators = []
-
-    def add_validator(self, validator):
-        self._validators.append(validator)
-
-    def validate(self, instance) -> ValidationResult:
-        results = []
-        for validator in self._validators:
-            result = validator.validate(instance)
-            if not result.ok:
-                results.append(result)
-        if not results:
-            return ValidationResult(ok=True)
-        else:
-            return ValidationResult(
-                ok=False,
-                messages=["error while validating this instance"],
-                children=results
-            )
-
-
 class Const(IValidator):
     def __init__(self, value):
         self.value = value
@@ -90,13 +66,13 @@ class ItemsArray(IValidator):
 class Items(IValidator):
     def __init__(self, **kwargs):
         #  TODO should this be -> build_validator(kwargs["items"])
-        self.values_validator = build_validator(kwargs.get("items"))
+        self._validator = build_validator(kwargs.get("items"))
 
     def validate(self, instance):
         children = []
         ok = True
         for value in instance:
-            res = self.values_validator.validate(value)
+            res = self._validator.validate(value)
             if not res.ok:
                 ok = False
                 children.append(res)
@@ -106,12 +82,12 @@ class Items(IValidator):
 
 class Contains(IValidator):
     def __init__(self, **kwargs):
-        self.value_validator = build_validator(kwargs['value'])
+        self._validator = build_validator(kwargs['value'])
 
     def validate(self, instance):
         ok = False
         for value in instance:
-            res = self.value_validator.validate(value)
+            res = self._validator.validate(value)
             if res.ok:
                 ok = True
         if ok:
@@ -192,6 +168,30 @@ class Array(IValidator):
             return ValidationResult(
                 ok=False,
                 messages=messages,
+                children=results
+            )
+
+
+class InstanceValidator(IValidator):
+
+    def __init__(self):
+        self._validators = []
+
+    def add_validator(self, validator):
+        self._validators.append(validator)
+
+    def validate(self, instance) -> ValidationResult:
+        results = []
+        for validator in self._validators:
+            result = validator.validate(instance)
+            if not result.ok:
+                results.append(result)
+        if not results:
+            return ValidationResult(ok=True)
+        else:
+            return ValidationResult(
+                ok=False,
+                messages=["error while validating this instance"],
                 children=results
             )
 
