@@ -105,3 +105,12 @@ Next steps
 * add support for string formatting
 * refactor
 * improve the performance - perform experiments
+
+
+# Thoughts
+There are a couple of things that are becoming clearer - there are different kinds of keywords
+Some are primitive - they accept only values
+Some are composite - they accept other schemas
+Some work on their own
+Some work together with other keywords e.g items and additionalItems
+Some operate on just a given type

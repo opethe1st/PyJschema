@@ -6,6 +6,8 @@ from .i_validator import IValidator
 from .number import Number
 from .primitives import AcceptAll, Boolean, Null, RejectAll
 from .string import String
+from .utils import Min, Max
+# TODO(ope): rename this file to composite validation? or just composite?
 
 
 class Const(IValidator):
@@ -33,13 +35,14 @@ class Enum(IValidator):
 
 
 class ItemsArray(IValidator):
-    def __init__(self, **kwargs):
-        self.item_validators = [build_validator(value) for value in kwargs.get("items", [])]
-        self.additional_item_validator = build_validator(kwargs['additionalItems']) if kwargs.get('additionalItems') else None
+    def __init__(self, items, additionalItems=None, **kwargs):
+        self.item_validators = [build_validator(value) for value in items]
+        self.additional_item_validator = build_validator(additionalItems) if additionalItems else None
 
     def validate(self, instance):
         children = []
         ok = True
+
         i = 0
         while i < len(self.item_validators):
             if i >= len(instance):
@@ -64,15 +67,17 @@ class ItemsArray(IValidator):
 
 
 class Items(IValidator):
-    def __init__(self, **kwargs):
-        #  TODO should this be -> build_validator(kwargs["items"])
-        self._validator = build_validator(kwargs.get("items"))
+    def __init__(self, items, **kwargs):
+        self._validator = build_validator(items)
 
+    # TODO (ope) - stop using this ok = False pattern
     def validate(self, instance):
         children = []
         ok = True
+
         for value in instance:
             res = self._validator.validate(value)
+
             if not res.ok:
                 ok = False
                 children.append(res)
@@ -81,19 +86,26 @@ class Items(IValidator):
 
 
 class Contains(IValidator):
-    def __init__(self, **kwargs):
-        self._validator = build_validator(kwargs['value'])
+    def __init__(self, value, **kwargs):
+        self._validator = build_validator(value)
 
+    # TODO(ope): stop using this ok = False pattern
     def validate(self, instance):
         ok = False
+
         for value in instance:
             res = self._validator.validate(value)
+
             if res.ok:
                 ok = True
+
         if ok:
             return ValidationResult(ok=True)
         else:
-            return ValidationResult(ok=False, messages=["No item in this array matches the schema in the contains keyword"])
+            return ValidationResult(
+                ok=False,
+                messages=["No item in this array matches the schema in the contains keyword"]
+            )
 
 
 class MinItems(IValidator):
@@ -113,6 +125,7 @@ class MaxItems(IValidator):
     def validate(self, instance):
         if self.value < len(instance):
             return ValidationResult(ok=False, messages=[])
+
         return ValidationResult(ok=True)
 
 
@@ -123,8 +136,10 @@ class UniqueItems(IValidator):
     def validate(self, instance):
         if self.value:
             itemsset = set([str(value) for value in instance])
+
             if len(itemsset) != len(instance):
                 return ValidationResult(ok=False)
+
         return ValidationResult(ok=True)
 
 
@@ -139,13 +154,16 @@ class Array(IValidator):
 
     def __init__(self, **kwargs):
         self._validators = []
+
         for keyword in self.keyword_to_validator:
+
             if kwargs.get(keyword) is not None:
                 self._validators.append(
                     self.keyword_to_validator[keyword](value=kwargs.get(keyword))
                 )
 
         if 'items' in kwargs:
+
             if isinstance(kwargs['items'], list):
                 items_validator = ItemsArray(items=kwargs['items'], additionalItems=kwargs.get('additionalItems'))
             else:
@@ -155,10 +173,12 @@ class Array(IValidator):
     def validate(self, instance):
         results = []
         messages = []
+
         if not isinstance(instance, list):
             messages.append('instance is not a number')
         for validator in self._validators:
             result = validator.validate(instance)
+
             if not result.ok:
                 results.append(result)
 
@@ -172,6 +192,162 @@ class Array(IValidator):
             )
 
 
+class Property(IValidator):
+
+    def __init__(self, value=None, additionalProperties=None, patternProperties=None):
+        import re
+        self._validators = {key: build_validator(value) for key, value in value.items()} if value else {}
+        self._additional_validator = build_validator(additionalProperties) if additionalProperties is not None else None
+        self._pattern_validators = {
+            re.compile(key): build_validator(value) for key, value in patternProperties.items()
+        } if patternProperties else {}
+
+    def validate(self, instance):
+        results = []
+        messages = []
+
+        for key in self._validators:
+            if key in instance:
+                result = self._validators[key].validate(instance[key])
+
+                if not result.ok:
+                    results.append(result)
+
+        additionalProperties = set(instance.keys()) - set(self._validators.keys())
+
+        properties_validated_by_pattern = set()
+        for regex in self._pattern_validators:
+            for key in additionalProperties:
+                if regex.match(key):
+                    properties_validated_by_pattern.add(key)
+                    result = self._pattern_validators[regex].validate(instance[key])
+                    if not result.ok:
+                        results.append(result)
+
+        # additionalProperties only applies to properties not in properties or patternProperties
+        additionalProperties -= properties_validated_by_pattern
+        if self._additional_validator:
+            for key in additionalProperties:
+                result = self._additional_validator.validate(instance[key])
+                if not result.ok:
+                    results.append(result)
+
+        if not results and not messages:
+            return ValidationResult(ok=True)
+        else:
+            return ValidationResult(
+                ok=False,
+                messages=messages,
+                children=results
+            )
+
+
+class Required(IValidator):
+    def __init__(self, value):
+        self.value = value
+
+    def validate(self, instance):
+        messages = []
+        if (set(self.value) - set(instance.keys())):
+            messages.append(f"There are some missing required fields: {set(self.value) - set(instance.keys())}")
+
+        if not messages:
+            return ValidationResult(ok=True)
+        else:
+            return ValidationResult(ok=False, messages=messages)
+
+
+class PropertyNames(IValidator):
+    # TODO(ope) rename to value to schema whenever a schema is expected.
+    # need to change this line below to - self.keyword_to_validator[keyword](value=kwargs.get(keyword))
+    # to self.keyword_to_validator[keyword](kwargs.get(keyword)) pass by position since the keyword args
+    # might be different
+    def __init__(self, value):
+        # add this to make sure that the type is string - I have seen it missing from
+        # examples in the documentation so can only assume it's allowed
+        value["type"] = "string"
+        self._validator = build_validator(value)
+
+    def validate(self, instance):
+        children = []
+        for propertyName in instance:
+            res = self._validator.validate(propertyName)
+
+            if not res.ok:
+                children.append(res)
+
+        if not children:
+            return ValidationResult(ok=True)
+        else:
+            return ValidationResult(ok=False, children=children)
+
+
+class MinProperties(Min):
+    pass
+
+
+class MaxProperties(Max):
+    pass
+
+
+class Object(IValidator):
+    keyword_to_validator = {
+        "required": Required,
+        "propertyNames": PropertyNames,
+        "minProperties": MinProperties,
+        "maxProperties": MaxProperties,
+    }
+
+    def __init__(self, **kwargs):
+        self._validators = []
+        for keyword in self.keyword_to_validator:
+
+            if kwargs.get(keyword) is not None:
+                self._validators.append(
+                    self.keyword_to_validator[keyword](value=kwargs.get(keyword))
+                )
+
+        if (
+            kwargs.get("properties") is not None
+            or kwargs.get("patternProperties") is not None
+            or kwargs.get("additionalProperties") is not None
+        ):
+            self._validators.append(
+                Property(
+                    value=kwargs.get("properties"),
+                    additionalProperties=kwargs.get("additionalProperties"),
+                    patternProperties=kwargs.get("patternProperties")
+                )
+            )
+
+    def validate(self, instance):
+        results = []
+        messages = []
+        if not isinstance(instance, dict):
+            messages.append('instance is not a dictionary')
+
+        keyTypes = set(type(key) for key in instance)
+        if keyTypes:
+            if len(keyTypes) != 1 or not (str in keyTypes):
+                messages.append('all the keys of the object need to be strings')
+
+        for validator in self._validators:
+            result = validator.validate(instance)
+
+            if not result.ok:
+                results.append(result)
+
+        if not results and not messages:
+            return ValidationResult(ok=True)
+        else:
+            return ValidationResult(
+                ok=False,
+                messages=messages,
+                children=results
+            )
+
+
+# TODO(ope); rename this to Validator?
 class InstanceValidator(IValidator):
 
     def __init__(self):
@@ -184,8 +360,10 @@ class InstanceValidator(IValidator):
         results = []
         for validator in self._validators:
             result = validator.validate(instance)
+
             if not result.ok:
                 results.append(result)
+
         if not results:
             return ValidationResult(ok=True)
         else:
@@ -216,6 +394,7 @@ def build_validator(schema: typing.Union[dict, bool]) -> IValidator:
             'boolean': Boolean,
             'null': Null,
             "array": Array,
+            "object": Object
         }
 
         if schema['type'] in schema_type_to_validator:
@@ -224,3 +403,9 @@ def build_validator(schema: typing.Union[dict, bool]) -> IValidator:
             )
 
     return instance_validator
+
+
+# TODO(ope); add validate_once that's a convenient function
+# def validate_once(schema, instance):
+#     validator = build_validator(schema)
+#     return validator.validate(instance)

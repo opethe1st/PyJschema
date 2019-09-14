@@ -172,6 +172,190 @@ class TestArrayValidation(unittest.TestCase):
         self.assertFalse(validate(schema=schema, instance=instance))
 
 
+class TestObject(unittest.TestCase):
+    @parameterized.parameterized.expand(
+        [
+            ('is object', {"type": "object"}, {"k1": "v1"}),
+            (
+                'object with properties',
+                {
+                    "type": "object",
+                    "properties": {
+                        "shortname": {"type": "string", "maxLength": 3},
+                        "longname": {"type": "string", "maxLength": 15},
+                    }
+                },
+                {"shortname": "ab", "longname": "abcdefghij"},
+            ),
+            (
+                'additionalProperties',
+                {
+                    "type": "object",
+                    "properties": {
+                        "shortname": {"type": "string", "maxLength": 3},
+                        "longname": {"type": "string", "maxLength": 15},
+                    },
+                    "additionalProperties": {
+                        "type": "number"
+                    }
+                },
+                {"shortname": "ab", "longname": "abcdefghij", "score": 1234}
+            ),
+            (
+                'object with required',
+                {
+                    "type": "object",
+                    "required": [
+                        "shortname",
+                        "longname",
+                    ]
+                },
+                {"shortname": "ab", "longname": "abcdefghij"},
+            ),
+            (
+                'object with propertyNames',
+                {
+                    "type": "object",
+                    "propertyNames": {
+                        "pattern": "[a-z]*"
+                    }
+                },
+                {"": "ab", "abc": "abcdefghij"},
+            ),
+            (
+                'minProperties',
+                {
+                    "type": "object",
+                    "minProperties": 1
+                },
+                {"abcde": "ab", "abc": "abcdefghij"},
+            ),
+            (
+                'maxProperties',
+                {
+                    "type": "object",
+                    "maxProperties": 5
+                },
+                {"abcde": "ab", "abc": "abcdefghij"},
+            ),
+            (
+                'patternProperties',
+                {
+                    "type": "object",
+                    "patternProperties": {
+                        "^S_": {"type": "string"},
+                        "^I_": {"type": "integer"}
+                    },
+                    "additionalProperties": False
+                },
+                {"S_25": "This is a string", "I_0": 42}
+            ),
+            (
+                'additionalProperties false with empty object',
+                {
+                    "type": "object",
+                    "additionalProperties": False
+                },
+                {}
+            ),
+        ]
+    )
+    def test_true(self, name, schema, instance):
+        self.assertTrue(validate(schema=schema, instance=instance))
+
+    @parameterized.parameterized.expand(
+        [
+            ('is object', {"type": "object"}, "not an object"),
+            ('object with non-string keys', {"type": "object"}, {123: "value"}),
+            (
+                'object with properties',
+                {
+                    "type": "object",
+                    "properties": {
+                        "shortname": {"type": "string", "maxLength": 3},
+                        "longname": {"type": "string", "maxLength": 4},
+                    }
+                },
+                {"shortname": "ab", "longname": "abcdefghij", "fullname": "short long"}
+            ),
+            (
+                'additionalProperties',
+                {
+                    "type": "object",
+                    "properties": {
+                        "shortname": {"type": "string", "maxLength": 3},
+                        "longname": {"type": "string", "maxLength": 15},
+                    },
+                    "additionalProperties": {
+                        "type": "number"
+                    }
+                },
+                {"shortname": "ab", "longname": "abcdefghij", "score": "this is clearly not a score"}
+            ),
+            (
+                'object with required',
+                {
+                    "type": "object",
+                    "required": [
+                        "shortname",
+                        "longname",
+                        "firstname",
+                    ]
+                },
+                {"shortname": "ab", "longname": "abcdefghij"},
+            ),
+            (
+                'object with propertyNames',
+                {
+                    "type": "object",
+                    "propertyNames": {
+                        "pattern": "[a-z]+"
+                    }
+                },
+                {"": "ab", "abc": "abcdefghij", "123": "doesnt conform to pattern"},
+            ),
+            (
+                'minProperties',
+                {
+                    "type": "object",
+                    "minProperties": 4
+                },
+                {"abcde": "ab", "abc": "abcdefghij"},
+            ),
+            (
+                'maxProperties',
+                {
+                    "type": "object",
+                    "maxProperties": 1
+                },
+                {"abcde": "ab", "abc": "abcdefghij"},
+            ),
+            (
+                'patternProperties',
+                {
+                    "type": "object",
+                    "patternProperties": {
+                        "^S_": {"type": "string"},
+                        "^I_": {"type": "integer"}
+                    },
+                    "additionalProperties": False
+                },
+                {"S_0": 42}
+            ),
+            (
+                'just AdditionalProperties false',
+                {
+                    "type": "object",
+                    "additionalProperties": False
+                },
+                {"key": "no properties allowed"}
+            ),
+        ]
+    )
+    def test_false(self, name, schema, instance):
+        self.assertFalse(validate(schema=schema, instance=instance))
+
+
 class TestTrue(unittest.TestCase):
 
     @parameterized.parameterized.expand(

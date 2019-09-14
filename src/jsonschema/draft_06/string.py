@@ -1,6 +1,7 @@
 from jsonschema.common import ValidationResult
 
 from .i_validator import IValidator
+# TODO(ope): get this to use Min and Max from utils - it is essentially the same concept
 
 
 class MaxLength(IValidator):
@@ -25,11 +26,11 @@ class MinLength(IValidator):
 
 class Pattern(IValidator):
     def __init__(self, value):
-        self.pattern = value
+        import re
+        self.regex = re.compile(value)
 
     def validate(self, instance):
-        import re
-        if not re.match(self.pattern, instance):
+        if not self.regex.match(instance):
             return ValidationResult(ok=False, messages=["instance doesn't match the pattern given"])
         return ValidationResult(ok=True)
 
