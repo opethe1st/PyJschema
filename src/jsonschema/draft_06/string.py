@@ -1,6 +1,7 @@
 from jsonschema.common import ValidationResult
 
 from .i_validator import IValidator
+# TODO(ope): get this to use Min and Max from utils - it is essentially the same concept
 
 
 class MaxLength(IValidator):

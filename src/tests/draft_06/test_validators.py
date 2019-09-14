@@ -208,6 +208,22 @@ class TestObject(unittest.TestCase):
                 },
                 {"": "ab", "abc": "abcdefghij"},
             ),
+            (
+                'minProperties',
+                {
+                    "type": "object",
+                    "minProperties": 1
+                },
+                {"abcde": "ab", "abc": "abcdefghij"},
+            ),
+            (
+                'maxProperties',
+                {
+                    "type": "object",
+                    "maxProperties": 5
+                },
+                {"abcde": "ab", "abc": "abcdefghij"},
+            ),
         ]
     )
     def test_true(self, name, schema, instance):
@@ -249,6 +265,22 @@ class TestObject(unittest.TestCase):
                     }
                 },
                 {"": "ab", "abc": "abcdefghij", "123": "doesnt conform to pattern"},
+            ),
+            (
+                'minProperties',
+                {
+                    "type": "object",
+                    "minProperties": 4
+                },
+                {"abcde": "ab", "abc": "abcdefghij"},
+            ),
+            (
+                'maxProperties',
+                {
+                    "type": "object",
+                    "maxProperties": 1
+                },
+                {"abcde": "ab", "abc": "abcdefghij"},
             ),
         ]
     )

@@ -5,7 +5,6 @@ from jsonschema.common import ValidationResult
 from .i_validator import IValidator
 
 
-# TODO move to it's own file
 class MultipleOf(IValidator):
     def __init__(self, value):
         self.value = value
@@ -56,6 +55,7 @@ class ExclusiveMaximum(IValidator):
         return ValidationResult(ok=True)
 
 
+# TODO add integer type - probably just subclass this and add an integer check in the validator
 class Number(IValidator):
     def __init__(self, **kwargs):
         self._validators = []

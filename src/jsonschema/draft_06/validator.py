@@ -6,6 +6,7 @@ from .i_validator import IValidator
 from .number import Number
 from .primitives import AcceptAll, Boolean, Null, RejectAll
 from .string import String
+from .utils import Min, Max
 # TODO(ope): rename this file to composite validation? or just composite?
 
 
@@ -235,11 +236,21 @@ class PropertyNames(IValidator):
             return ValidationResult(ok=False, children=children)
 
 
+class MinProperties(Min):
+    pass
+
+
+class MaxProperties(Max):
+    pass
+
+
 class Object(IValidator):
     keyword_to_validator = {
         "properties": Property,
         "required": Required,
         "propertyNames": PropertyNames,
+        "minProperties": MinProperties,
+        "maxProperties": MaxProperties,
     }
 
     def __init__(self, **kwargs):
