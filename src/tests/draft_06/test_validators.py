@@ -187,6 +187,17 @@ class TestObject(unittest.TestCase):
                 },
                 {"shortname": "ab", "longname": "abcdefghij"},
             ),
+            (
+                'object with required',
+                {
+                    "type": "object",
+                    "required": [
+                        "shortname",
+                        "longname",
+                    ]
+                },
+                {"shortname": "ab", "longname": "abcdefghij"},
+            ),
         ]
     )
     def test_true(self, name, schema, instance):
@@ -206,6 +217,18 @@ class TestObject(unittest.TestCase):
                     }
                 },
                 {"shortname": "ab", "longname": "abcdefghij"}
+            ),
+            (
+                'object with required',
+                {
+                    "type": "object",
+                    "required": [
+                        "shortname",
+                        "longname",
+                        "firstname",
+                    ]
+                },
+                {"shortname": "ab", "longname": "abcdefghij"},
             ),
         ]
     )

@@ -193,9 +193,25 @@ class Property(IValidator):
             )
 
 
+class Required(IValidator):
+    def __init__(self, value):
+        self.value = value
+
+    def validate(self, instance):
+        messages = []
+        if (set(self.value) - set(instance.keys())):
+            messages.append(f"There are some missing required fields: {set(self.value) - set(instance.keys())}")
+
+        if not messages:
+            return ValidationResult(ok=True)
+        else:
+            return ValidationResult(ok=False, messages=messages)
+
+
 class Object(IValidator):
     keyword_to_validator = {
-        "properties": Property
+        "properties": Property,
+        "required": Required
     }
 
     def __init__(self, **kwargs):
