@@ -188,6 +188,20 @@ class TestObject(unittest.TestCase):
                 {"shortname": "ab", "longname": "abcdefghij"},
             ),
             (
+                'additionalProperties',
+                {
+                    "type": "object",
+                    "properties": {
+                        "shortname": {"type": "string", "maxLength": 3},
+                        "longname": {"type": "string", "maxLength": 15},
+                    },
+                    "additionalProperties": {
+                        "type": "number"
+                    }
+                },
+                {"shortname": "ab", "longname": "abcdefghij", "score": 1234}
+            ),
+            (
                 'object with required',
                 {
                     "type": "object",
@@ -242,7 +256,21 @@ class TestObject(unittest.TestCase):
                         "longname": {"type": "string", "maxLength": 4},
                     }
                 },
-                {"shortname": "ab", "longname": "abcdefghij"}
+                {"shortname": "ab", "longname": "abcdefghij", "fullname": "short long"}
+            ),
+            (
+                'additionalProperties',
+                {
+                    "type": "object",
+                    "properties": {
+                        "shortname": {"type": "string", "maxLength": 3},
+                        "longname": {"type": "string", "maxLength": 15},
+                    },
+                    "additionalProperties": {
+                        "type": "number"
+                    }
+                },
+                {"shortname": "ab", "longname": "abcdefghij", "score": "this is clearly not a score"}
             ),
             (
                 'object with required',

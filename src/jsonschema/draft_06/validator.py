@@ -42,6 +42,7 @@ class ItemsArray(IValidator):
     def validate(self, instance):
         children = []
         ok = True
+
         i = 0
         while i < len(self.item_validators):
             if i >= len(instance):
@@ -73,8 +74,10 @@ class Items(IValidator):
     def validate(self, instance):
         children = []
         ok = True
+
         for value in instance:
             res = self._validator.validate(value)
+
             if not res.ok:
                 ok = False
                 children.append(res)
@@ -89,10 +92,13 @@ class Contains(IValidator):
     # TODO(ope): stop using this ok = False pattern
     def validate(self, instance):
         ok = False
+
         for value in instance:
             res = self._validator.validate(value)
+
             if res.ok:
                 ok = True
+
         if ok:
             return ValidationResult(ok=True)
         else:
@@ -116,6 +122,7 @@ class MaxItems(IValidator):
     def validate(self, instance):
         if self.value < len(instance):
             return ValidationResult(ok=False, messages=[])
+
         return ValidationResult(ok=True)
 
 
@@ -126,8 +133,10 @@ class UniqueItems(IValidator):
     def validate(self, instance):
         if self.value:
             itemsset = set([str(value) for value in instance])
+
             if len(itemsset) != len(instance):
                 return ValidationResult(ok=False)
+
         return ValidationResult(ok=True)
 
 
@@ -142,13 +151,16 @@ class Array(IValidator):
 
     def __init__(self, **kwargs):
         self._validators = []
+
         for keyword in self.keyword_to_validator:
+
             if kwargs.get(keyword) is not None:
                 self._validators.append(
                     self.keyword_to_validator[keyword](value=kwargs.get(keyword))
                 )
 
         if 'items' in kwargs:
+
             if isinstance(kwargs['items'], list):
                 items_validator = ItemsArray(items=kwargs['items'], additionalItems=kwargs.get('additionalItems'))
             else:
@@ -158,10 +170,12 @@ class Array(IValidator):
     def validate(self, instance):
         results = []
         messages = []
+
         if not isinstance(instance, list):
             messages.append('instance is not a number')
         for validator in self._validators:
             result = validator.validate(instance)
+
             if not result.ok:
                 results.append(result)
 
@@ -177,16 +191,25 @@ class Array(IValidator):
 
 class Property(IValidator):
 
-    def __init__(self, value):
+    def __init__(self, value, additionalProperties=None):
         self._validators = {key: build_validator(value) for key, value in value.items()}
+        self._additional_validator = build_validator(additionalProperties) if additionalProperties else None
 
     def validate(self, instance):
         results = []
         messages = []
         for key, value in instance.items():
-            result = self._validators[key].validate(value)
+
+            if key in self._validators:
+                result = self._validators[key].validate(value)
+            elif self._additional_validator is not None:
+                result = self._additional_validator.validate(value)
+            else:
+                result = ValidationResult(ok=True)
+
             if not result.ok:
                 results.append(result)
+
         if not results and not messages:
             return ValidationResult(ok=True)
         else:
@@ -227,6 +250,7 @@ class PropertyNames(IValidator):
         children = []
         for propertyName in instance:
             res = self._validator.validate(propertyName)
+
             if not res.ok:
                 children.append(res)
 
@@ -246,7 +270,6 @@ class MaxProperties(Max):
 
 class Object(IValidator):
     keyword_to_validator = {
-        "properties": Property,
         "required": Required,
         "propertyNames": PropertyNames,
         "minProperties": MinProperties,
@@ -256,10 +279,16 @@ class Object(IValidator):
     def __init__(self, **kwargs):
         self._validators = []
         for keyword in self.keyword_to_validator:
+
             if kwargs.get(keyword) is not None:
                 self._validators.append(
                     self.keyword_to_validator[keyword](value=kwargs.get(keyword))
                 )
+
+        if kwargs.get("properties") is not None:
+            self._validators.append(
+                Property(value=kwargs.get("properties"), additionalProperties=kwargs.get("additionalProperties"))
+            )
 
     def validate(self, instance):
         results = []
@@ -268,11 +297,13 @@ class Object(IValidator):
             messages.append('instance is not a dictionary')
 
         keyTypes = set(type(key) for key in instance)
+
         if len(keyTypes) != 1 or not (str in keyTypes):
             messages.append('all the keys of the object need to be strings')
 
         for validator in self._validators:
             result = validator.validate(instance)
+
             if not result.ok:
                 results.append(result)
 
@@ -299,8 +330,10 @@ class InstanceValidator(IValidator):
         results = []
         for validator in self._validators:
             result = validator.validate(instance)
+
             if not result.ok:
                 results.append(result)
+
         if not results:
             return ValidationResult(ok=True)
         else:
