@@ -1,9 +1,9 @@
 from jsonschema.common import ValidationResult
 
-from .i_validator import IValidator
+from .i_validator import AValidator
 
 
-class Max(IValidator):
+class Max(AValidator):
     def __init__(self, value):
         self.value = value
 
@@ -13,7 +13,7 @@ class Max(IValidator):
         return ValidationResult(ok=True)
 
 
-class Min(IValidator):
+class Min(AValidator):
     def __init__(self, value):
         self.value = value
 

@@ -2,42 +2,59 @@ import typing
 
 from jsonschema.common import ValidationResult
 
-from .i_validator import IValidator
-from .number import Number
-from .primitives import AcceptAll, Boolean, Null, RejectAll
+from .i_validator import AValidator
+from .number import Number, Integer
+from .primitives import AcceptAll, Boolean, Const, Enum, Null, RejectAll
 from .string import String
-from .utils import Min, Max
-# TODO(ope): rename this file to composite validation? or just composite?
+from .utils import Max, Min
+
+__all__ = [
+    'validate_once',
+    'build_validator',
+]
 
 
-class Const(IValidator):
-    def __init__(self, value):
-        self.value = value
-
-    def validate(self, instance):
-        if instance == self.value:
-            return ValidationResult(ok=True)
-        else:
-            # TODO I should add message
-            return ValidationResult(ok=False)
+def validate_once(schema: typing.Union[dict, bool], instance: dict) -> ValidationResult:
+    validator = build_validator(schema)
+    return validator.validate(instance)
 
 
-class Enum(IValidator):
-    def __init__(self, values):
-        self.values = values
+def build_validator(schema: typing.Union[dict, bool]) -> typing.Union[AcceptAll, RejectAll, "Validator"]:
+    if schema is True or schema == {}:
+        return AcceptAll()
+    elif schema is False:
+        return RejectAll()
+    if not isinstance(schema, dict):
+        raise Exception("schema must be either a boolean or a dictionary")
 
-    def validate(self, instance):
-        if instance in self.values:
-            return ValidationResult(ok=True)
-        else:
-            # TODO I should add message
-            return ValidationResult(ok=False)
+    validator = Validator()
+    if 'const' in schema:
+        validator.add_validator(Const(value=schema['const']))
+    if 'enum' in schema:
+        validator.add_validator(Enum(values=schema['enum']))
+    if 'type' in schema:
+        schema_type_to_validator: typing.Dict[str, typing.Type[AValidator]] = {
+            'string': String,
+            'number': Number,
+            'integer': Integer,
+            'boolean': Boolean,
+            'null': Null,
+            "array": Array,
+            "object": Object
+        }
+
+        if schema['type'] in schema_type_to_validator:
+            validator.add_validator(
+                schema_type_to_validator[schema['type']](**schema)
+            )
+
+    return validator
 
 
-class ItemsArray(IValidator):
-    def __init__(self, items, additionalItems=None, **kwargs):
-        self.item_validators = [build_validator(value) for value in items]
-        self.additional_item_validator = build_validator(additionalItems) if additionalItems else None
+class ItemsArray(AValidator):
+    def __init__(self, itemSchemas, additionalItemsSchema=None, **kwargs):
+        self.item_validators = [build_validator(schema) for schema in itemSchemas]
+        self.additional_item_validator = build_validator(additionalItemsSchema) if additionalItemsSchema else None
 
     def validate(self, instance):
         children = []
@@ -66,70 +83,51 @@ class ItemsArray(IValidator):
         return ValidationResult(ok=ok, children=children)
 
 
-class Items(IValidator):
-    def __init__(self, items, **kwargs):
-        self._validator = build_validator(items)
+class Items(AValidator):
+    def __init__(self, itemSchema, **kwargs):
+        self._validator = build_validator(itemSchema)
 
-    # TODO (ope) - stop using this ok = False pattern
     def validate(self, instance):
         children = []
-        ok = True
 
         for value in instance:
             res = self._validator.validate(value)
 
             if not res.ok:
-                ok = False
                 children.append(res)
+        if not children:
+            return ValidationResult(ok=True)
+        else:
+            return ValidationResult(ok=False, children=children)
 
-        return ValidationResult(ok=ok, children=children)
 
+class Contains(AValidator):
+    def __init__(self, schema, **kwargs):
+        self._validator = build_validator(schema)
 
-class Contains(IValidator):
-    def __init__(self, value, **kwargs):
-        self._validator = build_validator(value)
-
-    # TODO(ope): stop using this ok = False pattern
     def validate(self, instance):
-        ok = False
 
         for value in instance:
             res = self._validator.validate(value)
 
             if res.ok:
-                ok = True
+                return ValidationResult(ok=True)
 
-        if ok:
-            return ValidationResult(ok=True)
-        else:
-            return ValidationResult(
-                ok=False,
-                messages=["No item in this array matches the schema in the contains keyword"]
-            )
+        return ValidationResult(
+            ok=False,
+            messages=["No item in this array matches the schema in the contains keyword"]
+        )
 
 
-class MinItems(IValidator):
-    def __init__(self, value):
-        self.value = value
-
-    def validate(self, instance):
-        if len(instance) < self.value:
-            return ValidationResult(ok=False, messages=[])
-        return ValidationResult(ok=True)
+class MinItems(Min):
+    pass
 
 
-class MaxItems(IValidator):
-    def __init__(self, value):
-        self.value = value
-
-    def validate(self, instance):
-        if self.value < len(instance):
-            return ValidationResult(ok=False, messages=[])
-
-        return ValidationResult(ok=True)
+class MaxItems(Max):
+    pass
 
 
-class UniqueItems(IValidator):
+class UniqueItems(AValidator):
     def __init__(self, value):
         self.value = value
 
@@ -143,7 +141,7 @@ class UniqueItems(IValidator):
         return ValidationResult(ok=True)
 
 
-class Array(IValidator):
+class Array(AValidator):
 
     keyword_to_validator = {
         'minItems': MinItems,
@@ -159,15 +157,15 @@ class Array(IValidator):
 
             if kwargs.get(keyword) is not None:
                 self._validators.append(
-                    self.keyword_to_validator[keyword](value=kwargs.get(keyword))
+                    self.keyword_to_validator[keyword](kwargs.get(keyword))
                 )
 
         if 'items' in kwargs:
 
             if isinstance(kwargs['items'], list):
-                items_validator = ItemsArray(items=kwargs['items'], additionalItems=kwargs.get('additionalItems'))
+                items_validator = ItemsArray(itemSchemas=kwargs['items'], additionalItemsSchema=kwargs.get('additionalItems'))
             else:
-                items_validator = Items(items=kwargs['items'])
+                items_validator = Items(itemSchema=kwargs['items'])
             self._validators.append(items_validator)
 
     def validate(self, instance):
@@ -192,9 +190,9 @@ class Array(IValidator):
             )
 
 
-class Property(IValidator):
+class Property(AValidator):
 
-    def __init__(self, value=None, additionalProperties=None, patternProperties=None):
+    def __init__(self, value=None, additionalProperties=None, patternProperties=None, **kwargs):
         import re
         self._validators = {key: build_validator(value) for key, value in value.items()} if value else {}
         self._additional_validator = build_validator(additionalProperties) if additionalProperties is not None else None
@@ -242,7 +240,7 @@ class Property(IValidator):
             )
 
 
-class Required(IValidator):
+class Required(AValidator):
     def __init__(self, value):
         self.value = value
 
@@ -257,16 +255,12 @@ class Required(IValidator):
             return ValidationResult(ok=False, messages=messages)
 
 
-class PropertyNames(IValidator):
-    # TODO(ope) rename to value to schema whenever a schema is expected.
-    # need to change this line below to - self.keyword_to_validator[keyword](value=kwargs.get(keyword))
-    # to self.keyword_to_validator[keyword](kwargs.get(keyword)) pass by position since the keyword args
-    # might be different
-    def __init__(self, value):
+class PropertyNames(AValidator):
+    def __init__(self, schema):
         # add this to make sure that the type is string - I have seen it missing from
         # examples in the documentation so can only assume it's allowed
-        value["type"] = "string"
-        self._validator = build_validator(value)
+        schema["type"] = "string"
+        self._validator = build_validator(schema)
 
     def validate(self, instance):
         children = []
@@ -290,7 +284,7 @@ class MaxProperties(Max):
     pass
 
 
-class Object(IValidator):
+class Object(AValidator):
     keyword_to_validator = {
         "required": Required,
         "propertyNames": PropertyNames,
@@ -304,7 +298,7 @@ class Object(IValidator):
 
             if kwargs.get(keyword) is not None:
                 self._validators.append(
-                    self.keyword_to_validator[keyword](value=kwargs.get(keyword))
+                    self.keyword_to_validator[keyword](kwargs.get(keyword))
                 )
 
         if (
@@ -347,8 +341,7 @@ class Object(IValidator):
             )
 
 
-# TODO(ope); rename this to Validator?
-class InstanceValidator(IValidator):
+class Validator(AValidator):
 
     def __init__(self):
         self._validators = []
@@ -372,40 +365,3 @@ class InstanceValidator(IValidator):
                 messages=["error while validating this instance"],
                 children=results
             )
-
-
-def build_validator(schema: typing.Union[dict, bool]) -> IValidator:
-    if schema is True or schema == {}:
-        return AcceptAll()
-    elif schema is False:
-        return RejectAll()
-    if not isinstance(schema, dict):
-        raise Exception("schema must be either a boolean or a dictionary")
-
-    instance_validator = InstanceValidator()
-    if 'const' in schema:
-        instance_validator.add_validator(Const(value=schema['const']))
-    if 'enum' in schema:
-        instance_validator.add_validator(Enum(values=schema['enum']))
-    if 'type' in schema:
-        schema_type_to_validator: typing.Dict[str, typing.Type[IValidator]] = {
-            'string': String,
-            'number': Number,
-            'boolean': Boolean,
-            'null': Null,
-            "array": Array,
-            "object": Object
-        }
-
-        if schema['type'] in schema_type_to_validator:
-            instance_validator.add_validator(
-                schema_type_to_validator[schema['type']](**schema)
-            )
-
-    return instance_validator
-
-
-# TODO(ope); add validate_once that's a convenient function
-# def validate_once(schema, instance):
-#     validator = build_validator(schema)
-#     return validator.validate(instance)
