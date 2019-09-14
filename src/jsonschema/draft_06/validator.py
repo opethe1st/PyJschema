@@ -191,24 +191,37 @@ class Array(IValidator):
 
 class Property(IValidator):
 
-    def __init__(self, value, additionalProperties=None):
-        self._validators = {key: build_validator(value) for key, value in value.items()}
+    def __init__(self, value=None, additionalProperties=None, patternProperties=None):
+        import re
+        self._validators = {key: build_validator(value) for key, value in value.items()} if value else {}
         self._additional_validator = build_validator(additionalProperties) if additionalProperties else None
+        self._pattern_validators = {re.compile(key): build_validator(value) for key, value in patternProperties.items()} if patternProperties else {}
 
     def validate(self, instance):
         results = []
         messages = []
-        for key, value in instance.items():
 
-            if key in self._validators:
-                result = self._validators[key].validate(value)
-            elif self._additional_validator is not None:
-                result = self._additional_validator.validate(value)
-            else:
-                result = ValidationResult(ok=True)
+        for key in self._validators:
+            if key in instance:
+                result = self._validators[key].validate(instance[key])
 
-            if not result.ok:
-                results.append(result)
+                if not result.ok:
+                    results.append(result)
+
+        additionalProperties = set(instance.keys()) - set(self._validators.keys())
+
+        if self._additional_validator:
+            for key in additionalProperties:
+                result = self._additional_validator.validate(instance[key])
+                if not result.ok:
+                    results.append(result)
+
+        for regex in self._pattern_validators:
+            for key in additionalProperties:
+                if regex.match(key):
+                    result = self._pattern_validators[regex].validate(instance[key])
+                    if not result.ok:
+                        results.append(result)
 
         if not results and not messages:
             return ValidationResult(ok=True)
@@ -285,9 +298,9 @@ class Object(IValidator):
                     self.keyword_to_validator[keyword](value=kwargs.get(keyword))
                 )
 
-        if kwargs.get("properties") is not None:
+        if kwargs.get("properties") is not None or kwargs.get("patternProperties") is not None:
             self._validators.append(
-                Property(value=kwargs.get("properties"), additionalProperties=kwargs.get("additionalProperties"))
+                Property(value=kwargs.get("properties"), additionalProperties=kwargs.get("additionalProperties"), patternProperties=kwargs.get("patternProperties"))
             )
 
     def validate(self, instance):

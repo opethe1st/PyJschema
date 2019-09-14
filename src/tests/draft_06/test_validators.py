@@ -238,6 +238,18 @@ class TestObject(unittest.TestCase):
                 },
                 {"abcde": "ab", "abc": "abcdefghij"},
             ),
+            (
+                'patternProperties',
+                {
+                    "type": "object",
+                    "patternProperties": {
+                        "^S_": {"type": "string"},
+                        "^I_": {"type": "integer"}
+                    },
+                    "additionalProperties": False
+                },
+                {"S_25": "This is a string", "I_0": 42}
+            ),
         ]
     )
     def test_true(self, name, schema, instance):
@@ -310,6 +322,19 @@ class TestObject(unittest.TestCase):
                 },
                 {"abcde": "ab", "abc": "abcdefghij"},
             ),
+            (
+                'patternProperties',
+                {
+                    "type": "object",
+                    "patternProperties": {
+                        "^S_": {"type": "string"},
+                        "^I_": {"type": "integer"}
+                    },
+                    "additionalProperties": False
+                },
+                {"S_0": 42}
+            ),
+            # add test where there is additionalProperties and no properties keyword
         ]
     )
     def test_false(self, name, schema, instance):
