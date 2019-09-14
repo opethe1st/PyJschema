@@ -3,7 +3,7 @@ import typing
 from jsonschema.common import ValidationResult
 
 from .i_validator import AValidator
-from .number import Number
+from .number import Number, Integer
 from .primitives import AcceptAll, Boolean, Const, Enum, Null, RejectAll
 from .string import String
 from .utils import Max, Min
@@ -36,6 +36,7 @@ def build_validator(schema: typing.Union[dict, bool]) -> typing.Union[AcceptAll,
         schema_type_to_validator: typing.Dict[str, typing.Type[AValidator]] = {
             'string': String,
             'number': Number,
+            'integer': Integer,
             'boolean': Boolean,
             'null': Null,
             "array": Array,

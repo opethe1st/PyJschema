@@ -56,7 +56,7 @@ class ExclusiveMaximum(AValidator):
 
 
 # TODO add integer type - probably just subclass this and add an integer check in the validator
-class Number(AValidator):
+class NumberOrInteger(AValidator):
     def __init__(self, **kwargs):
         self._validators = []
         keyword_to_validator = {
@@ -74,19 +74,35 @@ class Number(AValidator):
 
     def validate(self, instance):
         results = []
-        messages = []
-        if not isinstance(instance, numbers.Number):
-            messages.append('instance is not a number')
         for validator in self._validators:
             result = validator.validate(instance)
             if not result.ok:
                 results.append(result)
 
-        if not results and not messages:
+        if not results:
             return ValidationResult(ok=True)
         else:
             return ValidationResult(
                 ok=False,
-                messages=messages,
                 children=results
             )
+
+
+class Number(NumberOrInteger):
+
+    def validate(self, instance):
+        res = super().validate(instance=instance)
+        if not isinstance(instance, numbers.Number):
+            res.ok = False
+            res.messages.append('instance is not a number')
+        return res
+
+
+class Integer(NumberOrInteger):
+
+    def validate(self, instance):
+        res = super().validate(instance=instance)
+        if not isinstance(instance, int):
+            res.ok = False
+            res.messages.append('instance is not an integer')
+        return res

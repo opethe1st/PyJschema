@@ -2,7 +2,7 @@ import unittest
 
 import parameterized
 
-from jsonschema.draft_06.validator import validate_once
+from jsonschema.draft_06 import validate_once
 
 
 class TestEnum(unittest.TestCase):
@@ -90,6 +90,7 @@ class TestNumber(unittest.TestCase):
             ("exclusiveMinimum", {"type": "number", "exclusiveMinimum": 3}, 4),
             ("maximum", {"type": "number", "maximum": 3}, 3),
             ("exclusiveMaximum", {"type": "number", "exclusiveMaximum": 5}, 4),
+            ("integer", {"type": "integer"}, 4),
         ]
 
     )
@@ -104,6 +105,7 @@ class TestNumber(unittest.TestCase):
             ("exclusiveMinimum", {"type": "number", "exclusiveMinimum": 124}, 124),
             ("maximum", {"type": "number", "maximum": 123}, 124),
             ("exclusiveMaximum", {"type": "number", "exclusiveMaximum": 124}, 124),
+            ("integer", {"type": "integer"}, 124.012),
         ]
 
     )
