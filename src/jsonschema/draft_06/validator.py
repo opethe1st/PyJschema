@@ -240,7 +240,7 @@ class NullValidator(IValidator):
             return ValidationResult(ok=False)
 
 
-class ItemsArrayValidator(IValidator):
+class ItemsArray(IValidator):
     def __init__(self, **kwargs):
         self.item_validators = [build_validator(value) for value in kwargs.get("items", [])]
         self.additional_item_validator = build_validator(kwargs['additionalItems']) if kwargs.get('additionalItems') else None
@@ -271,7 +271,7 @@ class ItemsArrayValidator(IValidator):
         return ValidationResult(ok=ok, children=children)
 
 
-class ItemsValidator(IValidator):
+class Items(IValidator):
     def __init__(self, **kwargs):
         #  TODO should this be -> build_validator(kwargs["items"])
         self.values_validator = build_validator(kwargs.get("items"))
@@ -288,7 +288,7 @@ class ItemsValidator(IValidator):
         return ValidationResult(ok=ok, children=children)
 
 
-class ContainsValidator(IValidator):
+class Contains(IValidator):
     def __init__(self, **kwargs):
         self.value_validator = build_validator(kwargs['value'])
 
@@ -304,67 +304,80 @@ class ContainsValidator(IValidator):
             return ValidationResult(ok=False, messages=["No item in this array matches the schema in the contains keyword"])
 
 
-class ArrayValidator(IValidator):
-    def __init__(self, **kwargs):
-        self.items_validator = None
-        if 'items' in kwargs:
-            if isinstance(kwargs['items'], list):
-                self.items_validator = ItemsArrayValidator(items=kwargs['items'], additionalItems=kwargs.get('additionalItems'))
-            else:
-                self.items_validator = ItemsValidator(items=kwargs['items'])
-        self.minItems = None
-        if 'minItems' in kwargs:
-            self.minItems = kwargs.pop('minItems')
-
-        self.maxItems = None
-        if 'maxItems' in kwargs:
-            # does modifying like this lead to weird side-effects?
-            self.maxItems = kwargs.pop('maxItems')
-
-        self.uniqueItems = None
-        if 'uniqueItems' in kwargs:
-            # should probably make this, such that if not true, no need to save.
-            self.uniqueItems = kwargs.pop('uniqueItems')
-        self.contains_validator = None
-        if 'contains' in kwargs:
-            self.contains_validator = ContainsValidator(value=kwargs.pop('contains'))
+class MinItems(IValidator):
+    def __init__(self, value):
+        self.value = value
 
     def validate(self, instance):
-        messages = []
-        children = []
-        ok = True
-        if not isinstance(instance, list):
-            ok = False
-            messages.append("instance is not an instance of a list")
+        if len(instance) < self.value:
+            return ValidationResult(ok=False, messages=[])
+        return ValidationResult(ok=True)
 
-        if self.items_validator:
-            res = self.items_validator.validate(instance)
-            if not res.ok:
-                ok = False
-                children.append(res)
-        if self.minItems:
-            if len(instance) < self.minItems:
-                ok = False
-                messages.append(f"length {len(instance)} is less than minItems {self.minItems}")
-        if self.maxItems:
-            if self.maxItems < len(instance):
-                ok = False
-                messages.append(f"length {len(instance)} is greater than maxItems {self.maxItems}")
 
-        if self.uniqueItems:
-            # this should work well enough I think but who knows
+class MaxItems(IValidator):
+    def __init__(self, value):
+        self.value = value
+
+    def validate(self, instance):
+        if self.value < len(instance):
+            return ValidationResult(ok=False, messages=[])
+        return ValidationResult(ok=True)
+
+
+class UniqueItems(IValidator):
+    def __init__(self, value):
+        self.value = value
+
+    def validate(self, instance):
+        if self.value:
             itemsset = set([str(value) for value in instance])
             if len(itemsset) != len(instance):
-                ok = False
-                messages.append(f"Not all items in this instance: {instance} are unique")
+                return ValidationResult(ok=False)
+        return ValidationResult(ok=True)
 
-        if self.contains_validator:
-            res = self.contains_validator.validate(instance)
-            if not res.ok:
-                ok = False
-                children.append(res)
 
-        return ValidationResult(ok=ok, messages=messages, children=children)
+class ArrayValidator(IValidator):
+
+    keyword_to_validator = {
+        'minItems': MinItems,
+        'maxItems': MaxItems,
+        'uniqueItems': UniqueItems,
+        'contains': Contains,
+    }
+
+    def __init__(self, **kwargs):
+        self._validators = []
+        for keyword in self.keyword_to_validator:
+            if kwargs.get(keyword) is not None:
+                self._validators.append(
+                    self.keyword_to_validator[keyword](value=kwargs.get(keyword))
+                )
+
+        if 'items' in kwargs:
+            if isinstance(kwargs['items'], list):
+                items_validator = ItemsArray(items=kwargs['items'], additionalItems=kwargs.get('additionalItems'))
+            else:
+                items_validator = Items(items=kwargs['items'])
+            self._validators.append(items_validator)
+
+    def validate(self, instance):
+        results = []
+        messages = []
+        if not isinstance(instance, list):
+            messages.append('instance is not a number')
+        for validator in self._validators:
+            result = validator.validate(instance)
+            if not result.ok:
+                results.append(result)
+
+        if not results and not messages:
+            return ValidationResult(ok=True)
+        else:
+            return ValidationResult(
+                ok=False,
+                messages=messages,
+                children=results
+            )
 
 
 class AcceptAllValidator(IValidator):
