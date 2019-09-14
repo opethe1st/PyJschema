@@ -86,42 +86,36 @@ class Items(AValidator):
     def __init__(self, items, **kwargs):
         self._validator = build_validator(items)
 
-    # TODO (ope) - stop using this ok = False pattern
     def validate(self, instance):
         children = []
-        ok = True
 
         for value in instance:
             res = self._validator.validate(value)
 
             if not res.ok:
-                ok = False
                 children.append(res)
-
-        return ValidationResult(ok=ok, children=children)
+        if not children:
+            return ValidationResult(ok=True)
+        else:
+            return ValidationResult(ok=False, children=children)
 
 
 class Contains(AValidator):
     def __init__(self, value, **kwargs):
         self._validator = build_validator(value)
 
-    # TODO(ope): stop using this ok = False pattern
     def validate(self, instance):
-        ok = False
 
         for value in instance:
             res = self._validator.validate(value)
 
             if res.ok:
-                ok = True
+                return ValidationResult(ok=True)
 
-        if ok:
-            return ValidationResult(ok=True)
-        else:
-            return ValidationResult(
-                ok=False,
-                messages=["No item in this array matches the schema in the contains keyword"]
-            )
+        return ValidationResult(
+            ok=False,
+            messages=["No item in this array matches the schema in the contains keyword"]
+        )
 
 
 class MinItems(Min):
