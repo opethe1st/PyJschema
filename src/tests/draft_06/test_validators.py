@@ -172,6 +172,47 @@ class TestArrayValidation(unittest.TestCase):
         self.assertFalse(validate(schema=schema, instance=instance))
 
 
+class TestObject(unittest.TestCase):
+    @parameterized.parameterized.expand(
+        [
+            ('is object', {"type": "object"}, {"k1": "v1"}),
+            (
+                'object with properties',
+                {
+                    "type": "object",
+                    "properties": {
+                        "shortname": {"type": "string", "maxLength": 3},
+                        "longname": {"type": "string", "maxLength": 15},
+                    }
+                },
+                {"shortname": "ab", "longname": "abcdefghij"},
+            ),
+        ]
+    )
+    def test_true(self, name, schema, instance):
+        self.assertTrue(validate(schema=schema, instance=instance))
+
+    @parameterized.parameterized.expand(
+        [
+            ('is object', {"type": "object"}, "not an object"),
+            ('object with non-string keys', {"type": "object"}, {123: "value"}),
+            (
+                'object with properties',
+                {
+                    "type": "object",
+                    "properties": {
+                        "shortname": {"type": "string", "maxLength": 3},
+                        "longname": {"type": "string", "maxLength": 4},
+                    }
+                },
+                {"shortname": "ab", "longname": "abcdefghij"}
+            ),
+        ]
+    )
+    def test_false(self, name, schema, instance):
+        self.assertFalse(validate(schema=schema, instance=instance))
+
+
 class TestTrue(unittest.TestCase):
 
     @parameterized.parameterized.expand(
