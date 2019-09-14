@@ -1,22 +1,11 @@
-import abc
-import collections.abc as ca
-import numbers
 import typing
 
 from jsonschema.common import ValidationResult
 
-
-JsonType = typing.Union[str, numbers.Number, bool, None, ca.Mapping, ca.Sequence]
-
-
-class IValidator(abc.ABC):
-
-    def __init__(self, **kwargs):
-        pass
-
-    @abc.abstractmethod
-    def validate(self, instance: JsonType) -> ValidationResult:
-        pass
+from .i_validator import IValidator
+from .number import Number
+from .primitives import AcceptAll, Boolean, Null, RejectAll
+from .string import String
 
 
 class InstanceValidator(IValidator):
@@ -43,7 +32,7 @@ class InstanceValidator(IValidator):
             )
 
 
-class ConstValidator(IValidator):
+class Const(IValidator):
     def __init__(self, value):
         self.value = value
 
@@ -55,7 +44,7 @@ class ConstValidator(IValidator):
             return ValidationResult(ok=False)
 
 
-class EnumValidator(IValidator):
+class Enum(IValidator):
     def __init__(self, values):
         self.values = values
 
@@ -64,179 +53,6 @@ class EnumValidator(IValidator):
             return ValidationResult(ok=True)
         else:
             # TODO I should add message
-            return ValidationResult(ok=False)
-
-
-# TODO move to its own file
-class MaxLength(IValidator):
-    def __init__(self, value):
-        self.max = value
-
-    def validate(self, instance):
-        if self.max < len(instance):
-            return ValidationResult(ok=False, messages=[])
-        return ValidationResult(ok=True)
-
-
-class MinLength(IValidator):
-    def __init__(self, value):
-        self.min = value
-
-    def validate(self, instance):
-        if len(instance) < self.min:
-            return ValidationResult(ok=False, messages=[])
-        return ValidationResult(ok=True)
-
-
-class Pattern(IValidator):
-    def __init__(self, value):
-        self.pattern = value
-
-    def validate(self, instance):
-        import re
-        if not re.match(self.pattern, instance):
-            return ValidationResult(ok=False, messages=["instance doesn't match the pattern given"])
-        return ValidationResult(ok=True)
-
-
-class String(IValidator):
-    def __init__(self, **kwargs):
-        self._validators = []
-        keyword_to_validator = {
-            'minLength': MinLength,
-            'maxLength': MaxLength,
-            'pattern': Pattern,
-        }
-        for keyword in keyword_to_validator:
-            if kwargs.get(keyword) is not None:
-                self._validators.append(
-                    keyword_to_validator[keyword](value=kwargs.get(keyword))
-                )
-
-    def validate(self, instance):
-        results = []
-        messages = []
-        if not isinstance(instance, str):
-            messages.append('instance is not a string')
-        for validator in self._validators:
-            result = validator.validate(instance)
-            if not result.ok:
-                results.append(result)
-
-        if not results and not messages:
-            return ValidationResult(ok=True)
-        else:
-            return ValidationResult(
-                ok=False,
-                messages=messages,
-                children=results
-            )
-
-
-# TODO move to it's own file
-class MultipleOf(IValidator):
-    def __init__(self, value):
-        self.value = value
-
-    def validate(self, instance):
-        if (instance % self.value) != 0:
-            return ValidationResult(ok=False)
-        return ValidationResult(ok=True)
-
-
-class Minimum(IValidator):
-    def __init__(self, value):
-        self.value = value
-
-    def validate(self, instance):
-        if instance < self.value:
-            return ValidationResult(ok=False)
-        return ValidationResult(ok=True)
-
-
-class Maximum(IValidator):
-    def __init__(self, value):
-        self.value = value
-
-    def validate(self, instance):
-        if self.value < instance:
-            return ValidationResult(ok=False)
-        return ValidationResult(ok=True)
-
-
-class ExclusiveMinimum(IValidator):
-    def __init__(self, value):
-        self.value = value
-
-    def validate(self, instance):
-        if instance <= self.value:
-            return ValidationResult(ok=False)
-        return ValidationResult(ok=True)
-
-
-class ExclusiveMaximum(IValidator):
-    def __init__(self, value):
-        self.value = value
-
-    def validate(self, instance):
-        if self.value <= instance:
-            return ValidationResult(ok=False)
-        return ValidationResult(ok=True)
-
-
-class Number(IValidator):
-    def __init__(self, **kwargs):
-        self._validators = []
-        keyword_to_validator = {
-            'multipleOf': MultipleOf,
-            'minimum': Minimum,
-            'maximum': Maximum,
-            'exclusiveMinimum': ExclusiveMinimum,
-            'exclusiveMaximum': ExclusiveMaximum,
-        }
-        for keyword in keyword_to_validator:
-            if kwargs.get(keyword) is not None:
-                self._validators.append(
-                    keyword_to_validator[keyword](value=kwargs.get(keyword))
-                )
-
-    def validate(self, instance):
-        results = []
-        messages = []
-        if not isinstance(instance, numbers.Number):
-            messages.append('instance is not a number')
-        for validator in self._validators:
-            result = validator.validate(instance)
-            if not result.ok:
-                results.append(result)
-
-        if not results and not messages:
-            return ValidationResult(ok=True)
-        else:
-            return ValidationResult(
-                ok=False,
-                messages=messages,
-                children=results
-            )
-
-
-# TODO(ope) - move this and other primitves to their own file
-class Boolean(IValidator):
-
-    def validate(self, instance):
-        # is this faster than an isinstance check?
-        if (instance is True) or (instance is False):
-            return ValidationResult(ok=True)
-        else:
-            return ValidationResult(ok=False, messages=['instance is not a valid boolean'])
-
-
-class Null(IValidator):
-
-    def validate(self, instance):
-        if instance is None:
-            return ValidationResult(ok=True)
-        else:
             return ValidationResult(ok=False)
 
 
@@ -380,31 +196,19 @@ class Array(IValidator):
             )
 
 
-class AcceptAllValidator(IValidator):
-
-    def validate(self, instance):
-        return ValidationResult(ok=True)
-
-
-class RejectAllValidator(IValidator):
-
-    def validate(self, instance):
-        return ValidationResult(ok=False, messages=["This fails for every value"])
-
-
 def build_validator(schema: typing.Union[dict, bool]) -> IValidator:
     if schema is True or schema == {}:
-        return AcceptAllValidator()
+        return AcceptAll()
     elif schema is False:
-        return RejectAllValidator()
+        return RejectAll()
     if not isinstance(schema, dict):
         raise Exception("schema must be either a boolean or a dictionary")
 
     instance_validator = InstanceValidator()
     if 'const' in schema:
-        instance_validator.add_validator(ConstValidator(value=schema['const']))
+        instance_validator.add_validator(Const(value=schema['const']))
     if 'enum' in schema:
-        instance_validator.add_validator(EnumValidator(values=schema['enum']))
+        instance_validator.add_validator(Enum(values=schema['enum']))
     if 'type' in schema:
         schema_type_to_validator: typing.Dict[str, typing.Type[IValidator]] = {
             'string': String,
