@@ -2,7 +2,7 @@ import typing
 
 from jsonschema.common import ValidationResult
 
-from .i_validator import IValidator
+from .i_validator import AValidator
 from .number import Number
 from .primitives import AcceptAll, Boolean, Null, RejectAll
 from .string import String
@@ -10,7 +10,7 @@ from .utils import Min, Max
 # TODO(ope): rename this file to composite validation? or just composite?
 
 
-class Const(IValidator):
+class Const(AValidator):
     def __init__(self, value):
         self.value = value
 
@@ -22,7 +22,7 @@ class Const(IValidator):
             return ValidationResult(ok=False)
 
 
-class Enum(IValidator):
+class Enum(AValidator):
     def __init__(self, values):
         self.values = values
 
@@ -34,7 +34,7 @@ class Enum(IValidator):
             return ValidationResult(ok=False)
 
 
-class ItemsArray(IValidator):
+class ItemsArray(AValidator):
     def __init__(self, items, additionalItems=None, **kwargs):
         self.item_validators = [build_validator(value) for value in items]
         self.additional_item_validator = build_validator(additionalItems) if additionalItems else None
@@ -66,7 +66,7 @@ class ItemsArray(IValidator):
         return ValidationResult(ok=ok, children=children)
 
 
-class Items(IValidator):
+class Items(AValidator):
     def __init__(self, items, **kwargs):
         self._validator = build_validator(items)
 
@@ -85,7 +85,7 @@ class Items(IValidator):
         return ValidationResult(ok=ok, children=children)
 
 
-class Contains(IValidator):
+class Contains(AValidator):
     def __init__(self, value, **kwargs):
         self._validator = build_validator(value)
 
@@ -108,7 +108,7 @@ class Contains(IValidator):
             )
 
 
-class MinItems(IValidator):
+class MinItems(AValidator):
     def __init__(self, value):
         self.value = value
 
@@ -118,7 +118,7 @@ class MinItems(IValidator):
         return ValidationResult(ok=True)
 
 
-class MaxItems(IValidator):
+class MaxItems(AValidator):
     def __init__(self, value):
         self.value = value
 
@@ -129,7 +129,7 @@ class MaxItems(IValidator):
         return ValidationResult(ok=True)
 
 
-class UniqueItems(IValidator):
+class UniqueItems(AValidator):
     def __init__(self, value):
         self.value = value
 
@@ -143,7 +143,7 @@ class UniqueItems(IValidator):
         return ValidationResult(ok=True)
 
 
-class Array(IValidator):
+class Array(AValidator):
 
     keyword_to_validator = {
         'minItems': MinItems,
@@ -192,7 +192,7 @@ class Array(IValidator):
             )
 
 
-class Property(IValidator):
+class Property(AValidator):
 
     def __init__(self, value=None, additionalProperties=None, patternProperties=None):
         import re
@@ -242,7 +242,7 @@ class Property(IValidator):
             )
 
 
-class Required(IValidator):
+class Required(AValidator):
     def __init__(self, value):
         self.value = value
 
@@ -257,7 +257,7 @@ class Required(IValidator):
             return ValidationResult(ok=False, messages=messages)
 
 
-class PropertyNames(IValidator):
+class PropertyNames(AValidator):
     # TODO(ope) rename to value to schema whenever a schema is expected.
     # need to change this line below to - self.keyword_to_validator[keyword](value=kwargs.get(keyword))
     # to self.keyword_to_validator[keyword](kwargs.get(keyword)) pass by position since the keyword args
@@ -290,7 +290,7 @@ class MaxProperties(Max):
     pass
 
 
-class Object(IValidator):
+class Object(AValidator):
     keyword_to_validator = {
         "required": Required,
         "propertyNames": PropertyNames,
@@ -348,7 +348,7 @@ class Object(IValidator):
 
 
 # TODO(ope); rename this to Validator?
-class InstanceValidator(IValidator):
+class InstanceValidator(AValidator):
 
     def __init__(self):
         self._validators = []
@@ -374,7 +374,7 @@ class InstanceValidator(IValidator):
             )
 
 
-def build_validator(schema: typing.Union[dict, bool]) -> IValidator:
+def build_validator(schema: typing.Union[dict, bool]) -> AValidator:
     if schema is True or schema == {}:
         return AcceptAll()
     elif schema is False:
@@ -388,7 +388,7 @@ def build_validator(schema: typing.Union[dict, bool]) -> IValidator:
     if 'enum' in schema:
         instance_validator.add_validator(Enum(values=schema['enum']))
     if 'type' in schema:
-        schema_type_to_validator: typing.Dict[str, typing.Type[IValidator]] = {
+        schema_type_to_validator: typing.Dict[str, typing.Type[AValidator]] = {
             'string': String,
             'number': Number,
             'boolean': Boolean,

@@ -1,9 +1,9 @@
 from jsonschema.common import ValidationResult
 
-from .i_validator import IValidator
+from .i_validator import AValidator
 
 
-class Boolean(IValidator):
+class Boolean(AValidator):
 
     def validate(self, instance):
         # is this faster than an isinstance check?
@@ -13,7 +13,7 @@ class Boolean(IValidator):
             return ValidationResult(ok=False, messages=['instance is not a valid boolean'])
 
 
-class Null(IValidator):
+class Null(AValidator):
 
     def validate(self, instance):
         if instance is None:
@@ -22,13 +22,13 @@ class Null(IValidator):
             return ValidationResult(ok=False)
 
 
-class AcceptAll(IValidator):
+class AcceptAll(AValidator):
 
     def validate(self, instance):
         return ValidationResult(ok=True)
 
 
-class RejectAll(IValidator):
+class RejectAll(AValidator):
 
     def validate(self, instance):
         return ValidationResult(ok=False, messages=["This fails for every value"])

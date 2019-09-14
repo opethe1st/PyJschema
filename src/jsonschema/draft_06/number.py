@@ -2,10 +2,10 @@ import numbers
 
 from jsonschema.common import ValidationResult
 
-from .i_validator import IValidator
+from .i_validator import AValidator
 
 
-class MultipleOf(IValidator):
+class MultipleOf(AValidator):
     def __init__(self, value):
         self.value = value
 
@@ -15,7 +15,7 @@ class MultipleOf(IValidator):
         return ValidationResult(ok=True)
 
 
-class Minimum(IValidator):
+class Minimum(AValidator):
     def __init__(self, value):
         self.value = value
 
@@ -25,7 +25,7 @@ class Minimum(IValidator):
         return ValidationResult(ok=True)
 
 
-class Maximum(IValidator):
+class Maximum(AValidator):
     def __init__(self, value):
         self.value = value
 
@@ -35,7 +35,7 @@ class Maximum(IValidator):
         return ValidationResult(ok=True)
 
 
-class ExclusiveMinimum(IValidator):
+class ExclusiveMinimum(AValidator):
     def __init__(self, value):
         self.value = value
 
@@ -45,7 +45,7 @@ class ExclusiveMinimum(IValidator):
         return ValidationResult(ok=True)
 
 
-class ExclusiveMaximum(IValidator):
+class ExclusiveMaximum(AValidator):
     def __init__(self, value):
         self.value = value
 
@@ -56,7 +56,7 @@ class ExclusiveMaximum(IValidator):
 
 
 # TODO add integer type - probably just subclass this and add an integer check in the validator
-class Number(IValidator):
+class Number(AValidator):
     def __init__(self, **kwargs):
         self._validators = []
         keyword_to_validator = {
