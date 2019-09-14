@@ -99,7 +99,7 @@ class Pattern(IValidator):
         return ValidationResult(ok=True)
 
 
-class StringValidator(IValidator):
+class String(IValidator):
     def __init__(self, **kwargs):
         self._validators = []
         keyword_to_validator = {
@@ -184,7 +184,7 @@ class ExclusiveMaximum(IValidator):
         return ValidationResult(ok=True)
 
 
-class NumberValidator(IValidator):
+class Number(IValidator):
     def __init__(self, **kwargs):
         self._validators = []
         keyword_to_validator = {
@@ -221,7 +221,7 @@ class NumberValidator(IValidator):
 
 
 # TODO(ope) - move this and other primitves to their own file
-class BooleanValidator(IValidator):
+class Boolean(IValidator):
 
     def validate(self, instance):
         # is this faster than an isinstance check?
@@ -231,7 +231,7 @@ class BooleanValidator(IValidator):
             return ValidationResult(ok=False, messages=['instance is not a valid boolean'])
 
 
-class NullValidator(IValidator):
+class Null(IValidator):
 
     def validate(self, instance):
         if instance is None:
@@ -336,7 +336,7 @@ class UniqueItems(IValidator):
         return ValidationResult(ok=True)
 
 
-class ArrayValidator(IValidator):
+class Array(IValidator):
 
     keyword_to_validator = {
         'minItems': MinItems,
@@ -407,11 +407,11 @@ def build_validator(schema: typing.Union[dict, bool]) -> IValidator:
         instance_validator.add_validator(EnumValidator(values=schema['enum']))
     if 'type' in schema:
         schema_type_to_validator: typing.Dict[str, typing.Type[IValidator]] = {
-            'string': StringValidator,
-            'number': NumberValidator,
-            'boolean': BooleanValidator,
-            'null': NullValidator,
-            "array": ArrayValidator,
+            'string': String,
+            'number': Number,
+            'boolean': Boolean,
+            'null': Null,
+            "array": Array,
         }
 
         if schema['type'] in schema_type_to_validator:
