@@ -1,4 +1,4 @@
-from .validator import build_validator, validate_once
+from .composite import build_validator, validate_once
 
 
 __all__ = [
