@@ -22,14 +22,14 @@ class IValidator(abc.ABC):
 class InstanceValidator(IValidator):
 
     def __init__(self):
-        self._sub_validators = []
+        self._validators = []
 
     def add_validator(self, validator):
-        self._sub_validators.append(validator)
+        self._validators.append(validator)
 
     def validate(self, instance) -> ValidationResult:
         results = []
-        for validator in self._sub_validators:
+        for validator in self._validators:
             result = validator.validate(instance)
             if not result.ok:
                 results.append(result)
@@ -67,32 +67,69 @@ class EnumValidator(IValidator):
             return ValidationResult(ok=False)
 
 
-class StringValidator(IValidator):
-    def __init__(self, **kwargs):
-        self.minLength = kwargs.get('minLength')
-        self.maxLength = kwargs.get('maxLength')
-        self.pattern = kwargs.get('pattern')
+class MaxLength(IValidator):
+    def __init__(self, value):
+        self.max = value
 
     def validate(self, instance):
+        if self.max < len(instance):
+            return ValidationResult(ok=False, messages=[])
+        return ValidationResult(ok=True)
+
+
+class MinLength(IValidator):
+    def __init__(self, value):
+        self.min = value
+
+    def validate(self, instance):
+        if len(instance) < self.min:
+            return ValidationResult(ok=False, messages=[])
+        return ValidationResult(ok=True)
+
+
+class Pattern(IValidator):
+    def __init__(self, value):
+        self.pattern = value
+
+    def validate(self, instance):
+        import re
+        if not re.match(self.pattern, instance):
+            return ValidationResult(ok=False, messages=["instance doesn't match the pattern given"])
+        return ValidationResult(ok=True)
+
+
+class StringValidator(IValidator):
+    def __init__(self, **kwargs):
+        self._validators = []
+        keyword_to_validator = {
+            'minLength': MinLength,
+            'maxLength': MaxLength,
+            'pattern': Pattern,
+        }
+        for keyword in keyword_to_validator:
+            if kwargs.get(keyword) is not None:
+                self._validators.append(
+                    keyword_to_validator[keyword](value=kwargs.get(keyword))
+                )
+
+    def validate(self, instance):
+        results = []
         messages = []
-        ok = True
         if not isinstance(instance, str):
             messages.append('instance is not a string')
-            ok = False
-        if self.minLength:
-            if len(instance) < self.minLength:
-                messages.append('instance is too short')
-                ok = False
-        if self.maxLength:
-            if self.maxLength < len(instance):
-                messages.append('instance is too long')
-                ok = False
-        if self.pattern:
-            import re
-            if not re.match(self.pattern, instance):
-                messages.append("instance doesn't match the pattern given")
-                ok = False
-        return ValidationResult(ok=ok, messages=messages)
+        for validator in self._validators:
+            result = validator.validate(instance)
+            if not result.ok:
+                results.append(result)
+
+        if not results and not messages:
+            return ValidationResult(ok=True)
+        else:
+            return ValidationResult(
+                ok=False,
+                messages=messages,
+                children=results
+            )
 
 
 class NumberValidator(IValidator):
