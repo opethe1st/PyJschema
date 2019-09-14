@@ -198,6 +198,16 @@ class TestObject(unittest.TestCase):
                 },
                 {"shortname": "ab", "longname": "abcdefghij"},
             ),
+            (
+                'object with propertyNames',
+                {
+                    "type": "object",
+                    "propertyNames": {
+                        "pattern": "[a-z]*"
+                    }
+                },
+                {"": "ab", "abc": "abcdefghij"},
+            ),
         ]
     )
     def test_true(self, name, schema, instance):
@@ -229,6 +239,16 @@ class TestObject(unittest.TestCase):
                     ]
                 },
                 {"shortname": "ab", "longname": "abcdefghij"},
+            ),
+            (
+                'object with propertyNames',
+                {
+                    "type": "object",
+                    "propertyNames": {
+                        "pattern": "[a-z]+"
+                    }
+                },
+                {"": "ab", "abc": "abcdefghij", "123": "doesnt conform to pattern"},
             ),
         ]
     )

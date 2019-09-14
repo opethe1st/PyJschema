@@ -6,6 +6,7 @@ from .i_validator import IValidator
 from .number import Number
 from .primitives import AcceptAll, Boolean, Null, RejectAll
 from .string import String
+# TODO(ope): rename this file to composite validation? or just composite?
 
 
 class Const(IValidator):
@@ -67,6 +68,7 @@ class Items(IValidator):
     def __init__(self, items, **kwargs):
         self._validator = build_validator(items)
 
+    # TODO (ope) - stop using this ok = False pattern
     def validate(self, instance):
         children = []
         ok = True
@@ -83,6 +85,7 @@ class Contains(IValidator):
     def __init__(self, value, **kwargs):
         self._validator = build_validator(value)
 
+    # TODO(ope): stop using this ok = False pattern
     def validate(self, instance):
         ok = False
         for value in instance:
@@ -208,10 +211,35 @@ class Required(IValidator):
             return ValidationResult(ok=False, messages=messages)
 
 
+class PropertyNames(IValidator):
+    # TODO(ope) rename to value to schema whenever a schema is expected.
+    # need to change this line below to - self.keyword_to_validator[keyword](value=kwargs.get(keyword))
+    # to self.keyword_to_validator[keyword](kwargs.get(keyword)) pass by position since the keyword args
+    # might be different
+    def __init__(self, value):
+        # add this to make sure that the type is string - I have seen it missing from
+        # examples in the documentation so can only assume it's allowed
+        value["type"] = "string"
+        self._validator = build_validator(value)
+
+    def validate(self, instance):
+        children = []
+        for propertyName in instance:
+            res = self._validator.validate(propertyName)
+            if not res.ok:
+                children.append(res)
+
+        if not children:
+            return ValidationResult(ok=True)
+        else:
+            return ValidationResult(ok=False, children=children)
+
+
 class Object(IValidator):
     keyword_to_validator = {
         "properties": Property,
-        "required": Required
+        "required": Required,
+        "propertyNames": PropertyNames,
     }
 
     def __init__(self, **kwargs):
@@ -301,3 +329,9 @@ def build_validator(schema: typing.Union[dict, bool]) -> IValidator:
             )
 
     return instance_validator
+
+
+# TODO(ope); add validate_once that's a convenient function
+# def validate_once(schema, instance):
+#     validator = build_validator(schema)
+#     return validator.validate(instance)
