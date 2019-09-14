@@ -1,9 +1,6 @@
-import dataclasses
-import typing
+from .validation_result import ValidationResult
 
 
-@dataclasses.dataclass
-class ValidationResult:
-    ok: bool
-    messages: typing.List[str] = dataclasses.field(default_factory=list)
-    children: typing.List['ValidationResult'] = dataclasses.field(default_factory=list)
+__all__ = [
+    'ValidationResult'
+]
