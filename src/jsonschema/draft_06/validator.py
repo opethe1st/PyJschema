@@ -67,6 +67,7 @@ class EnumValidator(IValidator):
             return ValidationResult(ok=False)
 
 
+# TODO move to its own file
 class MaxLength(IValidator):
     def __init__(self, value):
         self.max = value
@@ -132,42 +133,91 @@ class StringValidator(IValidator):
             )
 
 
-class NumberValidator(IValidator):
-    def __init__(self, **kwargs):
-        self.multipleOf = kwargs.get('multipleOf')
-        self.maximum = kwargs.get('maximum')
-        self.exclusiveMaximum = kwargs.get('exclusiveMaximum')
-        self.minimum = kwargs.get('minimum')
-        self.exclusiveMinimum = kwargs.get('exclusiveMinimum')
+# TODO move to it's own file
+class MultipleOf(IValidator):
+    def __init__(self, value):
+        self.value = value
 
     def validate(self, instance):
+        if (instance % self.value) != 0:
+            return ValidationResult(ok=False)
+        return ValidationResult(ok=True)
+
+
+class Minimum(IValidator):
+    def __init__(self, value):
+        self.value = value
+
+    def validate(self, instance):
+        if instance < self.value:
+            return ValidationResult(ok=False)
+        return ValidationResult(ok=True)
+
+
+class Maximum(IValidator):
+    def __init__(self, value):
+        self.value = value
+
+    def validate(self, instance):
+        if self.value < instance:
+            return ValidationResult(ok=False)
+        return ValidationResult(ok=True)
+
+
+class ExclusiveMinimum(IValidator):
+    def __init__(self, value):
+        self.value = value
+
+    def validate(self, instance):
+        if instance <= self.value:
+            return ValidationResult(ok=False)
+        return ValidationResult(ok=True)
+
+
+class ExclusiveMaximum(IValidator):
+    def __init__(self, value):
+        self.value = value
+
+    def validate(self, instance):
+        if self.value <= instance:
+            return ValidationResult(ok=False)
+        return ValidationResult(ok=True)
+
+
+class NumberValidator(IValidator):
+    def __init__(self, **kwargs):
+        self._validators = []
+        keyword_to_validator = {
+            'multipleOf': MultipleOf,
+            'minimum': Minimum,
+            'maximum': Maximum,
+            'exclusiveMinimum': ExclusiveMinimum,
+            'exclusiveMaximum': ExclusiveMaximum,
+        }
+        for keyword in keyword_to_validator:
+            if kwargs.get(keyword) is not None:
+                self._validators.append(
+                    keyword_to_validator[keyword](value=kwargs.get(keyword))
+                )
+
+    def validate(self, instance):
+        results = []
         messages = []
-        ok = True
         if not isinstance(instance, numbers.Number):
             messages.append('instance is not a number')
-            ok = False
-        if self.multipleOf:
-            if (instance % self.multipleOf) != 0:
-                ok = False
-                messages.append(f"This instance: {instance} is not a multipleOf {self.multipleOf}")
-        if self.maximum:
-            if self.maximum < instance:
-                ok = False
-                messages.append(f'This instance: {instance} is more than the maximum: {self.maximum}')
-        if self.exclusiveMaximum:
-            if self.exclusiveMaximum <= instance:
-                ok = False
-                messages.append(f'This instance: {instance} is more than or equal the exclusiveMaximum: {self.maximum}')
-        if self.minimum:
-            if instance < self.minimum:
-                ok = False
-                messages.append(f'this instance: {instance} is less than the minimum: {self.minimum}')
-        if self.exclusiveMinimum:
-            if instance <= self.exclusiveMinimum:
-                ok = False
-                messages.append(f'this instance: {instance} is less than or equal to the exclusiveMinimum: {self.exclusiveMinimum}')
+        for validator in self._validators:
+            result = validator.validate(instance)
+            if not result.ok:
+                results.append(result)
 
-        return ValidationResult(ok=ok, messages=messages)
+        if not results and not messages:
+            return ValidationResult(ok=True)
+        else:
+            return ValidationResult(
+                ok=False,
+                messages=messages,
+                children=results
+            )
 
 
 class BooleanValidator(IValidator):
