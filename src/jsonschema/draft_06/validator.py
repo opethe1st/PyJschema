@@ -220,6 +220,7 @@ class NumberValidator(IValidator):
             )
 
 
+# TODO(ope) - move this and other primitves to their own file
 class BooleanValidator(IValidator):
 
     def validate(self, instance):
