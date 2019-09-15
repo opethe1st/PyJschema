@@ -39,15 +39,28 @@ class TestGenerateContext(unittest.TestCase):
                     "$id": "#blah",
                     "type": "string",
                 },
+                {"#blah"},
+            ),
+            (
+                "make sure context is generated properly",
+                {
+                    "$id": "#blah",
+                    "type": "array",
+                    "items": {
+                        "$id": "#foo",
+                        "type": "string",
+                    }
+                },
+                {"#blah", "#foo"}
             ),
         ]
     )
-    def test(self, name, schema):
+    def test(self, name, schema, keys):
         validator = build_validator(schema=schema)
         context = generate_context(validator)
         self.assertEqual(
             set(context.keys()),
-            {"#blah"}
+            keys,
         )
 
 
