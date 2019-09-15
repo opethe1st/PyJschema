@@ -1,9 +1,14 @@
 import typing
 
 from jsonschema.common import ValidationResult
+from jsonschema.common.reference_resolver import (
+    Ref,
+    add_context_to_ref_validators,
+    generate_context
+)
+from jsonschema.common import AValidator
 
-from .i_validator import AValidator
-from .number import Number, Integer
+from .number import Integer, Number
 from .primitives import AcceptAll, Boolean, Const, Enum, Null, RejectAll
 from .string import String
 from .utils import Max, Min
@@ -16,22 +21,33 @@ __all__ = [
 
 def validate_once(schema: typing.Union[dict, bool], instance: dict) -> ValidationResult:
     validator = build_validator(schema)
+    context = generate_context(validator)
+    add_context_to_ref_validators(validator, context)
     return validator.validate(instance)
 
 
-def build_validator(schema: typing.Union[dict, bool]) -> typing.Union[AcceptAll, RejectAll, "Validator"]:
+def build_validator(schema: typing.Union[dict, bool]) -> typing.Union[AcceptAll, RejectAll, "Validator", "Ref"]:
     if schema is True or schema == {}:
         return AcceptAll()
     elif schema is False:
         return RejectAll()
-    if not isinstance(schema, dict):
+    elif not isinstance(schema, dict):
         raise Exception("schema must be either a boolean or a dictionary")
 
+    if "$ref" in schema:
+        return Ref(value=schema["$ref"])
+
     validator = Validator()
+
+    if "$id" in schema:
+        validator.id = schema["$id"]
+
     if 'const' in schema:
         validator.add_validator(Const(value=schema['const']))
+
     if 'enum' in schema:
         validator.add_validator(Enum(values=schema['enum']))
+
     if 'type' in schema:
         schema_type_to_validator: typing.Dict[str, typing.Type[AValidator]] = {
             'string': String,
@@ -344,6 +360,7 @@ class Object(AValidator):
 class Validator(AValidator):
 
     def __init__(self):
+        self.id = None
         self._validators = []
 
     def add_validator(self, validator):

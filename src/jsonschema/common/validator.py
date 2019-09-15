@@ -1,3 +1,4 @@
+# TODO add ASchemaValidator that has the id attribute/
 import abc
 import collections.abc as ca
 import numbers
@@ -16,3 +17,6 @@ class AValidator(abc.ABC):
     @abc.abstractmethod
     def validate(self, instance: JsonType) -> ValidationResult:
         pass
+
+    def get_subschema_validators(self) -> typing.List["AValidator"]:
+        return []

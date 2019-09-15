@@ -114,3 +114,6 @@ Some are composite - they accept other schemas
 Some work on their own
 Some work together with other keywords e.g items and additionalItems
 Some operate on just a given type
+
+
+Hm. the reason why we have cyclic imports and dependencies is because i am not using a factory/registry for everything, correct?

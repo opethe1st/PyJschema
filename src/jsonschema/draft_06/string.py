@@ -1,7 +1,6 @@
-from jsonschema.common import ValidationResult
+from jsonschema.common import AValidator, ValidationResult
 
-from .i_validator import AValidator
-from .utils import Min, Max
+from .utils import Max, Min
 
 
 class MaxLength(Max):

@@ -1,8 +1,6 @@
 import numbers
 
-from jsonschema.common import ValidationResult
-
-from .i_validator import AValidator
+from jsonschema.common import AValidator, ValidationResult
 
 
 class MultipleOf(AValidator):
