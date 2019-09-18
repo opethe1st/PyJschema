@@ -2,7 +2,7 @@ import unittest
 
 import parameterized
 
-from jsonschema.draft_06 import validate_once
+from jsonschema.draft_2019_09 import validate_once
 
 
 class TestEnum(unittest.TestCase):
@@ -398,3 +398,60 @@ class TestFalse(unittest.TestCase):
     )
     def test_true(self, name, schema, instance):
         self.assertFalse(validate_once(schema=schema, instance=instance).ok)
+
+
+class TestValidatorWithRef(unittest.TestCase):
+
+    @parameterized.parameterized.expand(
+        [
+            (
+                "testing testing",
+                {
+                    "type": "object",
+                    "properties": {
+                        "name": {
+                            "$anchor": "#string_property",
+                            "type": "string"
+                        },
+                        "surname": {
+                            "$ref": "#string_property"
+                        }
+                    }
+                },
+                {
+                    "name": "abcd",
+                    "surname": "abcd",
+                }
+            ),
+        ]
+    )
+    def test_true(self, name, schema, instance):
+        res = validate_once(schema, instance)
+        self.assertTrue(res.ok)
+
+    @parameterized.parameterized.expand(
+        [
+            (
+                "testing testing",
+                {
+                    "type": "object",
+                    "properties": {
+                        "name": {
+                            "$anchor": "#string_property",
+                            "type": "string"
+                        },
+                        "surname": {
+                            "$ref": "#string_property"
+                        }
+                    }
+                },
+                {
+                    "name": "abcd",
+                    "surname": 123,
+                }
+            ),
+        ]
+    )
+    def test_false(self, name, schema, instance):
+        res = validate_once(schema, instance)
+        self.assertFalse(res.ok)
