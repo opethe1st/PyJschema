@@ -98,6 +98,12 @@ class ItemsArray(AValidator):
 
         return ValidationResult(ok=ok, children=children)
 
+    def subschema_validators(self):
+        validators = self.item_validators[:]
+        if self.additional_item_validator:
+            validators.append(self.additional_item_validator)
+        return validators
+
 
 class Items(AValidator):
     def __init__(self, itemSchema, **kwargs):
@@ -116,6 +122,9 @@ class Items(AValidator):
         else:
             return ValidationResult(ok=False, children=children)
 
+    def subschema_validators(self):
+        return [self._validator]
+
 
 class Contains(AValidator):
     def __init__(self, schema, **kwargs):
@@ -133,6 +142,9 @@ class Contains(AValidator):
             ok=False,
             messages=["No item in this array matches the schema in the contains keyword"]
         )
+
+    def subschema_validators(self):
+        return [self._validator]
 
 
 class MinItems(Min):
@@ -167,6 +179,7 @@ class Array(AValidator):
     }
 
     def __init__(self, **kwargs):
+        self.anchor = None
         self._validators = []
 
         for keyword in self.keyword_to_validator:
@@ -204,6 +217,10 @@ class Array(AValidator):
                 messages=messages,
                 children=results
             )
+
+    def subschema_validators(self):
+        # maybe optimize by not returning validators that don't have schemas embedded
+        return self._validators
 
 
 class Property(AValidator):
@@ -255,6 +272,13 @@ class Property(AValidator):
                 children=results
             )
 
+    def subschema_validators(self):
+        validators = list(self._validators.values())
+        if self._additional_validator:
+            validators.append(self._additional_validator)
+        validators.extend(self._pattern_validators.values())
+        return validators
+
 
 class Required(AValidator):
     def __init__(self, value):
@@ -291,6 +315,9 @@ class PropertyNames(AValidator):
         else:
             return ValidationResult(ok=False, children=children)
 
+    def subschema_validators(self):
+        return [self._validator]
+
 
 class MinProperties(Min):
     pass
@@ -309,6 +336,7 @@ class Object(AValidator):
     }
 
     def __init__(self, **kwargs):
+        self.anchor = None
         self._validators = []
         for keyword in self.keyword_to_validator:
 
@@ -356,6 +384,9 @@ class Object(AValidator):
                 children=results
             )
 
+    def subschema_validators(self):
+        return self._validators
+
 
 class Validator(AValidator):
 
@@ -382,3 +413,6 @@ class Validator(AValidator):
                 messages=["error while validating this instance"],
                 children=results
             )
+
+    def subschema_validators(self):
+        return self._validators

@@ -42,16 +42,26 @@ class TestGenerateContext(unittest.TestCase):
                 {"#blah"},
             ),
             (
-                "make sure context is generated properly",
+                "make sure context is generated properly with nested anchors",
                 {
-                    "$id": "#blah",
+                    "$anchor": "#anarray",
                     "type": "array",
-                    "items": {
-                        "$anchor": "#foo",
-                        "type": "string",
-                    }
+                    "items": [
+                        {
+                            "$anchor": "#astring",
+                            "type": "string",
+                        },
+                        {
+                            "$anchor": "#anumber",
+                            "type": "number",
+                        },
+                        {
+                            "$anchor": "#anobject",
+                            "type": "object",
+                        },
+                    ]
                 },
-                {"#blah", "#foo"}
+                {"#anarray", "#astring", "#anumber", "#anobject"}
             ),
         ]
     )
@@ -118,6 +128,7 @@ class TestRefValidate(unittest.TestCase):
                     "$ref": "#blah"
                 },
             ),
+
         ]
     )
     def test_false(self, name, schema):

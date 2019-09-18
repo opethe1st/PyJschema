@@ -14,9 +14,9 @@ def generate_context(validator: "AValidator") -> Context:
     if hasattr(validator, "anchor") and validator.anchor is not None:  # type: ignore
         anchors[validator.anchor] = validator  # type: ignore
 
-    for sub_validator in validator.get_subschema_validators():
-        anchors.update(generate_context(validator=sub_validator))
-
+    for sub_validator in validator.subschema_validators():
+        subanchor = generate_context(validator=sub_validator)
+        anchors.update(subanchor)
     return anchors
 
 
@@ -24,7 +24,7 @@ def add_context_to_ref_validators(validator: typing.Union["AValidator"], context
     if isinstance(validator, Ref):
         validator.set_context(context)
 
-    for sub_validators in validator.get_subschema_validators():
+    for sub_validators in validator.subschema_validators():
         add_context_to_ref_validators(validator=sub_validators, context=context)
 
 
