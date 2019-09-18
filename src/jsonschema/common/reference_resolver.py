@@ -9,15 +9,15 @@ Context = typing.Dict[str, "AValidator"]
 
 # TODO(ope): move these two to reference resolver
 def generate_context(validator: "AValidator") -> Context:
-    ids = {}
+    anchors = {}
     # I might be able to do without this check if I restrict that this is allowed to pass in to just Validator
-    if hasattr(validator, "id") and validator.id is not None:  # type: ignore
-        ids[validator.id] = validator  # type: ignore
+    if hasattr(validator, "anchor") and validator.anchor is not None:  # type: ignore
+        anchors[validator.anchor] = validator  # type: ignore
 
     for sub_validator in validator.get_subschema_validators():
-        ids.update(generate_context(validator=sub_validator))
+        anchors.update(generate_context(validator=sub_validator))
 
-    return ids
+    return anchors
 
 
 def add_context_to_ref_validators(validator: typing.Union["AValidator"], context: Context):
@@ -36,6 +36,7 @@ class Ref(AValidator):
 
     def validate(self, instance):
         if self.context is None:
+            # Maybe have another state for not validated?
             return ValidationResult(ok=True)
         if self.value in self.context:
             return self.context[self.value].validate(instance)

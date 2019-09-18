@@ -39,8 +39,8 @@ def build_validator(schema: typing.Union[dict, bool]) -> typing.Union[AcceptAll,
 
     validator = Validator()
 
-    if "$id" in schema:
-        validator.id = schema["$id"]
+    if "$anchor" in schema:
+        validator.anchor = schema["$anchor"]
 
     if 'const' in schema:
         validator.add_validator(Const(value=schema['const']))
@@ -360,7 +360,7 @@ class Object(AValidator):
 class Validator(AValidator):
 
     def __init__(self):
-        self.id = None
+        self.anchor = None
         self._validators = []
 
     def add_validator(self, validator):

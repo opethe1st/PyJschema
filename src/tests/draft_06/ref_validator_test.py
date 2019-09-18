@@ -36,7 +36,7 @@ class TestGenerateContext(unittest.TestCase):
             (
                 "make sure context is generated properly",
                 {
-                    "$id": "#blah",
+                    "$anchor": "#blah",
                     "type": "string",
                 },
                 {"#blah"},
@@ -47,7 +47,7 @@ class TestGenerateContext(unittest.TestCase):
                     "$id": "#blah",
                     "type": "array",
                     "items": {
-                        "$id": "#foo",
+                        "$anchor": "#foo",
                         "type": "string",
                     }
                 },

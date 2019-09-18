@@ -117,3 +117,10 @@ Some operate on just a given type
 
 
 Hm. the reason why we have cyclic imports and dependencies is because i am not using a factory/registry for everything, correct?
+
+
+So I finally got to look at the latest Jsonschema. Wow. Reads so complex and I'm not sure why it has to be. Definitely making me feel like they should have made this a DSL.
+It would make the syntax etc much simpler.
+
+What I have decided to do it so incorporate some of the ideas that I find important from the latest draft into my implementation. e.g the `$def` keyword and `$anchor`
+I need to remember that the goal is not to implement the entire spec but rather use this as a learning project.
