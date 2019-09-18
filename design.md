@@ -124,3 +124,10 @@ It would make the syntax etc much simpler.
 
 What I have decided to do it so incorporate some of the ideas that I find important from the latest draft into my implementation. e.g the `$def` keyword and `$anchor`
 I need to remember that the goal is not to implement the entire spec but rather use this as a learning project.
+
+So I believe the references now work. I probably need to do some more extensive testing and I should call it a day at this point tbh.
+There is still a lot of work I could do.
+* Refactoring
+* Error messages
+* Optimize space and time
+Probably better to stop and write about what I have learned from this project so far and pick it up later.
