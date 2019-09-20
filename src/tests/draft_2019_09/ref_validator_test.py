@@ -102,40 +102,61 @@ class TestRefValidate(unittest.TestCase):
     @parameterized.parameterized.expand(
         [
             (
-                "make sure we add the context to add references",
+                "ref something in $defs",
                 {
-                    "$ref": "#blah"
+                    "type": "array",
+                    "items": {
+                        "$ref": "#StringWithmax20"
+                    },
+                    "$defs": {
+                        "string": {
+                            "$anchor": "StringWithmax20",
+                            "type": "string",
+                            "maxLength": 20
+                        },
+                        "blah": {
+                            "$anchor": "blah",
+                            "type": "number"
+                        }
+                    }
                 },
+                ["12345", "67890"]
             ),
         ]
     )
-    def test_true(self, name, schema):
-        ref = build_validator(schema)
-        string_instance_validator = Validator()
-        string_instance_validator.add_validator(String())
+    def test_true(self, name, schema, instance):
+        validator = build_validator(schema)
+        context = generate_context(validator)
+        add_context_to_ref_validators(validator, context)
 
-        add_context_to_ref_validators(ref, context={"#blah": string_instance_validator})
-
-        result = ref.validate("string")
+        result = validator.validate(instance)
         self.assertTrue(result.ok)
 
     @parameterized.parameterized.expand(
         [
             (
-                "make sure we add the context to add references",
+                "ref something in $defs",
                 {
-                    "$ref": "#blah"
+                    "type": "array",
+                    "items": {
+                        "$ref": "#NumberMax20"
+                    },
+                    "$defs": {
+                        "blah": {
+                            "$anchor": "NumberMax20",
+                            "type": "number",
+                            "maximum": 20
+                        }
+                    }
                 },
+                [23]
             ),
-
         ]
     )
-    def test_false(self, name, schema):
-        ref = build_validator(schema)
-        string_instance_validator = Validator()
-        string_instance_validator.add_validator(String())
+    def test_false(self, name, schema, instance):
+        validator = build_validator(schema)
+        context = generate_context(validator)
+        add_context_to_ref_validators(validator, context)
 
-        add_context_to_ref_validators(ref, context={"#blah": string_instance_validator})
-
-        result = ref.validate(12434)
+        result = validator.validate(instance)
         self.assertFalse(result.ok)

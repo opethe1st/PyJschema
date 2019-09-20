@@ -8,6 +8,7 @@ from jsonschema.common.reference_resolver import (
 )
 
 from .array import Array
+from .definitions import Def
 from .number import Integer, Number
 from .object_ import Object
 from .primitives import AcceptAll, Boolean, Const, Enum, Null, RejectAll
@@ -48,6 +49,9 @@ def build_validator(schema: typing.Union[dict, bool]) -> typing.Union[AcceptAll,
 
     if 'enum' in schema:
         validator.add_validator(Enum(values=schema['enum']))
+
+    if '$defs' in schema:
+        validator.add_validator(Def(definitions=schema['$defs']))
 
     if 'type' in schema:
         schema_type_to_validator: typing.Dict[str, typing.Type[AValidator]] = {
