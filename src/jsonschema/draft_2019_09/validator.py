@@ -52,7 +52,6 @@ def build_validator(schema: typing.Union[dict, bool]) -> typing.Union[AcceptAll,
 
     if '$defs' in schema:
         validator.add_validator(Def(definitions=schema['$defs']))
-        print(validator._validators)
 
     if 'type' in schema:
         schema_type_to_validator: typing.Dict[str, typing.Type[AValidator]] = {
