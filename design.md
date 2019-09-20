@@ -153,3 +153,13 @@ They are independent things fundamentally.
 
 
 In Python - does TypedDict solve all type bits of validation?
+
+Clean up what is still messy. the keyword arguments are 😅
+Make subschemas a property instead of a method? - make it a cached property?
+
+Important aspects left
+* Referencing/Dereferencing - $anchor/$id do I want to implement for the rest? Maybe not.
+* Keywords for applying schemas - seems like schemas are now turing complete.. no? Is that even a good thing?
+    - AllOf, AnyOf, Oneof, If, Then , Else
+
+* Refactor - breakdown my code to reflect the jsonschema core vs. validation vocabulary bits?

@@ -410,7 +410,7 @@ class TestValidatorWithRef(unittest.TestCase):
                     "type": "object",
                     "properties": {
                         "name": {
-                            "$anchor": "#string_property",
+                            "$anchor": "string_property",
                             "type": "string"
                         },
                         "surname": {
@@ -437,7 +437,7 @@ class TestValidatorWithRef(unittest.TestCase):
                     "type": "object",
                     "properties": {
                         "name": {
-                            "$anchor": "#string_property",
+                            "$anchor": "string_property",
                             "type": "string"
                         },
                         "surname": {

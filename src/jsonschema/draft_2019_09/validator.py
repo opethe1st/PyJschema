@@ -41,7 +41,7 @@ def build_validator(schema: typing.Union[dict, bool]) -> typing.Union[AcceptAll,
     validator = Validator()
 
     if "$anchor" in schema:
-        validator.anchor = schema["$anchor"]
+        validator.anchor = "#" + schema["$anchor"]
 
     if 'const' in schema:
         validator.add_validator(Const(value=schema['const']))

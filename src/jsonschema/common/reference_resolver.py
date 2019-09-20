@@ -40,7 +40,7 @@ class Ref(Keyword):
             return self.context[self.value].validate(instance)
         else:
             # this is temporary, probably need to do something else
-            raise Exception("unable to fix this reference")
+            raise Exception("unable to find this reference")
         return ValidationResult(ok=True)
 
     def set_context(self, context):

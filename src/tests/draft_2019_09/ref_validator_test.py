@@ -35,7 +35,7 @@ class TestGenerateContext(unittest.TestCase):
             (
                 "make sure context is generated properly",
                 {
-                    "$anchor": "#blah",
+                    "$anchor": "blah",
                     "type": "string",
                 },
                 {"#blah"},
@@ -43,19 +43,19 @@ class TestGenerateContext(unittest.TestCase):
             (
                 "make sure context is generated properly with nested anchors",
                 {
-                    "$anchor": "#anarray",
+                    "$anchor": "anarray",
                     "type": "array",
                     "items": [
                         {
-                            "$anchor": "#astring",
+                            "$anchor": "astring",
                             "type": "string",
                         },
                         {
-                            "$anchor": "#anumber",
+                            "$anchor": "anumber",
                             "type": "number",
                         },
                         {
-                            "$anchor": "#anobject",
+                            "$anchor": "anobject",
                             "type": "object",
                         },
                     ]
