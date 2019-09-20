@@ -1,14 +1,12 @@
 import typing
 
-from jsonschema.common.validator import AValidator
-
 from .validation_result import ValidationResult
+from .validator import AValidator, Keyword
 
-Context = typing.Dict[str, "AValidator"]
+Context = typing.Dict[str, AValidator]
 
 
-# TODO(ope): move these two to reference resolver
-def generate_context(validator: "AValidator") -> Context:
+def generate_context(validator: AValidator) -> Context:
     anchors = {}
     # I might be able to do without this check if I restrict that this is allowed to pass in to just Validator
     if hasattr(validator, "anchor") and validator.anchor is not None:  # type: ignore
@@ -20,7 +18,7 @@ def generate_context(validator: "AValidator") -> Context:
     return anchors
 
 
-def add_context_to_ref_validators(validator: typing.Union["AValidator"], context: Context):
+def add_context_to_ref_validators(validator: typing.Union[AValidator], context: Context):
     if isinstance(validator, Ref):
         validator.set_context(context)
 
@@ -28,7 +26,7 @@ def add_context_to_ref_validators(validator: typing.Union["AValidator"], context
         add_context_to_ref_validators(validator=sub_validators, context=context)
 
 
-class Ref(AValidator):
+class Ref(Keyword):
 
     def __init__(self, value):
         self.value = value

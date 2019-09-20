@@ -1,8 +1,8 @@
-from jsonschema.common import ValidationResult, AValidator
+from jsonschema.common import Keyword, ValidationResult
 
 
-class Max(AValidator):
-    def __init__(self, value):
+class Max(Keyword):
+    def __init__(self, value: int):
         self.value = value
 
     def validate(self, instance):
@@ -11,8 +11,8 @@ class Max(AValidator):
         return ValidationResult(ok=True)
 
 
-class Min(AValidator):
-    def __init__(self, value):
+class Min(Keyword):
+    def __init__(self, value: int):
         self.value = value
 
     def validate(self, instance):

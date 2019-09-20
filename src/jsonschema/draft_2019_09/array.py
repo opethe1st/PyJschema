@@ -1,0 +1,175 @@
+
+from jsonschema.common import Keyword, KeywordGroup, Type, ValidationResult
+
+from .common import Max, Min
+
+
+class ItemsArray(KeywordGroup):
+    def __init__(self, itemSchemas, additionalItemsSchema=None, **kwargs):
+        from .validator import build_validator
+
+        self.item_validators = [build_validator(schema) for schema in itemSchemas]
+        self.additional_item_validator = build_validator(additionalItemsSchema) if additionalItemsSchema else None
+
+    def validate(self, instance):
+        children = []
+
+        i = 0
+        while i < len(self.item_validators):
+            if i >= len(instance):
+                break
+
+            res = self.item_validators[i].validate(instance[i])
+
+            if not res.ok:
+                children.append(res)
+
+            i += 1
+
+        # additionalItem for the rest of the items in the instance
+        if self.additional_item_validator:
+            while i < len(instance):
+                res = self.additional_item_validator.validate(instance[i])
+
+                if not res.ok:
+                    children.append(res)
+
+                i += 1
+
+        if children:
+            return ValidationResult(ok=False, children=children)
+        else:
+            return ValidationResult(ok=True)
+
+    def subschema_validators(self):
+        validators = self.item_validators[:]
+
+        if self.additional_item_validator:
+            validators.append(self.additional_item_validator)
+
+        return validators
+
+
+class Items(Keyword):
+    def __init__(self, itemSchema, **kwargs):
+        from .validator import build_validator
+
+        self._validator = build_validator(itemSchema)
+
+    def validate(self, instance):
+        children = []
+
+        for value in instance:
+            res = self._validator.validate(value)
+
+            if not res.ok:
+                children.append(res)
+
+        if not children:
+            return ValidationResult(ok=True)
+        else:
+            return ValidationResult(ok=False, children=children)
+
+    def subschema_validators(self):
+        return [self._validator]
+
+
+class Contains(Keyword):
+    def __init__(self, schema, **kwargs):
+        from .validator import build_validator
+
+        self._validator = build_validator(schema)
+
+    def validate(self, instance):
+
+        for value in instance:
+            res = self._validator.validate(value)
+
+            if res.ok:
+                return ValidationResult(ok=True)
+
+        return ValidationResult(
+            ok=False,
+            messages=["No item in this array matches the schema in the contains keyword"]
+        )
+
+    def subschema_validators(self):
+        return [self._validator]
+
+
+class MinItems(Min):
+    pass
+
+
+class MaxItems(Max):
+    pass
+
+
+class UniqueItems(Keyword):
+    def __init__(self, value: bool):
+        self.value = value
+
+    def validate(self, instance):
+        if self.value:
+            itemsset = set([str(value) for value in instance])
+
+            if len(itemsset) != len(instance):
+                return ValidationResult(ok=False)
+            # TODO(ope) - actually make sure the values are unique
+
+        return ValidationResult(ok=True)
+
+
+class Array(Type):
+
+    keyword_to_validator = {
+        'minItems': MinItems,
+        'maxItems': MaxItems,
+        'uniqueItems': UniqueItems,
+        'contains': Contains,
+    }
+
+    def __init__(self, **kwargs):
+        self._validators = []
+
+        for keyword in self.keyword_to_validator:
+
+            if kwargs.get(keyword) is not None:
+                self._validators.append(
+                    self.keyword_to_validator[keyword](kwargs.get(keyword))
+                )
+
+        if 'items' in kwargs:
+
+            if isinstance(kwargs['items'], list):
+                items_validator = ItemsArray(itemSchemas=kwargs['items'], additionalItemsSchema=kwargs.get('additionalItems'))
+            else:
+                items_validator = Items(itemSchema=kwargs['items'])
+
+            self._validators.append(items_validator)
+
+    def validate(self, instance):
+        results = []
+        messages = []
+
+        if not isinstance(instance, list):
+            messages.append('instance is not a number')
+
+        for validator in self._validators:
+            result = validator.validate(instance)
+
+            if not result.ok:
+                results.append(result)
+
+        if not results and not messages:
+            return ValidationResult(ok=True)
+        else:
+            return ValidationResult(
+                ok=False,
+                messages=messages,
+                children=results
+            )
+
+    def subschema_validators(self):
+        # maybe optimize by not returning validators that don't have schemas embedded
+        return self._validators

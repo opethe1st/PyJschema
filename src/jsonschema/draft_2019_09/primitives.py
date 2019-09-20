@@ -1,7 +1,7 @@
-from jsonschema.common import AValidator, ValidationResult
+from jsonschema.common import AValidator, Keyword, Type, ValidationResult
 
 
-class Boolean(AValidator):
+class Boolean(Type):
 
     def validate(self, instance):
         # is this faster than an isinstance check?
@@ -11,7 +11,7 @@ class Boolean(AValidator):
             return ValidationResult(ok=False, messages=['instance is not a valid boolean'])
 
 
-class Null(AValidator):
+class Null(Type):
 
     def validate(self, instance):
         if instance is None:
@@ -20,7 +20,7 @@ class Null(AValidator):
             return ValidationResult(ok=False)
 
 
-class Const(AValidator):
+class Const(Keyword):
     def __init__(self, value):
         self.value = value
 
@@ -32,7 +32,7 @@ class Const(AValidator):
             return ValidationResult(ok=False)
 
 
-class Enum(AValidator):
+class Enum(Keyword):
     def __init__(self, values):
         self.values = values
 

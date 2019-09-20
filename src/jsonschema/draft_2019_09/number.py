@@ -1,10 +1,10 @@
 import numbers
 
-from jsonschema.common import AValidator, ValidationResult
+from jsonschema.common import Keyword, Type, ValidationResult
 
 
-class MultipleOf(AValidator):
-    def __init__(self, value):
+class MultipleOf(Keyword):
+    def __init__(self, value: int):
         self.value = value
 
     def validate(self, instance):
@@ -13,8 +13,8 @@ class MultipleOf(AValidator):
         return ValidationResult(ok=True)
 
 
-class Minimum(AValidator):
-    def __init__(self, value):
+class Minimum(Keyword):
+    def __init__(self, value: int):
         self.value = value
 
     def validate(self, instance):
@@ -23,8 +23,8 @@ class Minimum(AValidator):
         return ValidationResult(ok=True)
 
 
-class Maximum(AValidator):
-    def __init__(self, value):
+class Maximum(Keyword):
+    def __init__(self, value: int):
         self.value = value
 
     def validate(self, instance):
@@ -33,8 +33,8 @@ class Maximum(AValidator):
         return ValidationResult(ok=True)
 
 
-class ExclusiveMinimum(AValidator):
-    def __init__(self, value):
+class ExclusiveMinimum(Keyword):
+    def __init__(self, value: int):
         self.value = value
 
     def validate(self, instance):
@@ -43,8 +43,8 @@ class ExclusiveMinimum(AValidator):
         return ValidationResult(ok=True)
 
 
-class ExclusiveMaximum(AValidator):
-    def __init__(self, value):
+class ExclusiveMaximum(Keyword):
+    def __init__(self, value: int):
         self.value = value
 
     def validate(self, instance):
@@ -53,9 +53,8 @@ class ExclusiveMaximum(AValidator):
         return ValidationResult(ok=True)
 
 
-class NumberOrInteger(AValidator):
+class NumberOrInteger(Type):
     def __init__(self, **kwargs):
-        self.anchor = None
         self._validators = []
         keyword_to_validator = {
             'multipleOf': MultipleOf,

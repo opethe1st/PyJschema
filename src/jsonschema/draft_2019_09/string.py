@@ -1,6 +1,6 @@
-from jsonschema.common import AValidator, ValidationResult
+from jsonschema.common import Keyword, Type, ValidationResult
 
-from .utils import Max, Min
+from .common import Max, Min
 
 
 class MaxLength(Max):
@@ -11,7 +11,7 @@ class MinLength(Min):
     pass
 
 
-class Pattern(AValidator):
+class Pattern(Keyword):
     def __init__(self, value):
         import re
         self.regex = re.compile(value)
@@ -22,9 +22,8 @@ class Pattern(AValidator):
         return ValidationResult(ok=True)
 
 
-class String(AValidator):
+class String(Type):
     def __init__(self, **kwargs):
-        self.anchor = None
         self._validators = []
         keyword_to_validator = {
             'minLength': MinLength,
