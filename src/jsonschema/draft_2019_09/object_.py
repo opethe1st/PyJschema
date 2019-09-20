@@ -2,7 +2,7 @@
 from jsonschema.common import (
     Keyword,
     KeywordGroup,
-    TypeValidator,
+    Type,
     ValidationResult
 )
 
@@ -117,7 +117,7 @@ class MaxProperties(Max):
     pass
 
 
-class Object(TypeValidator):
+class Object(Type):
     keyword_to_validator = {
         "required": Required,
         "propertyNames": PropertyNames,

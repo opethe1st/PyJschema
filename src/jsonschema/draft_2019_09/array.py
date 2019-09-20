@@ -2,7 +2,7 @@
 from jsonschema.common import (
     Keyword,
     KeywordGroup,
-    TypeValidator,
+    Type,
     ValidationResult
 )
 
@@ -117,7 +117,7 @@ class UniqueItems(Keyword):
         return ValidationResult(ok=True)
 
 
-class Array(TypeValidator):
+class Array(Type):
 
     keyword_to_validator = {
         'minItems': MinItems,

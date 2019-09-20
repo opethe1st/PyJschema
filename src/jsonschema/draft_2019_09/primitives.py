@@ -1,12 +1,12 @@
 from jsonschema.common import (
     AValidator,
     Keyword,
-    TypeValidator,
+    Type,
     ValidationResult
 )
 
 
-class Boolean(TypeValidator):
+class Boolean(Type):
 
     def validate(self, instance):
         # is this faster than an isinstance check?
@@ -16,7 +16,7 @@ class Boolean(TypeValidator):
             return ValidationResult(ok=False, messages=['instance is not a valid boolean'])
 
 
-class Null(TypeValidator):
+class Null(Type):
 
     def validate(self, instance):
         if instance is None:

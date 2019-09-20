@@ -5,7 +5,7 @@ from .reference_resolver import (
     add_context_to_ref_validators,
     generate_context
 )
-from .validator import AValidator, Keyword, KeywordGroup, TypeValidator
+from .validator import AValidator, Keyword, KeywordGroup, Type
 
 __all__ = [
     'AValidator',
@@ -15,5 +15,5 @@ __all__ = [
     'generate_context',
     'KeywordGroup',
     'Keyword',
-    'TypeValidator',
+    'Type',
 ]

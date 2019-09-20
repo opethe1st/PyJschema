@@ -30,5 +30,5 @@ class Keyword(AValidator):
     pass
 
 
-class TypeValidator(AValidator):
+class Type(AValidator):
     pass
