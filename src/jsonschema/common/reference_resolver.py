@@ -1,8 +1,7 @@
 import typing
 
-from jsonschema.common.validator import AValidator
-
 from .validation_result import ValidationResult
+from .validator import AValidator, Keyword
 
 Context = typing.Dict[str, "AValidator"]
 
@@ -28,7 +27,7 @@ def add_context_to_ref_validators(validator: typing.Union["AValidator"], context
         add_context_to_ref_validators(validator=sub_validators, context=context)
 
 
-class Ref(AValidator):
+class Ref(Keyword):
 
     def __init__(self, value):
         self.value = value

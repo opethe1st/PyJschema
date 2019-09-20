@@ -1,11 +1,11 @@
 # validation_result has to be imported before reference_resolver, because reference_resolver depends on it
-from .validation_result import ValidationResult
+from .validation_result import ValidationResult  # isort:skip
 from .reference_resolver import (
     Ref,
     add_context_to_ref_validators,
     generate_context
 )
-from .validator import AValidator
+from .validator import AValidator, Keyword, KeywordGroup, TypeValidator
 
 __all__ = [
     'AValidator',
@@ -13,4 +13,7 @@ __all__ = [
     'Ref',
     'add_context_to_ref_validators',
     'generate_context',
+    'KeywordGroup',
+    'Keyword',
+    'TypeValidator',
 ]

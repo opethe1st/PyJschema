@@ -20,3 +20,15 @@ class AValidator(abc.ABC):
 
     def subschema_validators(self) -> typing.List["AValidator"]:
         return []
+
+
+class KeywordGroup(AValidator):
+    pass
+
+
+class Keyword(AValidator):
+    pass
+
+
+class TypeValidator(AValidator):
+    pass

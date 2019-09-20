@@ -7,8 +7,7 @@ from jsonschema.common.reference_resolver import (
     add_context_to_ref_validators,
     generate_context
 )
-from jsonschema.draft_2019_09 import build_validator
-from jsonschema.draft_2019_09.composite import Validator
+from jsonschema.draft_2019_09 import Validator, build_validator
 from jsonschema.draft_2019_09.string import String
 
 

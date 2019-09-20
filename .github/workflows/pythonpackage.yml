@@ -33,4 +33,4 @@ jobs:
         mypy src/jsonschema
     - name: Test with pytest
       run: |
-        pytest
+        pytest --cov=jsonschema

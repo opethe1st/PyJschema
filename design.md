@@ -131,3 +131,7 @@ There is still a lot of work I could do.
 * Error messages
 * Optimize space and time
 Probably better to stop and write about what I have learned from this project so far and pick it up later.
+
+
+Now pro - importing within functions to deal with cyclic imports.
+Hm... other way is to passing the build_validator as an argument! but this argument would need to be passed into everywhere
