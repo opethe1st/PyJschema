@@ -135,3 +135,21 @@ Probably better to stop and write about what I have learned from this project so
 
 Now pro - importing within functions to deal with cyclic imports.
 Hm... other way is to passing the build_validator as an argument! but this argument would need to be passed into everywhere
+
+KeywordGroup implies they are dependent on each other, right? Type - that it applies to just a particular type. That's all?
+
+Experimented with naming without the Validator prefix _ think it has somewhat worked. It would work best when people always put the
+namespace when they are coding just like in Go. So validators.String always import bare string outside. and not have StringValidator
+everywhere. I think the results are a bit mixed though especially if a name means/connotes something else already. eg. the String
+example. What would it look like if different type names where in different namespace though? i.e you could have Validator a class and also
+Validator a function.
+
+Next stuff?
+
+Factories for all the Types - so they can be changed by users? or even by me.
+Say be more flexible spec by spec.
+Though I actually think duplication is not the worst thing and I am not sure I like the idea of specs sharing code.
+They are independent things fundamentally.
+
+
+In Python - does TypedDict solve all type bits of validation?

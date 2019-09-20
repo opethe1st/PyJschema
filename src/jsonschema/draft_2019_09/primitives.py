@@ -1,9 +1,4 @@
-from jsonschema.common import (
-    AValidator,
-    Keyword,
-    Type,
-    ValidationResult
-)
+from jsonschema.common import AValidator, Keyword, Type, ValidationResult
 
 
 class Boolean(Type):

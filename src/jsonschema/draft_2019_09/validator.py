@@ -74,10 +74,10 @@ class Validator(AValidator):
         self.anchor = None
         self._validators = []
 
-    def add_validator(self, validator):
+    def add_validator(self, validator: AValidator):
         self._validators.append(validator)
 
-    def validate(self, instance) -> ValidationResult:
+    def validate(self, instance):
         results = []
         for validator in self._validators:
             result = validator.validate(instance)

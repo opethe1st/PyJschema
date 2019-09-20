@@ -1,12 +1,11 @@
-# TODO add ASchemaValidator that has the id attribute/
 import abc
-import collections.abc as ca
 import numbers
 import typing
+from collections.abc import Mapping, Sequence
 
 from jsonschema.common import ValidationResult
 
-JsonType = typing.Union[str, numbers.Number, bool, None, ca.Mapping, ca.Sequence]
+JsonType = typing.Union[str, numbers.Number, bool, None, Mapping, Sequence]
 
 
 class AValidator(abc.ABC):
@@ -23,12 +22,15 @@ class AValidator(abc.ABC):
 
 
 class KeywordGroup(AValidator):
+    '''Validator for a group of keyword that are dependent on each other'''
     pass
 
 
 class Keyword(AValidator):
+    '''Validator for a keyword'''
     pass
 
 
 class Type(AValidator):
+    '''Validator for a type'''
     pass

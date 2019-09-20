@@ -1,10 +1,5 @@
 
-from jsonschema.common import (
-    Keyword,
-    KeywordGroup,
-    Type,
-    ValidationResult
-)
+from jsonschema.common import Keyword, KeywordGroup, Type, ValidationResult
 
 from .common import Max, Min
 
@@ -18,7 +13,6 @@ class ItemsArray(KeywordGroup):
 
     def validate(self, instance):
         children = []
-        ok = True
 
         i = 0
         while i < len(self.item_validators):
@@ -26,26 +20,33 @@ class ItemsArray(KeywordGroup):
                 break
 
             res = self.item_validators[i].validate(instance[i])
+
             if not res.ok:
-                ok = False
                 children.append(res)
+
             i += 1
 
         # additionalItem for the rest of the items in the instance
         if self.additional_item_validator:
             while i < len(instance):
                 res = self.additional_item_validator.validate(instance[i])
+
                 if not res.ok:
-                    ok = False
                     children.append(res)
+
                 i += 1
 
-        return ValidationResult(ok=ok, children=children)
+        if children:
+            return ValidationResult(ok=False, children=children)
+        else:
+            return ValidationResult(ok=True)
 
     def subschema_validators(self):
         validators = self.item_validators[:]
+
         if self.additional_item_validator:
             validators.append(self.additional_item_validator)
+
         return validators
 
 
@@ -63,6 +64,7 @@ class Items(Keyword):
 
             if not res.ok:
                 children.append(res)
+
         if not children:
             return ValidationResult(ok=True)
         else:
@@ -104,7 +106,7 @@ class MaxItems(Max):
 
 
 class UniqueItems(Keyword):
-    def __init__(self, value):
+    def __init__(self, value: bool):
         self.value = value
 
     def validate(self, instance):
@@ -113,6 +115,7 @@ class UniqueItems(Keyword):
 
             if len(itemsset) != len(instance):
                 return ValidationResult(ok=False)
+            # TODO(ope) - actually make sure the values are unique
 
         return ValidationResult(ok=True)
 
@@ -142,6 +145,7 @@ class Array(Type):
                 items_validator = ItemsArray(itemSchemas=kwargs['items'], additionalItemsSchema=kwargs.get('additionalItems'))
             else:
                 items_validator = Items(itemSchema=kwargs['items'])
+
             self._validators.append(items_validator)
 
     def validate(self, instance):
@@ -150,6 +154,7 @@ class Array(Type):
 
         if not isinstance(instance, list):
             messages.append('instance is not a number')
+
         for validator in self._validators:
             result = validator.validate(instance)
 

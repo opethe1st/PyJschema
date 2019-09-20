@@ -1,8 +1,8 @@
-from jsonschema.common import ValidationResult, Keyword
+from jsonschema.common import Keyword, ValidationResult
 
 
 class Max(Keyword):
-    def __init__(self, value):
+    def __init__(self, value: int):
         self.value = value
 
     def validate(self, instance):
@@ -12,7 +12,7 @@ class Max(Keyword):
 
 
 class Min(Keyword):
-    def __init__(self, value):
+    def __init__(self, value: int):
         self.value = value
 
     def validate(self, instance):

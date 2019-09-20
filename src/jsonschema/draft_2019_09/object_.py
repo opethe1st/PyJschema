@@ -1,10 +1,7 @@
 
-from jsonschema.common import (
-    Keyword,
-    KeywordGroup,
-    Type,
-    ValidationResult
-)
+import typing
+
+from jsonschema.common import Keyword, KeywordGroup, Type, ValidationResult
 
 from .common import Max, Min
 
@@ -69,7 +66,7 @@ class Property(KeywordGroup):
 
 
 class Required(Keyword):
-    def __init__(self, value):
+    def __init__(self, value: typing.List[str]):
         self.value = value
 
     def validate(self, instance):
