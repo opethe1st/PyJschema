@@ -11,7 +11,6 @@ def generate_context(validator: AValidator) -> Context:
     # I might be able to do without this check if I restrict that this is allowed to pass in to just Validator
     if hasattr(validator, "anchor") and validator.anchor is not None:  # type: ignore
         anchors[validator.anchor] = validator  # type: ignore
-
     for sub_validator in validator.subschema_validators():
         subanchor = generate_context(validator=sub_validator)
         anchors.update(subanchor)
@@ -40,7 +39,7 @@ class Ref(Keyword):
             return self.context[self.value].validate(instance)
         else:
             # this is temporary, probably need to do something else
-            raise Exception("unable to find this reference")
+            raise Exception(f"unable to find this reference. reference {self.value}")
         return ValidationResult(ok=True)
 
     def set_context(self, context):
