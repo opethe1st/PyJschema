@@ -92,7 +92,7 @@ class TestAddContextToSchemaValidator(unittest.TestCase):
 
         self.assertIsNone(ref.context)
 
-        add_context_to_ref_validators(ref, context={"blah": validator})
+        add_context_to_ref_validators(ref, context={"#blah": validator})
 
         self.assertIsNotNone(ref.context)
 
