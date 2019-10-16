@@ -28,6 +28,17 @@ def validate_once(schema: typing.Union[dict, bool], instance: dict) -> Validatio
     return validator.validate(instance)
 
 
+SCHEMA_TO_TYPE_VALIDATORS: typing.Dict[str, typing.Type[AValidator]] = {
+    'string': String,
+    'number': Number,
+    'integer': Integer,
+    'boolean': Boolean,
+    'null': Null,
+    "array": Array,
+    "object": Object
+}
+
+
 def build_validator(schema: typing.Union[dict, bool]) -> typing.Union[AcceptAll, RejectAll, "Validator", "Ref"]:
     if schema is True or schema == {}:
         return AcceptAll()
@@ -54,19 +65,9 @@ def build_validator(schema: typing.Union[dict, bool]) -> typing.Union[AcceptAll,
         validator.add_validator(Defs(definitions=schema['$defs']))
 
     if 'type' in schema:
-        schema_type_to_validator: typing.Dict[str, typing.Type[AValidator]] = {
-            'string': String,
-            'number': Number,
-            'integer': Integer,
-            'boolean': Boolean,
-            'null': Null,
-            "array": Array,
-            "object": Object
-        }
-
-        if schema['type'] in schema_type_to_validator:
+        if schema['type'] in SCHEMA_TO_TYPE_VALIDATORS:
             validator.add_validator(
-                schema_type_to_validator[schema['type']](**schema)
+                SCHEMA_TO_TYPE_VALIDATORS[schema['type']](**schema)
             )
 
     return validator
