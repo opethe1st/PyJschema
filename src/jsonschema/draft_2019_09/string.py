@@ -23,17 +23,18 @@ class Pattern(Keyword):
 
 
 class String(Type):
+    KEYWORD_TO_VALIDATOR = {
+        'minLength': MinLength,
+        'maxLength': MaxLength,
+        'pattern': Pattern,
+    }
+
     def __init__(self, **kwargs):
         self._validators = []
-        keyword_to_validator = {
-            'minLength': MinLength,
-            'maxLength': MaxLength,
-            'pattern': Pattern,
-        }
-        for keyword in keyword_to_validator:
+        for keyword in self.KEYWORD_TO_VALIDATOR:
             if kwargs.get(keyword) is not None:
                 self._validators.append(
-                    keyword_to_validator[keyword](value=kwargs.get(keyword))
+                    self.KEYWORD_TO_VALIDATOR[keyword](value=kwargs.get(keyword))
                 )
 
     def validate(self, instance):

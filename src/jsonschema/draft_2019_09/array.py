@@ -5,11 +5,11 @@ from .common import Max, Min
 
 
 class ItemsArray(KeywordGroup):
-    def __init__(self, itemSchemas, additionalItemsSchema=None, **kwargs):
+    def __init__(self, item_schema, additional_items_schema=None, **kwargs):
         from .validator import build_validator
 
-        self.item_validators = [build_validator(schema) for schema in itemSchemas]
-        self.additional_item_validator = build_validator(additionalItemsSchema) if additionalItemsSchema else None
+        self.item_validators = [build_validator(schema) for schema in item_schema]
+        self.additional_item_validator = build_validator(additional_items_schema) if additional_items_schema else None
 
     def validate(self, instance):
         children = []
@@ -51,10 +51,10 @@ class ItemsArray(KeywordGroup):
 
 
 class Items(Keyword):
-    def __init__(self, itemSchema, **kwargs):
+    def __init__(self, item_schema, **kwargs):
         from .validator import build_validator
 
-        self._validator = build_validator(itemSchema)
+        self._validator = build_validator(item_schema)
 
     def validate(self, instance):
         children = []
@@ -122,7 +122,7 @@ class UniqueItems(Keyword):
 
 class Array(Type):
 
-    keyword_to_validator = {
+    KEYWORD_TO_VALIDATOR = {
         'minItems': MinItems,
         'maxItems': MaxItems,
         'uniqueItems': UniqueItems,
@@ -132,19 +132,19 @@ class Array(Type):
     def __init__(self, **kwargs):
         self._validators = []
 
-        for keyword in self.keyword_to_validator:
+        for keyword in self.KEYWORD_TO_VALIDATOR:
 
             if kwargs.get(keyword) is not None:
                 self._validators.append(
-                    self.keyword_to_validator[keyword](kwargs.get(keyword))
+                    self.KEYWORD_TO_VALIDATOR[keyword](kwargs.get(keyword))
                 )
 
         if 'items' in kwargs:
 
             if isinstance(kwargs['items'], list):
-                items_validator = ItemsArray(itemSchemas=kwargs['items'], additionalItemsSchema=kwargs.get('additionalItems'))
+                items_validator = ItemsArray(item_schema=kwargs['items'], additional_items_schema=kwargs.get('additionalItems'))
             else:
-                items_validator = Items(itemSchema=kwargs['items'])
+                items_validator = Items(item_schema=kwargs['items'])
 
             self._validators.append(items_validator)
 

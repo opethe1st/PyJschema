@@ -8,15 +8,15 @@ from .common import Max, Min
 
 class Property(KeywordGroup):
 
-    def __init__(self, value=None, additionalProperties=None, patternProperties=None, **kwargs):
+    def __init__(self, value=None, additional_properties=None, pattern_properties=None, **kwargs):
         import re
         from .validator import build_validator
 
         self._validators = {key: build_validator(value) for key, value in value.items()} if value else {}
-        self._additional_validator = build_validator(additionalProperties) if additionalProperties is not None else None
+        self._additional_validator = build_validator(additional_properties) if additional_properties is not None else None
         self._pattern_validators = {
-            re.compile(key): build_validator(value) for key, value in patternProperties.items()
-        } if patternProperties else {}
+            re.compile(key): build_validator(value) for key, value in pattern_properties.items()
+        } if pattern_properties else {}
 
     def validate(self, instance):
         results = []
@@ -115,7 +115,7 @@ class MaxProperties(Max):
 
 
 class Object(Type):
-    keyword_to_validator = {
+    KEYWORD_TO_VALIDATOR = {
         "required": Required,
         "propertyNames": PropertyNames,
         "minProperties": MinProperties,
@@ -124,11 +124,11 @@ class Object(Type):
 
     def __init__(self, **kwargs):
         self._validators = []
-        for keyword in self.keyword_to_validator:
+        for keyword in self.KEYWORD_TO_VALIDATOR:
 
             if kwargs.get(keyword) is not None:
                 self._validators.append(
-                    self.keyword_to_validator[keyword](kwargs.get(keyword))
+                    self.KEYWORD_TO_VALIDATOR[keyword](kwargs.get(keyword))
                 )
 
         if (
@@ -139,8 +139,8 @@ class Object(Type):
             self._validators.append(
                 Property(
                     value=kwargs.get("properties"),
-                    additionalProperties=kwargs.get("additionalProperties"),
-                    patternProperties=kwargs.get("patternProperties")
+                    additional_properties=kwargs.get("additionalProperties"),
+                    pattern_properties=kwargs.get("patternProperties")
                 )
             )
 

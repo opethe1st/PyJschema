@@ -1,7 +1,7 @@
 from jsonschema.common import Keyword, ValidationResult
 
 
-class Def(Keyword):
+class Defs(Keyword):
 
     def __init__(self, definitions):
         from .validator import build_validator
