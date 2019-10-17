@@ -100,4 +100,5 @@ class Validator(AValidator):
             )
 
     def subschema_validators(self):
-        return self._validators
+        for validator in self._validators:
+            yield validator

@@ -12,4 +12,5 @@ class Defs(Keyword):
         return ValidationResult(ok=True)
 
     def subschema_validators(self):
-        return list(self._validators.values())
+        for validator in self._validators.values():
+            yield validator

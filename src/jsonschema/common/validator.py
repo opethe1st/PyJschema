@@ -17,7 +17,7 @@ class AValidator(abc.ABC):
     def validate(self, instance: JsonType) -> ValidationResult:
         pass
 
-    def subschema_validators(self) -> typing.List["AValidator"]:
+    def subschema_validators(self) -> typing.Iterable["AValidator"]:
         return []
 
 

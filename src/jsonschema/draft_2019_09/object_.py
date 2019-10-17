@@ -58,11 +58,12 @@ class _Property(KeywordGroup):
             )
 
     def subschema_validators(self):
-        validators = list(self._validators.values())
+        for validator in self._validators.values():
+            yield validator
         if self._additional_validator:
-            validators.append(self._additional_validator)
-        validators.extend(self._pattern_validators.values())
-        return validators
+            yield self._additional_validator
+        for validator in self._pattern_validators.values():
+            yield validator
 
 
 class _Required(Keyword):
@@ -103,7 +104,7 @@ class _PropertyNames(Keyword):
             return ValidationResult(ok=False, children=children)
 
     def subschema_validators(self):
-        return [self._validator]
+        yield self._validator
 
 
 class _MinProperties(Min):
@@ -171,4 +172,5 @@ class Object(Type):
             )
 
     def subschema_validators(self):
-        return self._validators
+        for validator in self._validators:
+            yield validator

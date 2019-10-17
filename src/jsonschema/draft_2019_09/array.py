@@ -42,12 +42,10 @@ class _ItemsArray(KeywordGroup):
             return ValidationResult(ok=True)
 
     def subschema_validators(self):
-        validators = self.item_validators[:]
-
+        for validator in self.item_validators:
+            yield validator
         if self.additional_item_validator:
-            validators.append(self.additional_item_validator)
-
-        return validators
+            yield self.additional_item_validator
 
 
 class _Items(Keyword):
@@ -71,7 +69,7 @@ class _Items(Keyword):
             return ValidationResult(ok=False, children=children)
 
     def subschema_validators(self):
-        return [self._validator]
+        yield self._validator
 
 
 class _Contains(Keyword):
@@ -94,7 +92,7 @@ class _Contains(Keyword):
         )
 
     def subschema_validators(self):
-        return [self._validator]
+        yield self._validator
 
 
 class _MinItems(Min):
@@ -172,4 +170,5 @@ class Array(Type):
 
     def subschema_validators(self):
         # maybe optimize by not returning validators that don't have schemas embedded
-        return self._validators
+        for validator in self._validators:
+            yield validator
