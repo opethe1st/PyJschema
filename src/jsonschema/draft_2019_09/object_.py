@@ -6,7 +6,7 @@ from jsonschema.common import Keyword, KeywordGroup, Type, ValidationResult
 from .common import Max, Min
 
 
-class Property(KeywordGroup):
+class _Property(KeywordGroup):
 
     def __init__(self, value=None, additional_properties=None, pattern_properties=None, **kwargs):
         import re
@@ -65,7 +65,7 @@ class Property(KeywordGroup):
         return validators
 
 
-class Required(Keyword):
+class _Required(Keyword):
     def __init__(self, value: typing.List[str]):
         self.value = value
 
@@ -80,7 +80,7 @@ class Required(Keyword):
             return ValidationResult(ok=False, messages=messages)
 
 
-class PropertyNames(Keyword):
+class _PropertyNames(Keyword):
     def __init__(self, schema):
         # add this to make sure that the type is string - I have seen it missing from
         # examples in the documentation so can only assume it's allowed
@@ -106,20 +106,20 @@ class PropertyNames(Keyword):
         return [self._validator]
 
 
-class MinProperties(Min):
+class _MinProperties(Min):
     pass
 
 
-class MaxProperties(Max):
+class _MaxProperties(Max):
     pass
 
 
 class Object(Type):
     KEYWORD_TO_VALIDATOR = {
-        "required": Required,
-        "propertyNames": PropertyNames,
-        "minProperties": MinProperties,
-        "maxProperties": MaxProperties,
+        "required": _Required,
+        "propertyNames": _PropertyNames,
+        "minProperties": _MinProperties,
+        "maxProperties": _MaxProperties,
     }
 
     def __init__(self, **kwargs):
@@ -137,7 +137,7 @@ class Object(Type):
             or kwargs.get("additionalProperties") is not None
         ):
             self._validators.append(
-                Property(
+                _Property(
                     value=kwargs.get("properties"),
                     additional_properties=kwargs.get("additionalProperties"),
                     pattern_properties=kwargs.get("patternProperties")

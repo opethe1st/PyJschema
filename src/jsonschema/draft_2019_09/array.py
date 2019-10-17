@@ -4,7 +4,7 @@ from jsonschema.common import Keyword, KeywordGroup, Type, ValidationResult
 from .common import Max, Min
 
 
-class ItemsArray(KeywordGroup):
+class _ItemsArray(KeywordGroup):
     def __init__(self, item_schema, additional_items_schema=None, **kwargs):
         from .validator import build_validator
 
@@ -50,7 +50,7 @@ class ItemsArray(KeywordGroup):
         return validators
 
 
-class Items(Keyword):
+class _Items(Keyword):
     def __init__(self, item_schema, **kwargs):
         from .validator import build_validator
 
@@ -74,7 +74,7 @@ class Items(Keyword):
         return [self._validator]
 
 
-class Contains(Keyword):
+class _Contains(Keyword):
     def __init__(self, schema, **kwargs):
         from .validator import build_validator
 
@@ -97,15 +97,15 @@ class Contains(Keyword):
         return [self._validator]
 
 
-class MinItems(Min):
+class _MinItems(Min):
     pass
 
 
-class MaxItems(Max):
+class _MaxItems(Max):
     pass
 
 
-class UniqueItems(Keyword):
+class _UniqueItems(Keyword):
     def __init__(self, value: bool):
         self.value = value
 
@@ -123,10 +123,10 @@ class UniqueItems(Keyword):
 class Array(Type):
 
     KEYWORD_TO_VALIDATOR = {
-        'minItems': MinItems,
-        'maxItems': MaxItems,
-        'uniqueItems': UniqueItems,
-        'contains': Contains,
+        'minItems': _MinItems,
+        'maxItems': _MaxItems,
+        'uniqueItems': _UniqueItems,
+        'contains': _Contains,
     }
 
     def __init__(self, **kwargs):
@@ -142,9 +142,9 @@ class Array(Type):
         if 'items' in kwargs:
 
             if isinstance(kwargs['items'], list):
-                items_validator = ItemsArray(item_schema=kwargs['items'], additional_items_schema=kwargs.get('additionalItems'))
+                items_validator = _ItemsArray(item_schema=kwargs['items'], additional_items_schema=kwargs.get('additionalItems'))
             else:
-                items_validator = Items(item_schema=kwargs['items'])
+                items_validator = _Items(item_schema=kwargs['items'])
 
             self._validators.append(items_validator)
 

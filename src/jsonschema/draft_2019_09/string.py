@@ -3,15 +3,15 @@ from jsonschema.common import Keyword, Type, ValidationResult
 from .common import Max, Min
 
 
-class MaxLength(Max):
+class _MaxLength(Max):
     pass
 
 
-class MinLength(Min):
+class _MinLength(Min):
     pass
 
 
-class Pattern(Keyword):
+class _Pattern(Keyword):
     def __init__(self, value):
         import re
         self.regex = re.compile(value)
@@ -24,9 +24,9 @@ class Pattern(Keyword):
 
 class String(Type):
     KEYWORD_TO_VALIDATOR = {
-        'minLength': MinLength,
-        'maxLength': MaxLength,
-        'pattern': Pattern,
+        'minLength': _MinLength,
+        'maxLength': _MaxLength,
+        'pattern': _Pattern,
     }
 
     def __init__(self, **kwargs):

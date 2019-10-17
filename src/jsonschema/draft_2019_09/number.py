@@ -3,7 +3,7 @@ import numbers
 from jsonschema.common import Keyword, Type, ValidationResult
 
 
-class MultipleOf(Keyword):
+class _MultipleOf(Keyword):
     def __init__(self, value: int):
         self.value = value
 
@@ -13,7 +13,7 @@ class MultipleOf(Keyword):
         return ValidationResult(ok=True)
 
 
-class Minimum(Keyword):
+class _Minimum(Keyword):
     def __init__(self, value: int):
         self.value = value
 
@@ -23,7 +23,7 @@ class Minimum(Keyword):
         return ValidationResult(ok=True)
 
 
-class Maximum(Keyword):
+class _Maximum(Keyword):
     def __init__(self, value: int):
         self.value = value
 
@@ -33,7 +33,7 @@ class Maximum(Keyword):
         return ValidationResult(ok=True)
 
 
-class ExclusiveMinimum(Keyword):
+class _ExclusiveMinimum(Keyword):
     def __init__(self, value: int):
         self.value = value
 
@@ -43,7 +43,7 @@ class ExclusiveMinimum(Keyword):
         return ValidationResult(ok=True)
 
 
-class ExclusiveMaximum(Keyword):
+class _ExclusiveMaximum(Keyword):
     def __init__(self, value: int):
         self.value = value
 
@@ -53,13 +53,13 @@ class ExclusiveMaximum(Keyword):
         return ValidationResult(ok=True)
 
 
-class NumberOrInteger(Type):
+class _NumberOrInteger(Type):
     KEYWORD_TO_VALIDATOR = {
-        'multipleOf': MultipleOf,
-        'minimum': Minimum,
-        'maximum': Maximum,
-        'exclusiveMinimum': ExclusiveMinimum,
-        'exclusiveMaximum': ExclusiveMaximum,
+        'multipleOf': _MultipleOf,
+        'minimum': _Minimum,
+        'maximum': _Maximum,
+        'exclusiveMinimum': _ExclusiveMinimum,
+        'exclusiveMaximum': _ExclusiveMaximum,
     }
 
     def __init__(self, **kwargs):
@@ -86,7 +86,7 @@ class NumberOrInteger(Type):
             )
 
 
-class Number(NumberOrInteger):
+class Number(_NumberOrInteger):
 
     def validate(self, instance):
         res = super().validate(instance=instance)
@@ -96,7 +96,7 @@ class Number(NumberOrInteger):
         return res
 
 
-class Integer(NumberOrInteger):
+class Integer(_NumberOrInteger):
 
     def validate(self, instance):
         res = super().validate(instance=instance)
