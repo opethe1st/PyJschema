@@ -29,7 +29,7 @@ class Ref(Keyword):
 
     def __init__(self, value):
         self.value = value
-        self.context: Context = None
+        self.context: typing.Optional[Context] = None
 
     def validate(self, instance):
         if self.context is None:
