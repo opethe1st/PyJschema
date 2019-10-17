@@ -8,7 +8,7 @@ from jsonschema.common.reference_resolver import (
 )
 
 from .array import Array
-from .definitions import Defs
+from .defs import Defs
 from .number import Integer, Number
 from .object_ import Object
 from .primitives import AcceptAll, Boolean, Const, Enum, Null, RejectAll

@@ -153,7 +153,7 @@ class Array(Type):
         messages = []
 
         if not isinstance(instance, list):
-            messages.append('instance is not a number')
+            messages.append('instance is not a list')
 
         for validator in self._validators:
             result = validator.validate(instance)
