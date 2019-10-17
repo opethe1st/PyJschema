@@ -35,7 +35,7 @@ SCHEMA_TO_TYPE_VALIDATORS: typing.Dict[str, typing.Type[AValidator]] = {
     'boolean': Boolean,
     'null': Null,
     "array": Array,
-    "object": Object
+    "object": Object,
 }
 
 
