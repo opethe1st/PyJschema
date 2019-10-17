@@ -29,11 +29,11 @@ class Property(KeywordGroup):
                 if not result.ok:
                     results.append(result)
 
-        additionalProperties = set(instance.keys()) - set(self._validators.keys())
+        remaining_properties = set(instance.keys()) - set(self._validators.keys())
 
         properties_validated_by_pattern = set()
         for regex in self._pattern_validators:
-            for key in additionalProperties:
+            for key in remaining_properties:
                 if regex.match(key):
                     properties_validated_by_pattern.add(key)
                     result = self._pattern_validators[regex].validate(instance[key])
@@ -41,7 +41,7 @@ class Property(KeywordGroup):
                         results.append(result)
 
         # additionalProperties only applies to properties not in properties or patternProperties
-        additionalProperties -= properties_validated_by_pattern
+        additionalProperties = remaining_properties - properties_validated_by_pattern
         if self._additional_validator:
             for key in additionalProperties:
                 result = self._additional_validator.validate(instance[key])
