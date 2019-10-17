@@ -86,9 +86,10 @@ class TestAddContextToSchemaValidator(unittest.TestCase):
         ]
     )
     def test(self, name, schema):
+        #  not sure this is a valid test
         ref = build_validator(schema)
         validator = Validator()
-        validator.add_validator(String())
+        validator.add_validator(String(schema))
 
         self.assertIsNone(ref.context)
 

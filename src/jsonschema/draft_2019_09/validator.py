@@ -67,7 +67,7 @@ def build_validator(schema: typing.Union[dict, bool]) -> typing.Union[AcceptAll,
     if 'type' in schema:
         if schema['type'] in SCHEMA_TO_TYPE_VALIDATORS:
             validator.add_validator(
-                SCHEMA_TO_TYPE_VALIDATORS[schema['type']](**schema)
+                SCHEMA_TO_TYPE_VALIDATORS[schema['type']](schema=schema)
             )
 
     return validator
@@ -82,6 +82,7 @@ class Validator(AValidator):
     def add_validator(self, validator: AValidator):
         self._validators.append(validator)
 
+    # hm.. this is the same as the method in Type.
     def validate(self, instance):
         results = []
         for validator in self._validators:
@@ -99,6 +100,7 @@ class Validator(AValidator):
                 children=results
             )
 
+    # hm.. this is the same as the method in Type.
     def subschema_validators(self):
         for validator in self._validators:
             yield validator

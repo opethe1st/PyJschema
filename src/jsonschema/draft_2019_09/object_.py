@@ -8,15 +8,15 @@ from .common import Max, Min
 
 class _Property(KeywordGroup):
 
-    def __init__(self, value=None, additional_properties=None, pattern_properties=None, **kwargs):
+    def __init__(self, properties=None, additionalProperties=None, patternProperties=None):
         import re
         from .validator import build_validator
 
-        self._validators = {key: build_validator(value) for key, value in value.items()} if value else {}
-        self._additional_validator = build_validator(additional_properties) if additional_properties is not None else None
+        self._validators = {key: build_validator(prop) for key, prop in properties.items()} if properties else {}
+        self._additional_validator = build_validator(additionalProperties) if additionalProperties is not None else None
         self._pattern_validators = {
-            re.compile(key): build_validator(value) for key, value in pattern_properties.items()
-        } if pattern_properties else {}
+            re.compile(key): build_validator(properties) for key, properties in patternProperties.items()
+        } if patternProperties else {}
 
     def validate(self, instance):
         results = []
@@ -67,8 +67,8 @@ class _Property(KeywordGroup):
 
 
 class _Required(Keyword):
-    def __init__(self, value: typing.List[str]):
-        self.value = value
+    def __init__(self, required: typing.List[str]):
+        self.value = required
 
     def validate(self, instance):
         messages = []
@@ -82,13 +82,13 @@ class _Required(Keyword):
 
 
 class _PropertyNames(Keyword):
-    def __init__(self, schema):
+    def __init__(self, propertyNames):
         # add this to make sure that the type is string - I have seen it missing from
         # examples in the documentation so can only assume it's allowed
         from .validator import build_validator
 
-        schema["type"] = "string"
-        self._validator = build_validator(schema)
+        propertyNames["type"] = "string"
+        self._validator = build_validator(propertyNames)
 
     def validate(self, instance):
         children = []
@@ -108,69 +108,32 @@ class _PropertyNames(Keyword):
 
 
 class _MinProperties(Min):
-    pass
+    def __init__(self, minProperties):
+        self.value = minProperties
 
 
 class _MaxProperties(Max):
-    pass
+    def __init__(self, maxProperties):
+        self.value = maxProperties
 
 
 class Object(Type):
-    KEYWORD_TO_VALIDATOR = {
-        "required": _Required,
-        "propertyNames": _PropertyNames,
-        "minProperties": _MinProperties,
-        "maxProperties": _MaxProperties,
+    KEYWORDS_TO_VALIDATOR = {
+        ("required",): _Required,
+        ("propertyNames",): _PropertyNames,
+        ("minProperties",): _MinProperties,
+        ("maxProperties",): _MaxProperties,
+        ("properties", "patternProperties", "additionalProperties"): _Property,
     }
-
-    def __init__(self, **kwargs):
-        self._validators = []
-        for keyword in self.KEYWORD_TO_VALIDATOR:
-
-            if kwargs.get(keyword) is not None:
-                self._validators.append(
-                    self.KEYWORD_TO_VALIDATOR[keyword](kwargs.get(keyword))
-                )
-
-        if (
-            kwargs.get("properties") is not None
-            or kwargs.get("patternProperties") is not None
-            or kwargs.get("additionalProperties") is not None
-        ):
-            self._validators.append(
-                _Property(
-                    value=kwargs.get("properties"),
-                    additional_properties=kwargs.get("additionalProperties"),
-                    pattern_properties=kwargs.get("patternProperties")
-                )
-            )
+    type_ = dict
 
     def validate(self, instance):
-        results = []
-        messages = []
-        if not isinstance(instance, dict):
-            messages.append('instance is not a dictionary')
+        res = super().validate(instance=instance)
 
         keyTypes = set(type(key) for key in instance)
         if keyTypes:
             if len(keyTypes) != 1 or not (str in keyTypes):
-                messages.append('all the keys of the object need to be strings')
+                res.messages.append('all the keys of the object need to be strings')
+                return ValidationResult(ok=False, messages=res.messages)
+        return res
 
-        for validator in self._validators:
-            result = validator.validate(instance)
-
-            if not result.ok:
-                results.append(result)
-
-        if not results and not messages:
-            return ValidationResult(ok=True)
-        else:
-            return ValidationResult(
-                ok=False,
-                messages=messages,
-                children=results
-            )
-
-    def subschema_validators(self):
-        for validator in self._validators:
-            yield validator

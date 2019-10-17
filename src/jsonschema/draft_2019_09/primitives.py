@@ -2,6 +2,7 @@ from jsonschema.common import AValidator, Keyword, Type, ValidationResult
 
 
 class Boolean(Type):
+    type_ = bool
 
     def validate(self, instance):
         # is this faster than an isinstance check?
@@ -12,6 +13,7 @@ class Boolean(Type):
 
 
 class Null(Type):
+    type_ = None
 
     def validate(self, instance):
         if instance is None:

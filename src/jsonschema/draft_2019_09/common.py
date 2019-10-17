@@ -2,8 +2,7 @@ from jsonschema.common import Keyword, ValidationResult
 
 
 class Max(Keyword):
-    def __init__(self, value: int):
-        self.value = value
+    value = None
 
     def validate(self, instance):
         if self.value < len(instance):
@@ -12,8 +11,7 @@ class Max(Keyword):
 
 
 class Min(Keyword):
-    def __init__(self, value: int):
-        self.value = value
+    value = None
 
     def validate(self, instance):
         if len(instance) < self.value:
