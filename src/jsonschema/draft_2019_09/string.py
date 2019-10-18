@@ -1,56 +1,38 @@
+import typing as t
+
 from jsonschema.common import Keyword, Type, ValidationResult
 
 from .common import Max, Min
 
 
-class MaxLength(Max):
-    pass
+class _MaxLength(Max):
+    def __init__(self, maxLength: int):
+        self.value = maxLength
 
 
-class MinLength(Min):
-    pass
+class _MinLength(Min):
+    def __init__(self, minLength: int):
+        self.value = minLength
 
 
-class Pattern(Keyword):
-    def __init__(self, value):
+class _Pattern(Keyword):
+    def __init__(self, pattern: t.Pattern):
         import re
-        self.regex = re.compile(value)
+
+        self.regex = re.compile(pattern)
 
     def validate(self, instance):
         if not self.regex.match(instance):
-            return ValidationResult(ok=False, messages=["instance doesn't match the pattern given"])
+            return ValidationResult(
+                ok=False, messages=["instance doesn't match the pattern given"]
+            )
         return ValidationResult(ok=True)
 
 
 class String(Type):
-    def __init__(self, **kwargs):
-        self._validators = []
-        keyword_to_validator = {
-            'minLength': MinLength,
-            'maxLength': MaxLength,
-            'pattern': Pattern,
-        }
-        for keyword in keyword_to_validator:
-            if kwargs.get(keyword) is not None:
-                self._validators.append(
-                    keyword_to_validator[keyword](value=kwargs.get(keyword))
-                )
-
-    def validate(self, instance):
-        results = []
-        messages = []
-        if not isinstance(instance, str):
-            messages.append('instance is not a string')
-        for validator in self._validators:
-            result = validator.validate(instance)
-            if not result.ok:
-                results.append(result)
-
-        if not results and not messages:
-            return ValidationResult(ok=True)
-        else:
-            return ValidationResult(
-                ok=False,
-                messages=messages,
-                children=results
-            )
+    KEYWORDS_TO_VALIDATOR = {
+        ("minLength",): _MinLength,
+        ("maxLength",): _MaxLength,
+        ("pattern",): _Pattern,
+    }
+    type_ = str

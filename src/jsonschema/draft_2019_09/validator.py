@@ -1,34 +1,46 @@
-import typing
+import typing as t
 
-from jsonschema.common import AValidator, ValidationResult
-from jsonschema.common.reference_resolver import (
+from jsonschema.common import (
+    AValidator,
     Ref,
+    Schema,
+    ValidationResult,
     add_context_to_ref_validators,
     generate_context
 )
 
 from .array import Array
-from .definitions import Def
+from .defs import Defs
 from .number import Integer, Number
 from .object_ import Object
 from .primitives import AcceptAll, Boolean, Const, Enum, Null, RejectAll
 from .string import String
 
-__all__ = [
-    'validate_once',
-    'build_validator',
-    'Validator',
-]
+__all__ = ["validate_once", "build_validator", "Validator"]
 
 
-def validate_once(schema: typing.Union[dict, bool], instance: dict) -> ValidationResult:
+def validate_once(schema: t.Union[dict, bool], instance: dict) -> ValidationResult:
     validator = build_validator(schema)
     context = generate_context(validator)
     add_context_to_ref_validators(validator, context)
     return validator.validate(instance)
 
 
-def build_validator(schema: typing.Union[dict, bool]) -> typing.Union[AcceptAll, RejectAll, "Validator", "Ref"]:
+SCHEMA_TO_TYPE_VALIDATORS: t.Dict[str, t.Type[AValidator]] = {
+    "string": String,
+    "number": Number,
+    "integer": Integer,
+    "boolean": Boolean,
+    "null": Null,
+    "array": Array,
+    "object": Object,
+}
+
+
+BuildValidatorReturns = t.Union[AcceptAll, RejectAll, "Validator", Ref]
+
+
+def build_validator(schema: t.Union[Schema, bool]) -> BuildValidatorReturns:
     if schema is True or schema == {}:
         return AcceptAll()
     elif schema is False:
@@ -44,36 +56,25 @@ def build_validator(schema: typing.Union[dict, bool]) -> typing.Union[AcceptAll,
     if "$anchor" in schema:
         validator.anchor = "#" + schema["$anchor"]
 
-    if 'const' in schema:
-        validator.add_validator(Const(value=schema['const']))
+    if "const" in schema:
+        validator.add_validator(Const(const=schema["const"]))
 
-    if 'enum' in schema:
-        validator.add_validator(Enum(values=schema['enum']))
+    if "enum" in schema:
+        validator.add_validator(Enum(enum=schema["enum"]))
 
-    if '$defs' in schema:
-        validator.add_validator(Def(definitions=schema['$defs']))
+    if "$defs" in schema:
+        validator.add_validator(Defs(defs=schema["$defs"]))
 
-    if 'type' in schema:
-        schema_type_to_validator: typing.Dict[str, typing.Type[AValidator]] = {
-            'string': String,
-            'number': Number,
-            'integer': Integer,
-            'boolean': Boolean,
-            'null': Null,
-            "array": Array,
-            "object": Object
-        }
-
-        if schema['type'] in schema_type_to_validator:
+    if "type" in schema:
+        if schema["type"] in SCHEMA_TO_TYPE_VALIDATORS:
             validator.add_validator(
-                schema_type_to_validator[schema['type']](**schema)
+                SCHEMA_TO_TYPE_VALIDATORS[schema["type"]](schema=schema)
             )
 
     return validator
 
 
 class Validator(AValidator):
-
     def __init__(self):
         self.anchor = None
         self._validators = []
@@ -81,6 +82,7 @@ class Validator(AValidator):
     def add_validator(self, validator: AValidator):
         self._validators.append(validator)
 
+    # hm.. this is the same as the method in Type.
     def validate(self, instance):
         results = []
         for validator in self._validators:
@@ -95,8 +97,10 @@ class Validator(AValidator):
             return ValidationResult(
                 ok=False,
                 messages=["error while validating this instance"],
-                children=results
+                children=results,
             )
 
+    # hm.. this is the same as the method in Type.
     def subschema_validators(self):
-        return self._validators
+        for validator in self._validators:
+            yield validator

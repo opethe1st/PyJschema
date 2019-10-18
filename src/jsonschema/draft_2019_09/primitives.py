@@ -1,28 +1,28 @@
+import typing as t
+
 from jsonschema.common import AValidator, Keyword, Type, ValidationResult
 
 
 class Boolean(Type):
+    type_ = bool
 
     def validate(self, instance):
         # is this faster than an isinstance check?
         if (instance is True) or (instance is False):
             return ValidationResult(ok=True)
         else:
-            return ValidationResult(ok=False, messages=['instance is not a valid boolean'])
+            return ValidationResult(
+                ok=False, messages=["instance is not a valid boolean"]
+            )
 
 
 class Null(Type):
-
-    def validate(self, instance):
-        if instance is None:
-            return ValidationResult(ok=True)
-        else:
-            return ValidationResult(ok=False)
+    type_ = type(None)
 
 
 class Const(Keyword):
-    def __init__(self, value):
-        self.value = value
+    def __init__(self, const: t.Any):
+        self.value = const
 
     def validate(self, instance):
         if instance == self.value:
@@ -33,8 +33,8 @@ class Const(Keyword):
 
 
 class Enum(Keyword):
-    def __init__(self, values):
-        self.values = values
+    def __init__(self, enum: t.Any):
+        self.values = enum
 
     def validate(self, instance):
         if instance in self.values:
@@ -45,12 +45,10 @@ class Enum(Keyword):
 
 
 class AcceptAll(AValidator):
-
     def validate(self, instance):
         return ValidationResult(ok=True)
 
 
 class RejectAll(AValidator):
-
     def validate(self, instance):
         return ValidationResult(ok=False, messages=["This fails for every value"])
