@@ -1,8 +1,10 @@
 import typing as t
 
-from jsonschema.common import AValidator, ValidationResult
-from jsonschema.common.reference_resolver import (
+from jsonschema.common import (
+    AValidator,
     Ref,
+    Schema,
+    ValidationResult,
     add_context_to_ref_validators,
     generate_context,
 )
@@ -35,10 +37,10 @@ SCHEMA_TO_TYPE_VALIDATORS: t.Dict[str, t.Type[AValidator]] = {
 }
 
 
-BuildValidatorReturns = t.Union[AcceptAll, RejectAll, "Validator", "Ref"]
+BuildValidatorReturns = t.Union[AcceptAll, RejectAll, "Validator", Ref]
 
 
-def build_validator(schema: t.Union[dict, bool]) -> BuildValidatorReturns:
+def build_validator(schema: t.Union[Schema, bool]) -> BuildValidatorReturns:
     if schema is True or schema == {}:
         return AcceptAll()
     elif schema is False:
@@ -55,13 +57,13 @@ def build_validator(schema: t.Union[dict, bool]) -> BuildValidatorReturns:
         validator.anchor = "#" + schema["$anchor"]
 
     if "const" in schema:
-        validator.add_validator(Const(value=schema["const"]))
+        validator.add_validator(Const(const=schema["const"]))
 
     if "enum" in schema:
-        validator.add_validator(Enum(values=schema["enum"]))
+        validator.add_validator(Enum(enum=schema["enum"]))
 
     if "$defs" in schema:
-        validator.add_validator(Defs(definitions=schema["$defs"]))
+        validator.add_validator(Defs(defs=schema["$defs"]))
 
     if "type" in schema:
         if schema["type"] in SCHEMA_TO_TYPE_VALIDATORS:

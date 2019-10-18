@@ -8,6 +8,9 @@ from jsonschema.common import ValidationResult
 JsonType = t.Union[str, numbers.Number, bool, None, Mapping, Sequence]
 
 
+Schema = t.Dict
+
+
 class AValidator(abc.ABC):
     def __init__(self, **kwargs):
         pass
@@ -38,7 +41,7 @@ class Type(AValidator):
     KEYWORDS_TO_VALIDATOR: t.Dict[
         t.Tuple[str, ...], t.Union[t.Type[Keyword], t.Type[KeywordGroup]]
     ] = {}
-    type_: t.Optional[t.Type] = None  # this is required too
+    type_: t.Optional[t.Type]
 
     def __init__(self, schema):
         self._validators = []
@@ -57,10 +60,12 @@ class Type(AValidator):
         if not isinstance(instance, self.type_):
             messages.append(f"instance is not a {self.type_}")
 
-        results = list(filter(
-            (lambda res: not res.ok),
-            (validator.validate(instance) for validator in self._validators),
-        ))
+        results = list(
+            filter(
+                (lambda res: not res.ok),
+                (validator.validate(instance) for validator in self._validators),
+            )
+        )
 
         if not results and not messages:
             return ValidationResult(ok=True)

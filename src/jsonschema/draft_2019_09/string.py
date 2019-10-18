@@ -1,20 +1,20 @@
 from jsonschema.common import Keyword, Type, ValidationResult
-
+import typing as t
 from .common import Max, Min
 
 
 class _MaxLength(Max):
-    def __init__(self, maxLength):
+    def __init__(self, maxLength: int):
         self.value = maxLength
 
 
 class _MinLength(Min):
-    def __init__(self, minLength):
+    def __init__(self, minLength: int):
         self.value = minLength
 
 
 class _Pattern(Keyword):
-    def __init__(self, pattern):
+    def __init__(self, pattern: t.Pattern):
         import re
 
         self.regex = re.compile(pattern)

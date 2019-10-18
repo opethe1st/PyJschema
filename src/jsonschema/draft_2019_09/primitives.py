@@ -1,3 +1,5 @@
+import typing as t
+
 from jsonschema.common import AValidator, Keyword, Type, ValidationResult
 
 
@@ -15,18 +17,12 @@ class Boolean(Type):
 
 
 class Null(Type):
-    type_ = None
-
-    def validate(self, instance):
-        if instance is None:
-            return ValidationResult(ok=True)
-        else:
-            return ValidationResult(ok=False)
+    type_ = type(None)
 
 
 class Const(Keyword):
-    def __init__(self, value):
-        self.value = value
+    def __init__(self, const: t.Any):
+        self.value = const
 
     def validate(self, instance):
         if instance == self.value:
@@ -37,8 +33,8 @@ class Const(Keyword):
 
 
 class Enum(Keyword):
-    def __init__(self, values):
-        self.values = values
+    def __init__(self, enum: t.Any):
+        self.values = enum
 
     def validate(self, instance):
         if instance in self.values:

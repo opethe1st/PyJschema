@@ -1,11 +1,22 @@
 import typing as t
-from jsonschema.common import Keyword, KeywordGroup, Type, ValidationResult, AValidator
+from jsonschema.common import (
+    Keyword,
+    KeywordGroup,
+    Type,
+    ValidationResult,
+    AValidator,
+    Schema,
+)
 
 from .common import Max, Min
 
 
 class _Items(KeywordGroup):
-    def __init__(self, items: t.Union[dict], additionalItems: dict):
+    def __init__(
+        self,
+        items: t.Union[Schema, t.List[Schema]],
+        additionalItems: t.Optional[Schema],
+    ):
         from .validator import build_validator, BuildValidatorReturns
 
         self._items_validator: t.Optional[BuildValidatorReturns] = None
@@ -79,7 +90,7 @@ class _Items(KeywordGroup):
 
 
 class _Contains(Keyword):
-    def __init__(self, contains):
+    def __init__(self, contains: Schema):
         from .validator import build_validator
 
         self._validator = build_validator(contains)
