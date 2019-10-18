@@ -459,8 +459,10 @@ class TestValidatorWithRef(unittest.TestCase):
 
 class TestTypes(unittest.TestCase):
     @parameterized.parameterized.expand([
-        ('number accepted by string and number', {"type": ["string", "number"]}, 123),
-        ('string accepted string and number', {"type": ["string", "number"]}, "sdbfgs"),
+        ('number', {"type": ["string", "number"]}, 123),
+        ('string', {"type": ["string", "number"]}, "sdbfgs"),
+        ('number with maximum keyword', {"type": ["string", "number"], "maximum": 200}, 123),
+        ('string with maximum keyword', {"type": ["string", "number"], "maxLength": 10}, "sdbfgs"),
     ])
     def test_true(self, name, schema, instance):
         res = validate_once(schema, instance)
@@ -470,6 +472,8 @@ class TestTypes(unittest.TestCase):
     @parameterized.parameterized.expand([
         ('array not accepted by string and number', {"type": ["string", "number"]}, [123]),
         ('dict not accepted string and number', {"type": ["string", "number"]}, {"k": "v"}),
+        ('number fails validation', {"type": ["string", "number"], "maximum": 5}, 10),
+        ('string fails validation', {"type": ["string", "number"], "maxLength": 3}, "abcdefghi"),
     ])
     def test_false(self, name, schema, instance):
         res = validate_once(schema, instance)
