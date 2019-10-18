@@ -455,3 +455,22 @@ class TestValidatorWithRef(unittest.TestCase):
     def test_false(self, name, schema, instance):
         res = validate_once(schema, instance)
         self.assertFalse(res.ok)
+
+
+class TestTypes(unittest.TestCase):
+    @parameterized.parameterized.expand([
+        ('number accepted by string and number', {"type": ["string", "number"]}, 123),
+        ('string accepted string and number', {"type": ["string", "number"]}, "sdbfgs"),
+    ])
+    def test_true(self, name, schema, instance):
+        res = validate_once(schema, instance)
+        self.assertTrue(res.ok)
+
+
+    @parameterized.parameterized.expand([
+        ('array not accepted by string and number', {"type": ["string", "number"]}, [123]),
+        ('dict not accepted string and number', {"type": ["string", "number"]}, {"k": "v"}),
+    ])
+    def test_false(self, name, schema, instance):
+        res = validate_once(schema, instance)
+        self.assertFalse(res.ok)
