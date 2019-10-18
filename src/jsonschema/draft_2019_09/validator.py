@@ -49,7 +49,7 @@ def build_validator(schema: t.Union[Schema, bool]) -> BuildValidatorReturns:
         raise Exception("schema must be either a boolean or a dictionary")
 
     if "$ref" in schema:
-        return Ref(value=schema["$ref"])
+        return Ref(ref=schema["$ref"])
 
     validator = Validator()
 
@@ -66,10 +66,17 @@ def build_validator(schema: t.Union[Schema, bool]) -> BuildValidatorReturns:
         validator.add_validator(Defs(defs=schema["$defs"]))
 
     if "type" in schema:
-        if schema["type"] in SCHEMA_TO_TYPE_VALIDATORS:
-            validator.add_validator(
-                SCHEMA_TO_TYPE_VALIDATORS[schema["type"]](schema=schema)
-            )
+        if isinstance(schema["type"], list):
+            for type_ in schema["type"]:
+                if type_ in SCHEMA_TO_TYPE_VALIDATORS:
+                    validator.add_validator(
+                        SCHEMA_TO_TYPE_VALIDATORS[type_](schema=schema)
+                    )
+        else:
+            if schema["type"] in SCHEMA_TO_TYPE_VALIDATORS:
+                validator.add_validator(
+                    SCHEMA_TO_TYPE_VALIDATORS[schema["type"]](schema=schema)
+                )
 
     return validator
 

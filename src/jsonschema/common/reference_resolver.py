@@ -26,8 +26,8 @@ def add_context_to_ref_validators(validator: t.Union[AValidator], context: Conte
 
 
 class Ref(Keyword):
-    def __init__(self, value):
-        self.value = value
+    def __init__(self, ref):
+        self.value = ref
         self.context: t.Optional[Context] = None
 
     def validate(self, instance):
