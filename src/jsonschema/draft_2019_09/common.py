@@ -1,8 +1,10 @@
+import typing as t
+
 from jsonschema.common import Keyword, ValidationResult
 
 
 class Max(Keyword):
-    value = None
+    value = t.Optional[int]
 
     def validate(self, instance):
         if self.value < len(instance):
@@ -11,7 +13,7 @@ class Max(Keyword):
 
 
 class Min(Keyword):
-    value = None
+    value = t.Optional[int]
 
     def validate(self, instance):
         if len(instance) < self.value:

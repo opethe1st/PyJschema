@@ -9,7 +9,9 @@ class Boolean(Type):
         if (instance is True) or (instance is False):
             return ValidationResult(ok=True)
         else:
-            return ValidationResult(ok=False, messages=['instance is not a valid boolean'])
+            return ValidationResult(
+                ok=False, messages=["instance is not a valid boolean"]
+            )
 
 
 class Null(Type):
@@ -47,12 +49,10 @@ class Enum(Keyword):
 
 
 class AcceptAll(AValidator):
-
     def validate(self, instance):
         return ValidationResult(ok=True)
 
 
 class RejectAll(AValidator):
-
     def validate(self, instance):
         return ValidationResult(ok=False, messages=["This fails for every value"])

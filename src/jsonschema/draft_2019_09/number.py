@@ -55,11 +55,11 @@ class _ExclusiveMaximum(Keyword):
 
 class _NumberOrInteger(Type):
     KEYWORDS_TO_VALIDATOR = {
-        ('multipleOf',): _MultipleOf,
-        ('minimum',): _Minimum,
-        ('maximum',): _Maximum,
-        ('exclusiveMinimum',): _ExclusiveMinimum,
-        ('exclusiveMaximum',): _ExclusiveMaximum,
+        ("multipleOf",): _MultipleOf,
+        ("minimum",): _Minimum,
+        ("maximum",): _Maximum,
+        ("exclusiveMinimum",): _ExclusiveMinimum,
+        ("exclusiveMaximum",): _ExclusiveMaximum,
     }
 
 

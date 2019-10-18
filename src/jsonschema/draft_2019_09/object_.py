@@ -1,5 +1,4 @@
-
-import typing
+import typing as t
 
 from jsonschema.common import Keyword, KeywordGroup, Type, ValidationResult
 
@@ -7,16 +6,30 @@ from .common import Max, Min
 
 
 class _Property(KeywordGroup):
-
-    def __init__(self, properties=None, additionalProperties=None, patternProperties=None):
+    def __init__(
+        self, properties=None, additionalProperties=None, patternProperties=None
+    ):
         import re
         from .validator import build_validator
 
-        self._validators = {key: build_validator(prop) for key, prop in properties.items()} if properties else {}
-        self._additional_validator = build_validator(additionalProperties) if additionalProperties is not None else None
-        self._pattern_validators = {
-            re.compile(key): build_validator(properties) for key, properties in patternProperties.items()
-        } if patternProperties else {}
+        self._validators = (
+            {key: build_validator(prop) for key, prop in properties.items()}
+            if properties
+            else {}
+        )
+        self._additional_validator = (
+            build_validator(additionalProperties)
+            if additionalProperties is not None
+            else None
+        )
+        self._pattern_validators = (
+            {
+                re.compile(key): build_validator(properties)
+                for key, properties in patternProperties.items()
+            }
+            if patternProperties
+            else {}
+        )
 
     def validate(self, instance):
         results = []
@@ -51,11 +64,7 @@ class _Property(KeywordGroup):
         if not results and not messages:
             return ValidationResult(ok=True)
         else:
-            return ValidationResult(
-                ok=False,
-                messages=messages,
-                children=results
-            )
+            return ValidationResult(ok=False, messages=messages, children=results)
 
     def subschema_validators(self):
         for validator in self._validators.values():
@@ -67,13 +76,15 @@ class _Property(KeywordGroup):
 
 
 class _Required(Keyword):
-    def __init__(self, required: typing.List[str]):
+    def __init__(self, required: t.List[str]):
         self.value = required
 
     def validate(self, instance):
         messages = []
-        if (set(self.value) - set(instance.keys())):
-            messages.append(f"There are some missing required fields: {set(self.value) - set(instance.keys())}")
+        if set(self.value) - set(instance.keys()):
+            messages.append(
+                f"There are some missing required fields: {set(self.value) - set(instance.keys())}"
+            )
 
         if not messages:
             return ValidationResult(ok=True)
@@ -132,8 +143,8 @@ class Object(Type):
 
         keyTypes = set(type(key) for key in instance)
         if keyTypes:
+            # TODO(ope) this seems wrong to me
             if len(keyTypes) != 1 or not (str in keyTypes):
-                res.messages.append('all the keys of the object need to be strings')
+                res.messages.append("all the keys of the object need to be strings")
                 return ValidationResult(ok=False, messages=res.messages)
         return res
-

@@ -1,16 +1,16 @@
-
-from jsonschema.common import Keyword, KeywordGroup, Type, ValidationResult
+import typing as t
+from jsonschema.common import Keyword, KeywordGroup, Type, ValidationResult, AValidator
 
 from .common import Max, Min
 
 
 class _Items(KeywordGroup):
-    def __init__(self, items, additionalItems):
-        from .validator import build_validator
+    def __init__(self, items: t.Union[dict], additionalItems: dict):
+        from .validator import build_validator, BuildValidatorReturns
 
-        self._items_validator = None
-        self._items_validators = []
-        self._additional_items_validator = None
+        self._items_validator: t.Optional[BuildValidatorReturns] = None
+        self._items_validators: t.List[BuildValidatorReturns] = []
+        self._additional_items_validator: t.Optional[BuildValidatorReturns] = None
         if isinstance(items, list):
             self._items_validators = [build_validator(schema) for schema in items]
             if additionalItems:
@@ -94,7 +94,9 @@ class _Contains(Keyword):
 
         return ValidationResult(
             ok=False,
-            messages=["No item in this array matches the schema in the contains keyword"]
+            messages=[
+                "No item in this array matches the schema in the contains keyword"
+            ],
         )
 
     def subschema_validators(self):
@@ -102,13 +104,12 @@ class _Contains(Keyword):
 
 
 class _MinItems(Min):
-    def __init__(self, minItems):
+    def __init__(self, minItems: int):
         self.value = minItems
 
 
 class _MaxItems(Max):
-
-    def __init__(self, maxItems):
+    def __init__(self, maxItems: int):
         self.value = maxItems
 
 
@@ -130,11 +131,11 @@ class _UniqueItems(Keyword):
 class Array(Type):
 
     KEYWORDS_TO_VALIDATOR = {
-        ('minItems',): _MinItems,
-        ('maxItems',): _MaxItems,
-        ('uniqueItems',): _UniqueItems,
-        ('contains',): _Contains,
-        ('items', 'additionalItems'): _Items,
+        ("minItems",): _MinItems,
+        ("maxItems",): _MaxItems,
+        ("uniqueItems",): _UniqueItems,
+        ("contains",): _Contains,
+        ("items", "additionalItems"): _Items,
     }
 
     type_ = list

@@ -16,18 +16,21 @@ class _MinLength(Min):
 class _Pattern(Keyword):
     def __init__(self, pattern):
         import re
+
         self.regex = re.compile(pattern)
 
     def validate(self, instance):
         if not self.regex.match(instance):
-            return ValidationResult(ok=False, messages=["instance doesn't match the pattern given"])
+            return ValidationResult(
+                ok=False, messages=["instance doesn't match the pattern given"]
+            )
         return ValidationResult(ok=True)
 
 
 class String(Type):
     KEYWORDS_TO_VALIDATOR = {
-        ('minLength',): _MinLength,
-        ('maxLength',): _MaxLength,
-        ('pattern',): _Pattern,
+        ("minLength",): _MinLength,
+        ("maxLength",): _MaxLength,
+        ("pattern",): _Pattern,
     }
     type_ = str

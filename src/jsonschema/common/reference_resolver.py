@@ -1,9 +1,9 @@
-import typing
+import typing as t
 
 from .validation_result import ValidationResult
 from .validator import AValidator, Keyword
 
-Context = typing.Dict[str, AValidator]
+Context = t.Dict[str, AValidator]
 
 
 def generate_context(validator: AValidator) -> Context:
@@ -17,7 +17,7 @@ def generate_context(validator: AValidator) -> Context:
     return anchors
 
 
-def add_context_to_ref_validators(validator: typing.Union[AValidator], context: Context):
+def add_context_to_ref_validators(validator: t.Union[AValidator], context: Context):
     if isinstance(validator, Ref):
         validator.set_context(context)
 
@@ -26,10 +26,9 @@ def add_context_to_ref_validators(validator: typing.Union[AValidator], context: 
 
 
 class Ref(Keyword):
-
     def __init__(self, value):
         self.value = value
-        self.context: typing.Optional[Context] = None
+        self.context: t.Optional[Context] = None
 
     def validate(self, instance):
         if self.context is None:
