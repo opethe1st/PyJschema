@@ -1,5 +1,7 @@
-from jsonschema.common import Keyword, Type, ValidationResult
 import typing as t
+
+from jsonschema.common import Keyword, Type, ValidationResult
+
 from .common import Max, Min
 
 

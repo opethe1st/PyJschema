@@ -1,6 +1,6 @@
 import typing as t
 
-from jsonschema.common import Keyword, ValidationResult, Schema
+from jsonschema.common import Keyword, Schema, ValidationResult
 
 
 class Defs(Keyword):

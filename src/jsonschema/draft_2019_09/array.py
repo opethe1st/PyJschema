@@ -1,11 +1,12 @@
 import typing as t
+
 from jsonschema.common import (
+    AValidator,
     Keyword,
     KeywordGroup,
-    Type,
-    ValidationResult,
-    AValidator,
     Schema,
+    Type,
+    ValidationResult
 )
 
 from .common import Max, Min

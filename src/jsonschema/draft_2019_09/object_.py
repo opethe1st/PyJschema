@@ -1,7 +1,13 @@
 import re
 import typing as t
 
-from jsonschema.common import Keyword, KeywordGroup, Schema, Type, ValidationResult
+from jsonschema.common import (
+    Keyword,
+    KeywordGroup,
+    Schema,
+    Type,
+    ValidationResult
+)
 
 from .common import Max, Min
 

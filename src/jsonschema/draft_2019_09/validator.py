@@ -6,7 +6,7 @@ from jsonschema.common import (
     Schema,
     ValidationResult,
     add_context_to_ref_validators,
-    generate_context,
+    generate_context
 )
 
 from .array import Array
