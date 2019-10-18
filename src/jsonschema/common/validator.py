@@ -9,6 +9,9 @@ JsonType = t.Union[str, numbers.Number, bool, None, Mapping, Sequence]
 
 
 class AValidator(abc.ABC):
+    def __init__(self, **kwargs):
+        pass
+
     @abc.abstractmethod
     def validate(self, instance: JsonType) -> ValidationResult:
         pass
