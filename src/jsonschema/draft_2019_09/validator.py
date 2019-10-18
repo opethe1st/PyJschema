@@ -67,11 +67,9 @@ def build_validator(schema: t.Union[Schema, bool]) -> BuildValidatorReturns:
 
     if "type" in schema:
         if isinstance(schema["type"], list):
-            for type_ in schema["type"]:
-                if type_ in SCHEMA_TO_TYPE_VALIDATORS:
-                    validator.add_validator(
-                        SCHEMA_TO_TYPE_VALIDATORS[type_](schema=schema)
-                    )
+            validator.add_validator(
+                Types(schema=schema)
+            )
         else:
             if schema["type"] in SCHEMA_TO_TYPE_VALIDATORS:
                 validator.add_validator(
@@ -79,6 +77,35 @@ def build_validator(schema: t.Union[Schema, bool]) -> BuildValidatorReturns:
                 )
 
     return validator
+
+
+
+class Types(AValidator):
+
+    def __init__(self, schema):
+        self._validators = []
+        types = schema["type"]
+        for type_ in types:
+            if type_ in SCHEMA_TO_TYPE_VALIDATORS:
+                self._validators.append(
+                    SCHEMA_TO_TYPE_VALIDATORS[type_](schema=schema)
+                )
+
+    def validate(self, instance):
+        results = []
+        for validator in self._validators:
+            result = validator.validate(instance)
+
+            if result.ok:
+                return result
+            else:
+                results.append(result)
+
+        return ValidationResult(
+            ok=False,
+            messages=["error while validating this instance"],
+            children=results,
+        )
 
 
 class Validator(AValidator):
