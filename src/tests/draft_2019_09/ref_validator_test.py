@@ -5,23 +5,16 @@ import parameterized
 from jsonschema.common.reference_resolver import (
     Ref,
     add_context_to_ref_validators,
-    generate_context
+    generate_context,
+    attach_base_URIs,
 )
 from jsonschema.draft_2019_09 import Validator, build_validator
 from jsonschema.draft_2019_09.string import String
 
 
 class TestBuildValidator(unittest.TestCase):
-
     @parameterized.parameterized.expand(
-        [
-            (
-                "make sure there is a ref validator",
-                {
-                    "$ref": "#blah"
-                },
-            ),
-        ]
+        [("make sure there is a ref validator", {"$ref": "#blah"})]
     )
     def test(self, name, schema):
         ref = build_validator(schema)
@@ -29,16 +22,15 @@ class TestBuildValidator(unittest.TestCase):
 
 
 class TestGenerateContext(unittest.TestCase):
-
     @parameterized.parameterized.expand(
         [
             (
                 "make sure context is generated properly",
+                {"$anchor": "blah", "type": "string"},
                 {
-                    "$anchor": "blah",
-                    "type": "string",
+                    "https://json-schema.org/draft/2019-09/schema",
+                    "https://json-schema.org/draft/2019-09/schema#blah"
                 },
-                {"#blah"},
             ),
             (
                 "make sure context is generated properly with nested anchors",
@@ -46,44 +38,31 @@ class TestGenerateContext(unittest.TestCase):
                     "$anchor": "anarray",
                     "type": "array",
                     "items": [
-                        {
-                            "$anchor": "astring",
-                            "type": "string",
-                        },
-                        {
-                            "$anchor": "anumber",
-                            "type": "number",
-                        },
-                        {
-                            "$anchor": "anobject",
-                            "type": "object",
-                        },
-                    ]
+                        {"$anchor": "astring", "type": "string"},
+                        {"$anchor": "anumber", "type": "number"},
+                        {"$anchor": "anobject", "type": "object"},
+                    ],
                 },
-                {"#anarray", "#astring", "#anumber", "#anobject"}
+                {
+                    "https://json-schema.org/draft/2019-09/schema",
+                    "https://json-schema.org/draft/2019-09/schema#anarray",
+                    "https://json-schema.org/draft/2019-09/schema#astring",
+                    "https://json-schema.org/draft/2019-09/schema#anumber",
+                    "https://json-schema.org/draft/2019-09/schema#anobject",
+                },
             ),
         ]
     )
     def test(self, name, schema, keys):
         validator = build_validator(schema=schema)
+        attach_base_URIs(validator=validator)
         context = generate_context(validator)
-        self.assertEqual(
-            set(context.keys()),
-            keys,
-        )
+        self.assertEqual(set(context.keys()), keys)
 
 
 class TestAddContextToSchemaValidator(unittest.TestCase):
-
     @parameterized.parameterized.expand(
-        [
-            (
-                "make sure we add the context to add references",
-                {
-                    "$ref": "#blah"
-                },
-            ),
-        ]
+        [("make sure we add the context to add references", {"$ref": "#blah"})]
     )
     def test(self, name, schema):
         #  not sure this is a valid test
@@ -99,34 +78,29 @@ class TestAddContextToSchemaValidator(unittest.TestCase):
 
 
 class TestRefValidate(unittest.TestCase):
-
     @parameterized.parameterized.expand(
         [
             (
                 "ref something in $defs",
                 {
                     "type": "array",
-                    "items": {
-                        "$ref": "#StringWithmax20"
-                    },
+                    "items": {"$ref": "https://json-schema.org/draft/2019-09/schema#StringWithmax20"},
                     "$defs": {
                         "string": {
                             "$anchor": "StringWithmax20",
                             "type": "string",
-                            "maxLength": 20
+                            "maxLength": 20,
                         },
-                        "blah": {
-                            "$anchor": "blah",
-                            "type": "number"
-                        }
-                    }
+                        "blah": {"$anchor": "blah", "type": "number"},
+                    },
                 },
-                ["12345", "67890"]
-            ),
+                ["12345", "67890"],
+            )
         ]
     )
     def test_true(self, name, schema, instance):
         validator = build_validator(schema)
+        attach_base_URIs(validator=validator)
         context = generate_context(validator)
         add_context_to_ref_validators(validator, context)
 
@@ -139,23 +113,22 @@ class TestRefValidate(unittest.TestCase):
                 "ref something in $defs",
                 {
                     "type": "array",
-                    "items": {
-                        "$ref": "#NumberMax20"
-                    },
+                    "items": {"$ref": "https://json-schema.org/draft/2019-09/schema#NumberMax20"},
                     "$defs": {
                         "blah": {
                             "$anchor": "NumberMax20",
                             "type": "number",
-                            "maximum": 20
+                            "maximum": 20,
                         }
-                    }
+                    },
                 },
-                [23]
-            ),
+                [23],
+            )
         ]
     )
     def test_false(self, name, schema, instance):
         validator = build_validator(schema)
+        attach_base_URIs(validator=validator)
         context = generate_context(validator)
         add_context_to_ref_validators(validator, context)
 

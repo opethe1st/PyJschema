@@ -6,6 +6,7 @@ from jsonschema.common import (
     Schema,
     ValidationResult,
     add_context_to_ref_validators,
+    attach_base_URIs,
     generate_context
 )
 
@@ -21,6 +22,8 @@ __all__ = ["validate_once", "build_validator", "Validator"]
 
 def validate_once(schema: t.Union[dict, bool], instance: dict) -> ValidationResult:
     validator = build_validator(schema)
+    if isinstance(schema, dict):
+        attach_base_URIs(validator, schema.get("$id"))
     context = generate_context(validator)
     add_context_to_ref_validators(validator, context)
     return validator.validate(instance)
@@ -65,6 +68,9 @@ def build_validator(schema: t.Union[Schema, bool]) -> BuildValidatorReturns:
     if "$defs" in schema:
         validator.add_validator(Defs(defs=schema["$defs"]))
 
+    if "$id" in schema:
+        validator.id = schema["$id"]
+
     if "type" in schema:
         if isinstance(schema["type"], list):
             validator.add_validator(
@@ -83,7 +89,10 @@ def build_validator(schema: t.Union[Schema, bool]) -> BuildValidatorReturns:
 class Types(AValidator):
 
     def __init__(self, schema):
+        self.anchor = None
+        self.id = None
         self._validators = []
+
         types = schema["type"]
         for type_ in types:
             if type_ in SCHEMA_TO_TYPE_VALIDATORS:
@@ -111,6 +120,7 @@ class Types(AValidator):
 class Validator(AValidator):
     def __init__(self):
         self.anchor = None
+        self.id = None
         self._validators = []
 
     def add_validator(self, validator: AValidator):

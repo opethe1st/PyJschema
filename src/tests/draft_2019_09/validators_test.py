@@ -2,7 +2,8 @@ import unittest
 
 import parameterized
 
-from jsonschema.draft_2019_09 import validate_once
+from jsonschema.draft_2019_09 import validate_once, build_validator
+from jsonschema.common import attach_base_URIs
 
 
 class TestEnum(unittest.TestCase):
@@ -408,13 +409,14 @@ class TestValidatorWithRef(unittest.TestCase):
                 "testing testing",
                 {
                     "type": "object",
+                    "$id": "www.myschema.com/test",
                     "properties": {
                         "name": {
                             "$anchor": "string_property",
                             "type": "string"
                         },
                         "surname": {
-                            "$ref": "#string_property"
+                            "$ref": "www.myschema.com/test#string_property"
                         }
                     }
                 },
@@ -435,13 +437,14 @@ class TestValidatorWithRef(unittest.TestCase):
                 "testing testing",
                 {
                     "type": "object",
+                    "$id": "www.myschema.com/test",
                     "properties": {
                         "name": {
                             "$anchor": "string_property",
                             "type": "string"
                         },
                         "surname": {
-                            "$ref": "#string_property"
+                            "$ref": "www.myschema.com/test#string_property"
                         }
                     }
                 },
@@ -478,3 +481,33 @@ class TestTypes(unittest.TestCase):
     def test_false(self, name, schema, instance):
         res = validate_once(schema, instance)
         self.assertFalse(res.ok)
+
+
+class TestId(unittest.TestCase):
+    @parameterized.parameterized.expand([
+        (
+            'number',
+            {
+                "$id": "mysite.org/array",
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "$id": "mysite.org/name",
+                        "$anchor": "blah",
+                        "type": "string",
+                    },
+                    "surname": {
+                        "$ref": "mysite.org/name"
+                    },
+                    "firstname": {
+                        "$ref": "mysite.org/name"
+                    },
+                }
+
+            },
+            {"name": "abc", "surname": "def", "firstname": "312"}
+        ),
+    ])
+    def test_xxx(self, name, schema, instance):
+        res = validate_once(schema, instance)
+        self.assertTrue(res.ok)
