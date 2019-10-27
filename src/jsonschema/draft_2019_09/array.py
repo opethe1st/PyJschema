@@ -6,7 +6,7 @@ from jsonschema.common import (
     KeywordGroup,
     Schema,
     Type,
-    ValidationResult
+    ValidationResult,
 )
 
 from .common import Max, Min

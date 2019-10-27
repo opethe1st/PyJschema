@@ -6,7 +6,8 @@ from jsonschema.common import (
     Schema,
     ValidationResult,
     add_context_to_ref_validators,
-    generate_context
+    attach_base_URIs,
+    generate_context,
 )
 
 from .array import Array
@@ -20,10 +21,15 @@ __all__ = ["validate_once", "build_validator", "Validator"]
 
 
 def validate_once(schema: t.Union[dict, bool], instance: dict) -> ValidationResult:
-    validator = build_validator(schema)
-    context = generate_context(validator)
-    add_context_to_ref_validators(validator, context)
-    return validator.validate(instance)
+    validator = build_validator(schema=schema)
+    if isinstance(schema, dict):
+        if "$id" in schema:
+            attach_base_URIs(validator=validator, parent_URI=schema["$id"])
+        else:
+            raise Exception("The root schema needs to have $id defined")
+    context = generate_context(validator=validator)
+    add_context_to_ref_validators(validator=validator, context=context)
+    return validator.validate(instance=instance)
 
 
 SCHEMA_TO_TYPE_VALIDATORS: t.Dict[str, t.Type[AValidator]] = {
@@ -65,11 +71,12 @@ def build_validator(schema: t.Union[Schema, bool]) -> BuildValidatorReturns:
     if "$defs" in schema:
         validator.add_validator(Defs(defs=schema["$defs"]))
 
+    if "$id" in schema:
+        validator.id = schema["$id"]
+
     if "type" in schema:
         if isinstance(schema["type"], list):
-            validator.add_validator(
-                Types(schema=schema)
-            )
+            validator.add_validator(Types(schema=schema))
         else:
             if schema["type"] in SCHEMA_TO_TYPE_VALIDATORS:
                 validator.add_validator(
@@ -79,17 +86,14 @@ def build_validator(schema: t.Union[Schema, bool]) -> BuildValidatorReturns:
     return validator
 
 
-
 class Types(AValidator):
-
     def __init__(self, schema):
         self._validators = []
+
         types = schema["type"]
         for type_ in types:
             if type_ in SCHEMA_TO_TYPE_VALIDATORS:
-                self._validators.append(
-                    SCHEMA_TO_TYPE_VALIDATORS[type_](schema=schema)
-                )
+                self._validators.append(SCHEMA_TO_TYPE_VALIDATORS[type_](schema=schema))
 
     def validate(self, instance):
         results = []
@@ -110,7 +114,6 @@ class Types(AValidator):
 
 class Validator(AValidator):
     def __init__(self):
-        self.anchor = None
         self._validators = []
 
     def add_validator(self, validator: AValidator):
