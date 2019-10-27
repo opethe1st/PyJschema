@@ -30,7 +30,7 @@ def attach_base_URIs(validator: AValidator, parent_URI):
     for sub_validator in validator.subschema_validators():
         attach_base_URIs(
             validator=sub_validator, parent_URI=validator.id
-        )  # type: ignore
+        )
 
 
 def add_context_to_ref_validators(validator: t.Union[AValidator], context: Context):

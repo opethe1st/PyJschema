@@ -101,12 +101,6 @@ class TestRefValidate(unittest.TestCase):
         ]
     )
     def test_true(self, name, schema, instance):
-        # validator = build_validator(schema=schema)
-        # attach_base_URIs(validator=validator)
-        # context = generate_context(validator)
-        # add_context_to_ref_validators(validator, context)
-
-        # result = validator.validate(instance)
         result = validate_once(schema=schema, instance=instance)
         self.assertTrue(result.ok)
 
@@ -131,10 +125,5 @@ class TestRefValidate(unittest.TestCase):
         ]
     )
     def test_false(self, name, schema, instance):
-        validator = build_validator(schema)
-        attach_base_URIs(validator=validator, parent_URI=schema["$id"])
-        context = generate_context(validator)
-        add_context_to_ref_validators(validator, context)
-
-        result = validator.validate(instance)
+        result = validate_once(schema=schema, instance=instance)
         self.assertFalse(result.ok)

@@ -88,8 +88,6 @@ def build_validator(schema: t.Union[Schema, bool]) -> BuildValidatorReturns:
 
 class Types(AValidator):
     def __init__(self, schema):
-        self.anchor = None
-        self.id = None
         self._validators = []
 
         types = schema["type"]
@@ -116,8 +114,6 @@ class Types(AValidator):
 
 class Validator(AValidator):
     def __init__(self):
-        self.anchor = None
-        self.id = None
         self._validators = []
 
     def add_validator(self, validator: AValidator):
