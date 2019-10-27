@@ -4,7 +4,7 @@ from .reference_resolver import (
     Ref,
     add_context_to_ref_validators,
     attach_base_URIs,
-    generate_context
+    generate_context,
 )
 from .validator import AValidator, Keyword, KeywordGroup, Schema, Type
 

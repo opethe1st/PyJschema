@@ -7,7 +7,7 @@ from jsonschema.common import (
     ValidationResult,
     add_context_to_ref_validators,
     attach_base_URIs,
-    generate_context
+    generate_context,
 )
 
 from .array import Array
@@ -76,9 +76,7 @@ def build_validator(schema: t.Union[Schema, bool]) -> BuildValidatorReturns:
 
     if "type" in schema:
         if isinstance(schema["type"], list):
-            validator.add_validator(
-                Types(schema=schema)
-            )
+            validator.add_validator(Types(schema=schema))
         else:
             if schema["type"] in SCHEMA_TO_TYPE_VALIDATORS:
                 validator.add_validator(
@@ -88,9 +86,7 @@ def build_validator(schema: t.Union[Schema, bool]) -> BuildValidatorReturns:
     return validator
 
 
-
 class Types(AValidator):
-
     def __init__(self, schema):
         self.anchor = None
         self.id = None
@@ -99,9 +95,7 @@ class Types(AValidator):
         types = schema["type"]
         for type_ in types:
             if type_ in SCHEMA_TO_TYPE_VALIDATORS:
-                self._validators.append(
-                    SCHEMA_TO_TYPE_VALIDATORS[type_](schema=schema)
-                )
+                self._validators.append(SCHEMA_TO_TYPE_VALIDATORS[type_](schema=schema))
 
     def validate(self, instance):
         results = []
