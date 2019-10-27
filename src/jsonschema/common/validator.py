@@ -12,6 +12,9 @@ Schema = t.Dict
 
 
 class AValidator(abc.ABC):
+    id = None
+    anchor = None
+
     def __init__(self, **kwargs):
         pass
 
@@ -41,7 +44,7 @@ class Type(AValidator):
     KEYWORDS_TO_VALIDATOR: t.Dict[
         t.Tuple[str, ...], t.Union[t.Type[Keyword], t.Type[KeywordGroup]]
     ] = {}
-    type_: t.Optional[t.Type]
+    type_: t.Optional[t.Type] = None
 
     def __init__(self, schema):
         self._validators = []
@@ -57,7 +60,7 @@ class Type(AValidator):
     def validate(self, instance):
         results = []
         messages = []
-        if not isinstance(instance, self.type_):
+        if self.type_ is not None and not isinstance(instance, self.type_):
             messages.append(f"instance is not a {self.type_}")
 
         results = list(

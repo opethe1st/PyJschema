@@ -7,21 +7,26 @@ Context = t.Dict[str, AValidator]
 
 
 def generate_context(validator: AValidator) -> Context:
-    anchors = {}
-    # I might be able to do without this check if I restrict that this is allowed to pass in to just Validator
-    if hasattr(validator, "anchor") and validator.anchor is not None:  # type: ignore
-        anchors[validator.id + validator.anchor] = validator  # type: ignore
-    if hasattr(validator, "id"):
-        anchors[validator.id] = validator  # type: ignore
+    uri_to_validator: Context = {}
+
+    if validator.anchor is not None:
+        uri_to_validator[validator.id + validator.anchor] = validator
+
+    # This supports just canonical URIs
+    if validator.id is not None:
+        uri_to_validator[validator.id] = validator
+
     for sub_validator in validator.subschema_validators():
-        subanchor = generate_context(validator=sub_validator)
-        anchors.update(subanchor)
-    return anchors
+        sub_uri_to_validator = generate_context(validator=sub_validator)
+        uri_to_validator.update(sub_uri_to_validator)
+
+    return uri_to_validator
 
 
-def attach_base_URIs(validator: AValidator, parent_URI="https://json-schema.org/draft/2019-09/schema"):
-    if not hasattr(validator, "id") or (hasattr(validator, "id") and validator.id is None):  # type: ignore
-        validator.id = parent_URI # type: ignore
+def attach_base_URIs(validator: AValidator, parent_URI):
+    if validator.id is None:
+        validator.id = parent_URI
+
     for sub_validator in validator.subschema_validators():
         attach_base_URIs(validator=sub_validator, parent_URI=validator.id) # type: ignore
 

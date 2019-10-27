@@ -8,7 +8,7 @@ from jsonschema.common.reference_resolver import (
     generate_context,
     attach_base_URIs,
 )
-from jsonschema.draft_2019_09 import Validator, build_validator
+from jsonschema.draft_2019_09 import Validator, build_validator, validate_once
 from jsonschema.draft_2019_09.string import String
 
 
@@ -26,15 +26,16 @@ class TestGenerateContext(unittest.TestCase):
         [
             (
                 "make sure context is generated properly",
-                {"$anchor": "blah", "type": "string"},
+                {"$anchor": "blah", "type": "string", "$id": "https://example.com/ope",},
                 {
-                    "https://json-schema.org/draft/2019-09/schema",
-                    "https://json-schema.org/draft/2019-09/schema#blah"
+                    "https://example.com/ope",
+                    "https://example.com/ope#blah"
                 },
             ),
             (
                 "make sure context is generated properly with nested anchors",
                 {
+                    "$id": "https://example.com/ope",
                     "$anchor": "anarray",
                     "type": "array",
                     "items": [
@@ -44,18 +45,18 @@ class TestGenerateContext(unittest.TestCase):
                     ],
                 },
                 {
-                    "https://json-schema.org/draft/2019-09/schema",
-                    "https://json-schema.org/draft/2019-09/schema#anarray",
-                    "https://json-schema.org/draft/2019-09/schema#astring",
-                    "https://json-schema.org/draft/2019-09/schema#anumber",
-                    "https://json-schema.org/draft/2019-09/schema#anobject",
+                    "https://example.com/ope",
+                    "https://example.com/ope#anarray",
+                    "https://example.com/ope#astring",
+                    "https://example.com/ope#anumber",
+                    "https://example.com/ope#anobject",
                 },
             ),
         ]
     )
     def test(self, name, schema, keys):
         validator = build_validator(schema=schema)
-        attach_base_URIs(validator=validator)
+        attach_base_URIs(validator=validator, parent_URI=schema["$id"])
         context = generate_context(validator)
         self.assertEqual(set(context.keys()), keys)
 
@@ -84,7 +85,8 @@ class TestRefValidate(unittest.TestCase):
                 "ref something in $defs",
                 {
                     "type": "array",
-                    "items": {"$ref": "https://json-schema.org/draft/2019-09/schema#StringWithmax20"},
+                    "$id": "https://example.com/ope",
+                    "items": {"$ref": "https://example.com/ope#StringWithmax20"},
                     "$defs": {
                         "string": {
                             "$anchor": "StringWithmax20",
@@ -99,12 +101,13 @@ class TestRefValidate(unittest.TestCase):
         ]
     )
     def test_true(self, name, schema, instance):
-        validator = build_validator(schema)
-        attach_base_URIs(validator=validator)
-        context = generate_context(validator)
-        add_context_to_ref_validators(validator, context)
+        # validator = build_validator(schema=schema)
+        # attach_base_URIs(validator=validator)
+        # context = generate_context(validator)
+        # add_context_to_ref_validators(validator, context)
 
-        result = validator.validate(instance)
+        # result = validator.validate(instance)
+        result = validate_once(schema=schema, instance=instance)
         self.assertTrue(result.ok)
 
     @parameterized.parameterized.expand(
@@ -112,8 +115,9 @@ class TestRefValidate(unittest.TestCase):
             (
                 "ref something in $defs",
                 {
+                    "$id": "https://example.com/ope",
                     "type": "array",
-                    "items": {"$ref": "https://json-schema.org/draft/2019-09/schema#NumberMax20"},
+                    "items": {"$ref": "https://example.com/ope#NumberMax20"},
                     "$defs": {
                         "blah": {
                             "$anchor": "NumberMax20",
@@ -128,7 +132,7 @@ class TestRefValidate(unittest.TestCase):
     )
     def test_false(self, name, schema, instance):
         validator = build_validator(schema)
-        attach_base_URIs(validator=validator)
+        attach_base_URIs(validator=validator, parent_URI=schema["$id"])
         context = generate_context(validator)
         add_context_to_ref_validators(validator, context)
 
