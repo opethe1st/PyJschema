@@ -152,6 +152,26 @@ class TestArrayValidation(unittest.TestCase):
                 },
                 [123, 124, "aa"]
             ),
+            (
+                'contains with maxContains',
+                {
+                    "$id": "https://example.com/ope",
+                    "type": "array",
+                    "contains": {"type": "string"},
+                    "maxContains": 1,
+                },
+                [123, 124, "aa"]
+            ),
+            (
+                'minContains and maxContains has no effect without contains',
+                {
+                    "$id": "https://example.com/ope",
+                    "type": "array",
+                    "minContains": 1,
+                    "maxContains": 1,
+                },
+                [123, 124, "aa"]
+            ),
         ]
     )
     def test_true(self, name, schema, instance):
@@ -178,6 +198,7 @@ class TestArrayValidation(unittest.TestCase):
             ('uniqueItems with arrays since arrays are not hashable', {"$id": "https://example.com/ope", "type": "array", "uniqueItems": True}, [["k1", "v1"], ["k1", "v1"]]),
             ('uniqueItems with objects since objects are not hashable', {"$id": "https://example.com/ope", "type": "array", "uniqueItems": True}, [{"k1": "v1"}, {"k1": "v1"}]),
             ('contains', {"$id": "https://example.com/ope", "type": "array", "contains": {"type": "string"}}, [123, 124, 1234]),
+            ('the number of items match contains is more than maxContains', {"$id": "https://example.com/ope", "type": "array", "contains": {"type": "string"}, "maxContains": 2}, ["123", "124", "1234"]),
         ]
     )
     def test_false(self, name, schema, instance):

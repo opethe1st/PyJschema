@@ -27,7 +27,9 @@ def validate_once(schema: t.Union[dict, bool], instance: dict) -> ValidationResu
     validator = build_validator(schema=schemaInstance)
     if isinstance(schemaInstance.value, dict):
         if "$id" in schemaInstance.value:
-            attach_base_URIs(validator=validator, parent_URI=schemaInstance.value["$id"].value)
+            attach_base_URIs(
+                validator=validator, parent_URI=schemaInstance.value["$id"].value
+            )
         else:
             raise Exception("The root schema needs to have $id defined")
     context = generate_context(validator=validator)
@@ -96,7 +98,9 @@ class Types(AValidator):
         types = schema.value["type"].value
         for type_ in types:
             if type_.value in SCHEMA_TO_TYPE_VALIDATORS:
-                self._validators.append(SCHEMA_TO_TYPE_VALIDATORS[type_.value](schema=schema))
+                self._validators.append(
+                    SCHEMA_TO_TYPE_VALIDATORS[type_.value](schema=schema)
+                )
 
     def validate(self, instance):
         results = []

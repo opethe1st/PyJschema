@@ -5,6 +5,7 @@ from jsonschema.common import Keyword, Type, ValidationResult
 from .common import Max, Min
 from .annotate import Instance
 
+
 class _MaxLength(Max):
     def __init__(self, maxLength: Instance):
         self.value = maxLength.value
