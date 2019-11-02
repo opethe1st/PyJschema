@@ -2,10 +2,12 @@ import numbers
 
 from jsonschema.common import Keyword, Type, ValidationResult
 
+from .annotate import Instance
+
 
 class _MultipleOf(Keyword):
-    def __init__(self, multipleOf: int):
-        self.value = multipleOf
+    def __init__(self, multipleOf: Instance):
+        self.value = multipleOf.value
 
     def validate(self, instance):
         if (instance % self.value) != 0:
@@ -14,8 +16,8 @@ class _MultipleOf(Keyword):
 
 
 class _Minimum(Keyword):
-    def __init__(self, minimum: int):
-        self.value = minimum
+    def __init__(self, minimum: Instance):
+        self.value = minimum.value
 
     def validate(self, instance):
         if instance < self.value:
@@ -24,8 +26,8 @@ class _Minimum(Keyword):
 
 
 class _Maximum(Keyword):
-    def __init__(self, maximum: int):
-        self.value = maximum
+    def __init__(self, maximum: Instance):
+        self.value = maximum.value
 
     def validate(self, instance):
         if self.value < instance:
@@ -34,8 +36,8 @@ class _Maximum(Keyword):
 
 
 class _ExclusiveMinimum(Keyword):
-    def __init__(self, exclusiveMinimum: int):
-        self.value = exclusiveMinimum
+    def __init__(self, exclusiveMinimum: Instance):
+        self.value = exclusiveMinimum.value
 
     def validate(self, instance):
         if instance <= self.value:
@@ -44,8 +46,8 @@ class _ExclusiveMinimum(Keyword):
 
 
 class _ExclusiveMaximum(Keyword):
-    def __init__(self, exclusiveMaximum: int):
-        self.value = exclusiveMaximum
+    def __init__(self, exclusiveMaximum: Instance):
+        self.value = exclusiveMaximum.value
 
     def validate(self, instance):
         if self.value <= instance:
