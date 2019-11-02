@@ -6,12 +6,13 @@ from jsonschema.common import Keyword, KeywordGroup, Schema, Type, ValidationRes
 from .common import Max, Min
 from .annotate import Instance
 
+
 class _Property(KeywordGroup):
     def __init__(
         self,
-        properties: t.Optional[Instance]=None,
-        additionalProperties: t.Optional[Instance]=None,
-        patternProperties: t.Optional[Instance]=None,
+        properties: t.Optional[Instance] = None,
+        additionalProperties: t.Optional[Instance] = None,
+        patternProperties: t.Optional[Instance] = None,
     ):
         from .validator import build_validator
 

@@ -1,32 +1,26 @@
 import typing as t
 
-from jsonschema.common import (
-    AValidator,
-    Keyword,
-    KeywordGroup,
-    Type,
-    ValidationResult,
-)
+from jsonschema.common import AValidator, Keyword, KeywordGroup, Type, ValidationResult
 
 from .annotate import Instance
 from .common import Max, Min
 
 
 class _Items(KeywordGroup):
-    def __init__(
-        self,
-        items: Instance,
-        additionalItems: t.Optional[Instance] = None,
-    ):
+    def __init__(self, items: Instance, additionalItems: t.Optional[Instance] = None):
         from .validator import build_validator, BuildValidatorResultType
 
         self._items_validator: t.Optional[BuildValidatorResultType] = None
         self._items_validators: t.List[BuildValidatorResultType] = []
         self._additional_items_validator: t.Optional[BuildValidatorResultType] = None
         if isinstance(items.value, list):
-            self._items_validators = [build_validator(schema=schema) for schema in items.value]
+            self._items_validators = [
+                build_validator(schema=schema) for schema in items.value
+            ]
             if additionalItems:
-                self._additional_items_validator = build_validator(schema=additionalItems)
+                self._additional_items_validator = build_validator(
+                    schema=additionalItems
+                )
         else:
             self._items_validator = build_validator(schema=items)
 
@@ -91,29 +85,56 @@ class _Items(KeywordGroup):
 
 
 class _Contains(Keyword):
-    def __init__(self, contains: Instance):
+    def __init__(
+        self, contains: Instance, maxContains: Instance, minContains: Instance
+    ):
         from .validator import build_validator
 
-        self.location = contains.location
-        self._validator = build_validator(schema=contains)
+        self._contains_present = False if contains is None else True
+        self._validator = None
+        if contains:
+            self.location = contains.location
+            self._validator = build_validator(schema=contains)
+        self.maxContainsValue = maxContains.value if maxContains else float("inf")
+        self.minContainsValue = minContains.value if minContains else -float("inf")
 
     def validate(self, instance):
 
-        for value in instance:
-            res = self._validator.validate(value)
+        if self._contains_present:
+            contains = False
+            count = 0
+            for value in instance:
+                res = self._validator.validate(value)
 
-            if res.ok:
+                if res.ok:
+                    count += 1
+
+                    if not contains:
+                        contains = True
+
+            if contains and (self.minContainsValue <= count <= self.maxContainsValue):
                 return ValidationResult(ok=True)
 
-        return ValidationResult(
-            ok=False,
-            messages=[
-                "No item in this array matches the schema in the contains keyword"
-            ],
-        )
+            if not (self.minContainsValue <= count <= self.maxContainsValue):
+                return ValidationResult(
+                    ok=False,
+                    messages=[
+                        f"The number of items matching the contains keyword is not less than or equal to {self.minContainsValue} or greater than or equal to {self.maxContainsValue}"
+                    ],
+                )
+
+            return ValidationResult(
+                ok=False,
+                messages=[
+                    "No item in this array matches the schema in the contains keyword"
+                ],
+            )
+        else:
+            return ValidationResult(ok=True)
 
     def subschema_validators(self):
-        yield self._validator
+        if self._validator:
+            yield self._validator
 
 
 class _MinItems(Min):
@@ -147,7 +168,7 @@ class Array(Type):
         ("minItems",): _MinItems,
         ("maxItems",): _MaxItems,
         ("uniqueItems",): _UniqueItems,
-        ("contains",): _Contains,
+        ("contains", "maxContains", "minContains"): _Contains,
         ("items", "additionalItems"): _Items,
     }
 

@@ -3,6 +3,7 @@ import typing as t
 import dataclasses
 from .utils import append
 
+
 @dataclasses.dataclass
 class Instance:
     value: t.Any
