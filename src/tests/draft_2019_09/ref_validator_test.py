@@ -31,7 +31,8 @@ class TestGenerateContext(unittest.TestCase):
                 {"$anchor": "blah", "type": "string", "$id": "https://example.com/ope",},
                 {
                     "https://example.com/ope",
-                    "https://example.com/ope#blah"
+                    "https://example.com/ope#blah",
+                    "#",
                 },
             ),
             (
@@ -52,6 +53,10 @@ class TestGenerateContext(unittest.TestCase):
                     "https://example.com/ope#astring",
                     "https://example.com/ope#anumber",
                     "https://example.com/ope#anobject",
+                    '#/items/2',
+                    '#/items/0',
+                    '#',
+                    '#/items/1',
                 },
             ),
         ]
@@ -100,7 +105,24 @@ class TestRefValidate(unittest.TestCase):
                     },
                 },
                 ["12345", "67890"],
-            )
+            ),
+            (
+                "ref something in $defs with relative pointer",
+                {
+                    "type": "array",
+                    "$id": "https://example.com/ope",
+                    "items": {"$ref": "#/$defs/string"},
+                    "$defs": {
+                        "string": {
+                            "$anchor": "StringWithmax20",
+                            "type": "string",
+                            "maxLength": 20,
+                        },
+                        "blah": {"$anchor": "blah", "type": "number"},
+                    },
+                },
+                ["12345", "67890"],
+            ),
         ]
     )
     def test_true(self, name, schema, instance):

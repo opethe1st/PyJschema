@@ -9,7 +9,7 @@ class Instance:
     location: str
 
 
-def annotate(obj, location="") -> Instance:
+def annotate(obj, location="#") -> Instance:
     if isinstance(obj, list):
         return Instance(
             value=[

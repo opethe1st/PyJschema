@@ -11,6 +11,8 @@ def generate_context(validator: AValidator) -> Context:
 
     if validator.anchor is not None:
         uri_to_validator[validator.id + validator.anchor] = validator
+    if validator.location is not None:
+        uri_to_validator[validator.location] = validator
 
     # This supports just canonical URIs
     if validator.id is not None:

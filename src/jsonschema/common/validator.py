@@ -14,6 +14,7 @@ Schema = t.Dict
 class AValidator(abc.ABC):
     id = None
     anchor = None
+    location: t.Optional[str] = None
 
     def __init__(self, **kwargs):
         pass
@@ -47,6 +48,7 @@ class Type(AValidator):
     type_: t.Optional[t.Type] = None
 
     def __init__(self, schema):
+        self.location = schema.location
         self._validators: t.List[AValidator] = []
         for keywords in self.KEYWORDS_TO_VALIDATOR:
 

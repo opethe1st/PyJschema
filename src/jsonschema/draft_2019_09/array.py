@@ -94,6 +94,7 @@ class _Contains(Keyword):
     def __init__(self, contains: Instance):
         from .validator import build_validator
 
+        self.location = contains.location
         self._validator = build_validator(schema=contains)
 
     def validate(self, instance):
