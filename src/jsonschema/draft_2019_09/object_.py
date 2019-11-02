@@ -4,31 +4,31 @@ import typing as t
 from jsonschema.common import Keyword, KeywordGroup, Schema, Type, ValidationResult
 
 from .common import Max, Min
-
+from .annotate import Instance
 
 class _Property(KeywordGroup):
     def __init__(
         self,
-        properties: t.Optional[Schema],
-        additionalProperties: t.Optional[Schema],
-        patternProperties=t.Optional[Schema],
+        properties: t.Optional[Instance]=None,
+        additionalProperties: t.Optional[Instance]=None,
+        patternProperties: t.Optional[Instance]=None,
     ):
         from .validator import build_validator
 
         self._validators = (
-            {key: build_validator(prop) for key, prop in properties.items()}
+            {key: build_validator(prop) for key, prop in properties.value.items()}
             if properties
             else {}
         )
         self._additional_validator = (
-            build_validator(additionalProperties)
+            build_validator(schema=additionalProperties)
             if additionalProperties is not None
             else None
         )
         self._pattern_validators = (
             {
-                re.compile(key): build_validator(properties)
-                for key, properties in patternProperties.items()
+                re.compile(key): build_validator(schema=properties)
+                for key, properties in patternProperties.value.items()
             }
             if patternProperties
             else {}
@@ -79,8 +79,8 @@ class _Property(KeywordGroup):
 
 
 class _Required(Keyword):
-    def __init__(self, required: t.List[str]):
-        self.value = required
+    def __init__(self, required: Instance):
+        self.value = [item.value for item in required.value]
 
     def validate(self, instance):
         messages = []
@@ -96,13 +96,13 @@ class _Required(Keyword):
 
 
 class _PropertyNames(Keyword):
-    def __init__(self, propertyNames: Schema):
+    def __init__(self, propertyNames: Instance):
         # add this to make sure that the type is string - I have seen it missing from
         # examples in the documentation so can only assume it's allowed
         from .validator import build_validator
 
-        propertyNames["type"] = "string"
-        self._validator = build_validator(propertyNames)
+        propertyNames.value["type"] = Instance(value="string", location="")
+        self._validator = build_validator(schema=propertyNames)
 
     def validate(self, instance):
         children = []
@@ -122,13 +122,13 @@ class _PropertyNames(Keyword):
 
 
 class _MinProperties(Min):
-    def __init__(self, minProperties: int):
-        self.value = minProperties
+    def __init__(self, minProperties: Instance):
+        self.value = minProperties.value
 
 
 class _MaxProperties(Max):
-    def __init__(self, maxProperties: int):
-        self.value = maxProperties
+    def __init__(self, maxProperties: Instance):
+        self.value = maxProperties.value
 
 
 class Object(Type):

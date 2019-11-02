@@ -11,6 +11,8 @@ def generate_context(validator: AValidator) -> Context:
 
     if validator.anchor is not None:
         uri_to_validator[validator.id + validator.anchor] = validator
+    if validator.location is not None:
+        uri_to_validator[validator.location] = validator
 
     # This supports just canonical URIs
     if validator.id is not None:
@@ -43,7 +45,7 @@ def add_context_to_ref_validators(validator: t.Union[AValidator], context: Conte
 
 class Ref(Keyword):
     def __init__(self, ref):
-        self.value = ref
+        self.value = ref.value
         self.context: t.Optional[Context] = None
 
     def validate(self, instance):

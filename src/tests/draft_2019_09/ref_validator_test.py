@@ -8,8 +8,10 @@ from jsonschema.common.reference_resolver import (
     generate_context,
     attach_base_URIs,
 )
+from jsonschema.draft_2019_09.annotate import annotate
 from jsonschema.draft_2019_09 import Validator, build_validator, validate_once
 from jsonschema.draft_2019_09.string import String
+from jsonschema.draft_2019_09.annotate import Instance
 
 
 class TestBuildValidator(unittest.TestCase):
@@ -17,8 +19,8 @@ class TestBuildValidator(unittest.TestCase):
         [("make sure there is a ref validator", {"$ref": "#blah"})]
     )
     def test(self, name, schema):
-        ref = build_validator(schema)
-        self.assertEqual(ref, Ref("#blah"))
+        ref = build_validator(schema=annotate(obj=schema))
+        self.assertEqual(ref, Ref(ref=Instance(value="#blah", location="")))
 
 
 class TestGenerateContext(unittest.TestCase):
@@ -29,7 +31,8 @@ class TestGenerateContext(unittest.TestCase):
                 {"$anchor": "blah", "type": "string", "$id": "https://example.com/ope",},
                 {
                     "https://example.com/ope",
-                    "https://example.com/ope#blah"
+                    "https://example.com/ope#blah",
+                    "#",
                 },
             ),
             (
@@ -50,12 +53,16 @@ class TestGenerateContext(unittest.TestCase):
                     "https://example.com/ope#astring",
                     "https://example.com/ope#anumber",
                     "https://example.com/ope#anobject",
+                    '#/items/2',
+                    '#/items/0',
+                    '#',
+                    '#/items/1',
                 },
             ),
         ]
     )
     def test(self, name, schema, keys):
-        validator = build_validator(schema=schema)
+        validator = build_validator(schema=annotate(obj=schema))
         attach_base_URIs(validator=validator, parent_URI=schema["$id"])
         context = generate_context(validator)
         self.assertEqual(set(context.keys()), keys)
@@ -67,7 +74,8 @@ class TestAddContextToSchemaValidator(unittest.TestCase):
     )
     def test(self, name, schema):
         #  not sure this is a valid test
-        ref = build_validator(schema)
+        schema = annotate(obj=schema)
+        ref = build_validator(schema=schema)
         validator = Validator()
         validator.add_validator(String(schema))
 
@@ -97,7 +105,24 @@ class TestRefValidate(unittest.TestCase):
                     },
                 },
                 ["12345", "67890"],
-            )
+            ),
+            (
+                "ref something in $defs with relative pointer",
+                {
+                    "type": "array",
+                    "$id": "https://example.com/ope",
+                    "items": {"$ref": "#/$defs/string"},
+                    "$defs": {
+                        "string": {
+                            "$anchor": "StringWithmax20",
+                            "type": "string",
+                            "maxLength": 20,
+                        },
+                        "blah": {"$anchor": "blah", "type": "number"},
+                    },
+                },
+                ["12345", "67890"],
+            ),
         ]
     )
     def test_true(self, name, schema, instance):

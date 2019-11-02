@@ -15,3 +15,4 @@ htmlcov
 
 # editor
 .vscode
+.DS_Store

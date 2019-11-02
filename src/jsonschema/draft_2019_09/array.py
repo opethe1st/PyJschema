@@ -4,31 +4,31 @@ from jsonschema.common import (
     AValidator,
     Keyword,
     KeywordGroup,
-    Schema,
     Type,
     ValidationResult,
 )
 
+from .annotate import Instance
 from .common import Max, Min
 
 
 class _Items(KeywordGroup):
     def __init__(
         self,
-        items: t.Union[Schema, t.List[Schema]],
-        additionalItems: t.Optional[Schema],
+        items: Instance,
+        additionalItems: t.Optional[Instance] = None,
     ):
-        from .validator import build_validator, BuildValidatorReturns
+        from .validator import build_validator, BuildValidatorResultType
 
-        self._items_validator: t.Optional[BuildValidatorReturns] = None
-        self._items_validators: t.List[BuildValidatorReturns] = []
-        self._additional_items_validator: t.Optional[BuildValidatorReturns] = None
-        if isinstance(items, list):
-            self._items_validators = [build_validator(schema) for schema in items]
+        self._items_validator: t.Optional[BuildValidatorResultType] = None
+        self._items_validators: t.List[BuildValidatorResultType] = []
+        self._additional_items_validator: t.Optional[BuildValidatorResultType] = None
+        if isinstance(items.value, list):
+            self._items_validators = [build_validator(schema=schema) for schema in items.value]
             if additionalItems:
-                self._additional_items_validator = build_validator(additionalItems)
+                self._additional_items_validator = build_validator(schema=additionalItems)
         else:
-            self._items_validator = build_validator(items)
+            self._items_validator = build_validator(schema=items)
 
     def validate(self, instance):
         if self._items_validator:
@@ -91,10 +91,11 @@ class _Items(KeywordGroup):
 
 
 class _Contains(Keyword):
-    def __init__(self, contains: Schema):
+    def __init__(self, contains: Instance):
         from .validator import build_validator
 
-        self._validator = build_validator(contains)
+        self.location = contains.location
+        self._validator = build_validator(schema=contains)
 
     def validate(self, instance):
 
@@ -116,18 +117,18 @@ class _Contains(Keyword):
 
 
 class _MinItems(Min):
-    def __init__(self, minItems: int):
-        self.value = minItems
+    def __init__(self, minItems: Instance):
+        self.value = minItems.value
 
 
 class _MaxItems(Max):
-    def __init__(self, maxItems: int):
-        self.value = maxItems
+    def __init__(self, maxItems: Instance):
+        self.value = maxItems.value
 
 
 class _UniqueItems(Keyword):
-    def __init__(self, uniqueItems: bool):
-        self.value = uniqueItems
+    def __init__(self, uniqueItems: Instance):
+        self.value = uniqueItems.value
 
     def validate(self, instance):
         if self.value:

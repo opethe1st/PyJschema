@@ -3,23 +3,23 @@ import typing as t
 from jsonschema.common import Keyword, Type, ValidationResult
 
 from .common import Max, Min
-
+from .annotate import Instance
 
 class _MaxLength(Max):
-    def __init__(self, maxLength: int):
-        self.value = maxLength
+    def __init__(self, maxLength: Instance):
+        self.value = maxLength.value
 
 
 class _MinLength(Min):
-    def __init__(self, minLength: int):
-        self.value = minLength
+    def __init__(self, minLength: Instance):
+        self.value = minLength.value
 
 
 class _Pattern(Keyword):
-    def __init__(self, pattern: t.Pattern):
+    def __init__(self, pattern: Instance):
         import re
 
-        self.regex = re.compile(pattern)
+        self.regex = re.compile(pattern.value)
 
     def validate(self, instance):
         if not self.regex.match(instance):
