@@ -132,12 +132,27 @@ class _MaxProperties(Max):
         self.value = maxProperties.value
 
 
+class _DependentRequired(Keyword):
+    def __init__(self, dependentRequired: Instance):
+        self.dependentRequired = {
+            key: [val.value for val in value.value] for key, value in dependentRequired.value.items()
+        }
+
+    def validate(self, instance):
+        for prop, dependentProperties in self.dependentRequired.items():
+            if prop in instance:
+                if not (set(dependentProperties) < set(instance.keys())):
+                    return ValidationResult(ok=False)
+        return ValidationResult(ok=True)
+
+
 class Object(Type):
     KEYWORDS_TO_VALIDATOR = {
         ("required",): _Required,
         ("propertyNames",): _PropertyNames,
         ("minProperties",): _MinProperties,
         ("maxProperties",): _MaxProperties,
+        ("dependentRequired", ): _DependentRequired,
         ("properties", "patternProperties", "additionalProperties"): _Property,
     }
     type_ = dict
