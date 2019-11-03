@@ -51,6 +51,16 @@ class Test(unittest.TestCase):
         "boolean_schema",
         "required",
 
+        # "anyOf",
+        # "oneOf",
+        # "allOf",
+        # "dependencies", # is this still a thing in draft2019-09
+        # "default",
+        # "format",
+        # "not",
+        # "ref",
+        # "refRemote",
+
     ])
     def tests(self, keyword):
         with open(f"src/tests/json-schema-tests/tests/draft2019-09/{keyword}.json") as file:

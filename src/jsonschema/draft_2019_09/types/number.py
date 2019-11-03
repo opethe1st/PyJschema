@@ -8,6 +8,7 @@ class _MultipleOf(Keyword):
         self.value = multipleOf.value
 
     def validate(self, instance):
+        # using this multipier here so that the precision is better
         multiplier = 100000
         instance = instance * multiplier
         value = self.value * multiplier

@@ -1,7 +1,13 @@
-import re
 import typing as t
 
-from jsonschema.common import Instance, Keyword, KeywordGroup, Type, ValidationResult
+from jsonschema.common import (
+    Instance,
+    Keyword,
+    KeywordGroup,
+    Type,
+    ValidationResult
+)
+from jsonschema.common.utils import re_compile
 
 from .common import Max, Min
 
@@ -170,12 +176,3 @@ class Object(Type):
             return res
         else:
             return res
-
-
-# TODO(ope): needs a better name
-def re_compile(pattern):
-    if pattern.startswith("^"):
-        value = pattern
-    else:
-        value = ".*"+pattern
-    return re.compile(value)

@@ -29,6 +29,8 @@ class Const(Keyword):
         self.location = const.location
 
     def validate(self, instance):
+        # these special rules are required because bool is a number and that messes up the
+        # type checks
         if isinstance(instance, bool) and isinstance(self.value, bool):
             if instance == self.value:
                 return ValidationResult(ok=True)
@@ -49,7 +51,7 @@ class Const(Keyword):
 class Enum(Keyword):
     def __init__(self, enum: Instance):
         self.location = enum.location
-        self._values_validators = [Const(item) for item in enum.value]
+        self._values_validators = [Const(const=item) for item in enum.value]
 
     def validate(self, instance):
         for validator in self._values_validators:

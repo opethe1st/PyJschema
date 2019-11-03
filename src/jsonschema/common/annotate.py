@@ -23,6 +23,7 @@ def annotate(obj, location="#") -> Instance:
         return Instance(value=obj, location=location)
 
 
+# TODO(ope): use deannotate wherever it is useful, + Add tests
 def deannotate(instance: Instance):
     if isinstance(instance.value, list):
         return [
