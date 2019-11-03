@@ -5,6 +5,7 @@ import parameterized
 from jsonschema.draft_2019_09 import validate_once, build_validator
 from jsonschema.common import attach_base_URIs
 
+# TODO: ope split this up into multiple files
 
 class TestEnum(unittest.TestCase):
     def test_instance_in_enum(self):
@@ -299,6 +300,31 @@ class TestObject(unittest.TestCase):
                 },
                 {}
             ),
+            (
+                'dependentRequired object empty',
+                {
+                    "$id": "https://example.com/ope",
+                    "type": "object",
+                    "dependentRequired": {
+                        "firstname": ["lastname"]
+                    }
+                },
+                {}
+            ),
+            (
+                'dependentRequired object ',
+                {
+                    "$id": "https://example.com/ope",
+                    "type": "object",
+                    "dependentRequired": {
+                        "firstname": ["lastname"]
+                    }
+                },
+                {
+                    "firstname": "Ope",
+                    "lastname": "Ope"
+                }
+            ),
         ]
     )
     def test_true(self, name, schema, instance):
@@ -398,6 +424,19 @@ class TestObject(unittest.TestCase):
                     "additionalProperties": False
                 },
                 {"key": "no properties allowed"}
+            ),
+            (
+                'dependentRequired object ',
+                {
+                    "$id": "https://example.com/ope",
+                    "type": "object",
+                    "dependentRequired": {
+                        "firstname": ["lastname"]
+                    }
+                },
+                {
+                    "firstname": "Ope",
+                }
             ),
         ]
     )
