@@ -31,4 +31,9 @@ class If(KeywordGroup):
                 return self._else_validator.validate(instance=instance)
         return ValidationResult(ok=True)
 
-    # TODO: ope implement subschema_validators
+    def subschema_validators(self):
+        yield self._if_validator
+        if self._then_validator:
+            yield self._then_validator
+        if self._else_validator:
+            yield self._else_validator
