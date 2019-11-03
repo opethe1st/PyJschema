@@ -1,6 +1,6 @@
 
 from jsonschema.common import Instance, Keyword, Type, ValidationResult
-
+from jsonschema.common.utils import re_compile
 from .common import Max, Min
 
 
@@ -16,9 +16,7 @@ class _MinLength(Min):
 
 class _Pattern(Keyword):
     def __init__(self, pattern: Instance):
-        import re
-
-        self.regex = re.compile(pattern.value)
+        self.regex = re_compile(pattern=pattern.value)
 
     def validate(self, instance):
         if not self.regex.match(instance):

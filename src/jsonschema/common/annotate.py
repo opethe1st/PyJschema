@@ -21,3 +21,19 @@ def annotate(obj, location="#") -> Instance:
         )
     else:
         return Instance(value=obj, location=location)
+
+
+# TODO(ope): use deannotate wherever it is useful, + Add tests
+def deannotate(instance: Instance):
+    if isinstance(instance.value, list):
+        return [
+            deannotate(instance=value)
+            for value in instance.value
+        ]
+    elif isinstance(instance.value, dict):
+        return {
+                key: deannotate(instance=value)
+                for key, value in instance.value.items()
+            }
+    else:
+        return instance.value
