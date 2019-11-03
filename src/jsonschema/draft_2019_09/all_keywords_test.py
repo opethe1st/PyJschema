@@ -1,6 +1,6 @@
 import unittest
 
-import parameterized
+import parameterized  # type: ignore
 
 from .validator import all_keywords
 from jsonschema.common import Type, Keyword
