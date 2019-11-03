@@ -13,7 +13,7 @@ from .annotate import Instance
 
 class If(KeywordGroup):
     def __init__(self, schema: Instance):
-        from .validator import build_validator, BuildValidatorResultType
+        from .validator import build_validator
 
         self._if_validator = build_validator(schema=schema.value["if"])
         self._then_validator = build_validator(schema=schema.value["then"]) if schema.value.get("then") else None
