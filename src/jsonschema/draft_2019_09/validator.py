@@ -17,6 +17,7 @@ from .number import Integer, Number
 from .object_ import Object
 from .primitives import AcceptAll, Boolean, Const, Enum, Null, RejectAll
 from .string import String
+from .boolean_applicators import If
 
 __all__ = ["validate_once", "build_validator", "Validator"]
 
@@ -78,6 +79,9 @@ def build_validator(schema: Instance) -> BuildValidatorResultType:
 
     if "$id" in schema.value:
         validator.id = schema.value["$id"].value
+
+    if "if" in schema.value:
+        validator.add_validator(If(schema=schema))
 
     if "type" in schema.value:
         if isinstance(schema.value["type"].value, list):
