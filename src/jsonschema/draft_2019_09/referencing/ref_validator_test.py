@@ -2,16 +2,16 @@ import unittest
 
 import parameterized  # type: ignore
 
-from jsonschema.common.reference_resolver import (
-    Ref,
-    add_context_to_ref_validators,
-    generate_context,
-    attach_base_URIs,
-)
-from jsonschema.common.annotate import annotate
+from jsonschema.common.annotate import Instance, annotate
 from jsonschema.draft_2019_09 import Validator, build_validator, validate_once
 from jsonschema.draft_2019_09.types.string import String
-from jsonschema.common.annotate import Instance
+
+from .reference_resolver import (
+    Ref,
+    add_context_to_ref_validators,
+    attach_base_URIs,
+    generate_context
+)
 
 
 class TestBuildValidator(unittest.TestCase):

@@ -13,18 +13,12 @@ class TestRand(unittest.TestCase):
                 "description": "A product from Acme's catalog",
                 "type": "object",
                 "properties": {
-                    "productId": {
-                        "$ref": "http://example.com/product.schema.json#ID"
-                    },
-                    "productName": {
-                        "type": "string"
-                    },
-                    "price": {
-                        "type": "number"
-                    },
+                    "productId": {"$ref": "http://example.com/product.schema.json#ID"},
+                    "productName": {"type": "string"},
+                    "price": {"type": "number"},
                     "tags": {
                         "$ref": "http://example.com/product.schema.json#ArrayOfStrings"
-                    }
+                    },
                 },
                 "required": ["productId"],
                 "$defs": {
@@ -36,17 +30,15 @@ class TestRand(unittest.TestCase):
                     "ArrayOfStrings": {
                         "$anchor": "ArrayOfStrings",
                         "type": "array",
-                        "items": {
-                            "type": "string"
-                        }
-                    }
-                }
+                        "items": {"type": "string"},
+                    },
+                },
             },
             instance={
                 "productId": 1,
                 "productName": "A green door",
                 "price": 12.50,
-                "tags": ["home", "green"]
-                },
+                "tags": ["home", "green"],
+            },
         ).ok
         self.assertTrue(ok)

@@ -1,16 +1,13 @@
 import typing as t
 
-from jsonschema.common import (
-    AValidator,
-    Instance,
+from jsonschema.common import AValidator, Instance, Type, ValidationResult
+from jsonschema.common.annotate import annotate
+from jsonschema.draft_2019_09.referencing import (
     Ref,
-    Type,
-    ValidationResult,
     add_context_to_ref_validators,
     attach_base_URIs,
-    generate_context,
+    generate_context
 )
-from jsonschema.common.annotate import annotate
 
 from .boolean_applicators import If
 from .defs import Defs
@@ -25,7 +22,7 @@ from .types import (
     Number,
     Object,
     RejectAll,
-    String,
+    String
 )
 
 __all__ = ["validate_once", "build_validator", "Validator"]

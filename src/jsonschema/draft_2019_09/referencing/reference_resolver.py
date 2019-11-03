@@ -1,7 +1,7 @@
 import typing as t
 
 from .ref import Context, Ref
-from .validator import AValidator
+from jsonschema.common.validator import AValidator
 
 
 def generate_context(validator: AValidator) -> Context:
