@@ -45,7 +45,7 @@ class _Property(KeywordGroup):
                 if not result.ok:
                     results.append(result)
 
-        remaining_properties = set(instance.keys()) - set(self._validators.keys())
+        remaining_properties = set(instance.keys())
 
         properties_validated_by_pattern = set()
         for regex in self._pattern_validators:
@@ -57,7 +57,7 @@ class _Property(KeywordGroup):
                         results.append(result)
 
         # additionalProperties only applies to properties not in properties or patternProperties
-        additionalProperties = remaining_properties - properties_validated_by_pattern
+        additionalProperties = (remaining_properties - properties_validated_by_pattern) - set(self._validators.keys())
         if self._additional_validator:
             for key in additionalProperties:
                 result = self._additional_validator.validate(instance[key])
@@ -101,7 +101,8 @@ class _PropertyNames(Keyword):
         # examples in the documentation so can only assume it's allowed
         from jsonschema.draft_2019_09.validator import build_validator
 
-        propertyNames.value["type"] = Instance(value="string", location="")
+        if isinstance(propertyNames.value, dict):
+            propertyNames.value["type"] = Instance(value="string", location="")
         self._validator = build_validator(schema=propertyNames)
 
     def validate(self, instance):

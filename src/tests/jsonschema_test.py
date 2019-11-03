@@ -19,7 +19,7 @@ class Test(unittest.TestCase):
         "maxProperties",
         "minProperties",
         "properties",
-        # "propertyNames",
+        "propertyNames",
         "patternProperties",
         "additionalProperties",
         "uniqueItems",
@@ -47,6 +47,9 @@ class Test(unittest.TestCase):
         "enum",
 
         "if-then-else",
+
+        "boolean_schema",
+        "required",
 
     ])
     def tests(self, keyword):
