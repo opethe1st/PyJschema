@@ -18,7 +18,11 @@ class _Pattern(Keyword):
     def __init__(self, pattern: Instance):
         import re
 
-        self.regex = re.compile(pattern.value)
+        if pattern.value.startswith("^"):
+            value = pattern.value
+        else:
+            value = ".*"+pattern.value
+        self.regex = re.compile(value)
 
     def validate(self, instance):
         if not self.regex.match(instance):

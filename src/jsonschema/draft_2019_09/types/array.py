@@ -20,15 +20,15 @@ class _Items(KeywordGroup):
         self._items_validator: t.Optional[BuildValidatorResultType] = None
         self._items_validators: t.List[BuildValidatorResultType] = []
         self._additional_items_validator: t.Optional[BuildValidatorResultType] = None
-        if isinstance(items.value, list):
+        if items and isinstance(items.value, list):
             self._items_validators = [
                 build_validator(schema=schema) for schema in items.value
             ]
-            if additionalItems:
+            if items and additionalItems:
                 self._additional_items_validator = build_validator(
                     schema=additionalItems
                 )
-        else:
+        elif items:
             self._items_validator = build_validator(schema=items)
 
     def validate(self, instance):
@@ -36,7 +36,7 @@ class _Items(KeywordGroup):
             return self._validate_items(instance=instance)
         elif self._items_validators:
             return self._validate_items_list(instance=instance)
-        return ValidationResult(ok=False)
+        return ValidationResult(ok=True)
 
     def _validate_items(self, instance):
         children = []

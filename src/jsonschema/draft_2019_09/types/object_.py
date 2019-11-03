@@ -27,7 +27,7 @@ class _Property(KeywordGroup):
         )
         self._pattern_validators = (
             {
-                re.compile(key): build_validator(schema=properties)
+                re_compile(key): build_validator(schema=properties)
                 for key, properties in patternProperties.value.items()
             }
             if patternProperties
@@ -159,11 +159,22 @@ class Object(Type):
 
     def validate(self, instance):
         res = super().validate(instance=instance)
+        if res.ok:
+            keyTypes = set(type(key) for key in instance)
+            if keyTypes:
+                # TODO(ope) this seems wrong to me
+                if len(keyTypes) != 1 or not (str in keyTypes):
+                    res.messages.append("all the keys of the object need to be strings")
+                    return ValidationResult(ok=False, messages=res.messages)
+            return res
+        else:
+            return res
 
-        keyTypes = set(type(key) for key in instance)
-        if keyTypes:
-            # TODO(ope) this seems wrong to me
-            if len(keyTypes) != 1 or not (str in keyTypes):
-                res.messages.append("all the keys of the object need to be strings")
-                return ValidationResult(ok=False, messages=res.messages)
-        return res
+
+# TODO(ope): needs a better name
+def re_compile(pattern):
+    if pattern.startswith("^"):
+        value = pattern
+    else:
+        value = ".*"+pattern
+    return re.compile(value)

@@ -39,7 +39,10 @@ def validate_once(schema: t.Union[dict, bool], instance: dict) -> ValidationResu
                 validator=validator, parent_URI=schemaInstance.value["$id"].value
             )
         else:
-            raise Exception("The root schema needs to have $id defined")
+            attach_base_URIs(
+                validator=validator, parent_URI=""
+            )
+            # raise Exception("The root schema needs to have $id defined")
     context = generate_context(validator=validator)
     add_context_to_ref_validators(validator=validator, context=context)
     return validator.validate(instance=instance)

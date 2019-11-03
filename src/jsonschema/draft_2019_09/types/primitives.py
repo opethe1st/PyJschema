@@ -1,4 +1,5 @@
 from jsonschema.common import AValidator, Instance, Keyword, Type, ValidationResult
+from jsonschema.common.annotate import deannotate
 
 
 class Boolean(Type):
@@ -6,12 +7,16 @@ class Boolean(Type):
 
     def validate(self, instance):
         # is this faster than an isinstance check?
-        if (instance is True) or (instance is False):
-            return ValidationResult(ok=True)
+        res = super().validate(instance=instance)
+        if res.ok:
+            if (instance is True) or (instance is False):
+                return ValidationResult(ok=True)
+            else:
+                return ValidationResult(
+                    ok=False, messages=["instance is not a valid boolean"]
+                )
         else:
-            return ValidationResult(
-                ok=False, messages=["instance is not a valid boolean"]
-            )
+            return res
 
 
 class Null(Type):
@@ -20,10 +25,20 @@ class Null(Type):
 
 class Const(Keyword):
     def __init__(self, const: Instance):
-        self.value = const.value
+        self.value = deannotate(const)
         self.location = const.location
 
     def validate(self, instance):
+        if isinstance(instance, bool) and isinstance(self.value, bool):
+            if instance == self.value:
+                return ValidationResult(ok=True)
+            else:
+                return ValidationResult(ok=False)
+        if isinstance(instance, bool) and isinstance(self.value, (int, float)):
+            return ValidationResult(ok=False)
+        if isinstance(self.value, bool) and isinstance(instance, (int, float)):
+            return ValidationResult(ok=False)
+
         if instance == self.value:
             return ValidationResult(ok=True)
         else:
@@ -34,14 +49,15 @@ class Const(Keyword):
 class Enum(Keyword):
     def __init__(self, enum: Instance):
         self.location = enum.location
-        self.values = [item.value for item in enum.value]
+        self._values_validators = [Const(item) for item in enum.value]
 
     def validate(self, instance):
-        if instance in self.values:
-            return ValidationResult(ok=True)
-        else:
+        for validator in self._values_validators:
+            res = validator.validate(instance=instance)
+            if res.ok:
+                return res
             # TODO I should add message
-            return ValidationResult(ok=False)
+        return ValidationResult(ok=False)
 
 
 class AcceptAll(AValidator):

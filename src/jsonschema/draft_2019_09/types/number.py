@@ -8,7 +8,10 @@ class _MultipleOf(Keyword):
         self.value = multipleOf.value
 
     def validate(self, instance):
-        if (instance % self.value) != 0:
+        multiplier = 100000
+        instance = instance * multiplier
+        value = self.value * multiplier
+        if (instance % value) != 0:
             return ValidationResult(ok=False)
         return ValidationResult(ok=True)
 
@@ -61,6 +64,29 @@ class _NumberOrInteger(Type):
         ("exclusiveMinimum",): _ExclusiveMinimum,
         ("exclusiveMaximum",): _ExclusiveMaximum,
     }
+
+    def validate(self, instance):
+        results = []
+        messages = []
+        if self.type_ is not None and not isinstance(instance, self.type_):
+            messages.append(f"instance is not a {self.type_}")
+
+        if isinstance(instance, bool):
+            messages.append(f"instance is not a {self.type_}")
+        if messages:
+            return ValidationResult(ok=False, messages=messages)
+
+        results = list(
+            filter(
+                (lambda res: not res.ok),
+                (validator.validate(instance) for validator in self._validators),
+            )
+        )
+
+        if not results and not messages:
+            return ValidationResult(ok=True)
+        else:
+            return ValidationResult(ok=False, messages=messages, children=results)
 
 
 class Number(_NumberOrInteger):
