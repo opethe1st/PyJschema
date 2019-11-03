@@ -687,3 +687,35 @@ class TestBooleanLogic(unittest.TestCase):
     def test_false(self, name, schema, instance):
         res = validate_once(schema, instance)
         self.assertFalse(res.ok)
+
+
+class TestKeywordValidationWithoutType(unittest.TestCase):
+    @parameterized.parameterized.expand([
+        (
+            'maxLength validation without the type keyword',
+            {
+                "$id": "mysite",
+                "maxLength": 10
+            },
+            "a string"
+        ),
+        (
+            'maxLength validation doesnt validate number',
+            {
+                "$id": "mysite",
+                "maxLength": 10
+            },
+            34
+        ),
+        (
+            'maximum validation works',
+            {
+                "$id": "mysite",
+                "maximum": 100
+            },
+            34
+        ),
+    ])
+    def test_true(self, name, schema, instance):
+        res = validate_once(schema, instance)
+        self.assertTrue(res.ok)

@@ -4,6 +4,7 @@ from jsonschema.common import (
     AValidator,
     Ref,
     Schema,
+    Type,
     ValidationResult,
     add_context_to_ref_validators,
     attach_base_URIs,
@@ -26,6 +27,7 @@ def validate_once(schema: t.Union[dict, bool], instance: dict) -> ValidationResu
     schemaInstance = annotate(obj=schema)
 
     validator = build_validator(schema=schemaInstance)
+
     if isinstance(schemaInstance.value, dict):
         if "$id" in schemaInstance.value:
             attach_base_URIs(
@@ -91,6 +93,8 @@ def build_validator(schema: Instance) -> BuildValidatorResultType:
                 validator.add_validator(
                     SCHEMA_TO_TYPE_VALIDATORS[schema.value["type"].value](schema=schema)
                 )
+    else:
+        validator.add_validator(Types(schema=schema))
 
     return validator
 
@@ -98,16 +102,21 @@ def build_validator(schema: Instance) -> BuildValidatorResultType:
 class Types(AValidator):
     def __init__(self, schema):
         self._validators = []
+        if "type" in schema.value:
+            types = [item.value for item in schema.value["type"].value]
+        else:
+            # if there is no type, then try all the types
+            types = SCHEMA_TO_TYPE_VALIDATORS.keys()
 
-        types = schema.value["type"].value
         for type_ in types:
-            if type_.value in SCHEMA_TO_TYPE_VALIDATORS:
+            if type_ in SCHEMA_TO_TYPE_VALIDATORS:
                 self._validators.append(
-                    SCHEMA_TO_TYPE_VALIDATORS[type_.value](schema=schema)
+                    SCHEMA_TO_TYPE_VALIDATORS[type_](schema=schema)
                 )
 
     def validate(self, instance):
         results = []
+
         for validator in self._validators:
             result = validator.validate(instance)
 
@@ -152,3 +161,12 @@ class Validator(AValidator):
     def subschema_validators(self):
         for validator in self._validators:
             yield validator
+
+
+def all_keywords(type_cls):
+    if issubclass(type_cls, Type):
+        res = []
+        for keywords in type_cls.KEYWORDS_TO_VALIDATOR.keys():
+            res.extend(list(keywords))
+        return set(res)
+    return set()
