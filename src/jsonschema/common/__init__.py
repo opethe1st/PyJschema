@@ -6,7 +6,8 @@ from .reference_resolver import (
     attach_base_URIs,
     generate_context,
 )
-from .validator import AValidator, Keyword, KeywordGroup, Schema, Type
+from .validator import AValidator, Keyword, KeywordGroup, Type
+from .instance import Instance
 
 __all__ = [
     "AValidator",
@@ -14,9 +15,9 @@ __all__ = [
     "Ref",
     "add_context_to_ref_validators",
     "generate_context",
+    "Instance",
     "KeywordGroup",
     "Keyword",
-    "Schema",
     "Type",
     "attach_base_URIs",
 ]

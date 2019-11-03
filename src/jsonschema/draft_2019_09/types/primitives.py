@@ -1,7 +1,12 @@
 import typing as t
 
-from jsonschema.common import AValidator, Keyword, Type, ValidationResult
-from .annotate import Instance
+from jsonschema.common import (
+    AValidator,
+    Instance,
+    Keyword,
+    Type,
+    ValidationResult
+)
 
 
 class Boolean(Type):

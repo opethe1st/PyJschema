@@ -1,9 +1,8 @@
 import typing as t
 
-from jsonschema.common import Keyword, Type, ValidationResult
+from jsonschema.common import Instance, Keyword, Type, ValidationResult
 
 from .common import Max, Min
-from .annotate import Instance
 
 
 class _MaxLength(Max):

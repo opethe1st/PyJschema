@@ -2,23 +2,30 @@ import typing as t
 
 from jsonschema.common import (
     AValidator,
+    Instance,
     Ref,
-    Schema,
-    Type,
     ValidationResult,
     add_context_to_ref_validators,
     attach_base_URIs,
-    generate_context,
+    generate_context
 )
+from jsonschema.common.annotate import annotate
 
-from .annotate import annotate, Instance
-from .array import Array
-from .defs import Defs
-from .number import Integer, Number
-from .object_ import Object
-from .primitives import AcceptAll, Boolean, Const, Enum, Null, RejectAll
-from .string import String
 from .boolean_applicators import If
+from .defs import Defs
+from .types import (
+    AcceptAll,
+    Array,
+    Boolean,
+    Const,
+    Enum,
+    Integer,
+    Null,
+    Number,
+    Object,
+    RejectAll,
+    String
+)
 
 __all__ = ["validate_once", "build_validator", "Validator"]
 

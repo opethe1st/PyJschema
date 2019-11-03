@@ -1,13 +1,8 @@
+import dataclasses
 import typing as t
 
-import dataclasses
+from .instance import Instance
 from .utils import append
-
-
-@dataclasses.dataclass
-class Instance:
-    value: t.Any
-    location: str
 
 
 def annotate(obj, location="#") -> Instance:

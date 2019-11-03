@@ -8,10 +8,10 @@ from jsonschema.common.reference_resolver import (
     generate_context,
     attach_base_URIs,
 )
-from jsonschema.draft_2019_09.annotate import annotate
+from jsonschema.common.annotate import annotate
 from jsonschema.draft_2019_09 import Validator, build_validator, validate_once
-from jsonschema.draft_2019_09.string import String
-from jsonschema.draft_2019_09.annotate import Instance
+from jsonschema.draft_2019_09.types.string import String
+from jsonschema.common.annotate import Instance
 
 
 class TestBuildValidator(unittest.TestCase):

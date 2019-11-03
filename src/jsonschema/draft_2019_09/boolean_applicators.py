@@ -2,13 +2,12 @@ import typing as t
 
 from jsonschema.common import (
     AValidator,
+    Instance,
     Keyword,
     KeywordGroup,
     Type,
     ValidationResult
 )
-
-from .annotate import Instance
 
 
 class If(KeywordGroup):

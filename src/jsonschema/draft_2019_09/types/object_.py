@@ -1,10 +1,15 @@
 import re
 import typing as t
 
-from jsonschema.common import Keyword, KeywordGroup, Schema, Type, ValidationResult
+from jsonschema.common import (
+    Instance,
+    Keyword,
+    KeywordGroup,
+    Type,
+    ValidationResult
+)
 
 from .common import Max, Min
-from .annotate import Instance
 
 
 class _Property(KeywordGroup):
@@ -14,7 +19,7 @@ class _Property(KeywordGroup):
         additionalProperties: t.Optional[Instance] = None,
         patternProperties: t.Optional[Instance] = None,
     ):
-        from .validator import build_validator
+        from jsonschema.draft_2019_09.validator import build_validator
 
         self._validators = (
             {key: build_validator(prop) for key, prop in properties.value.items()}
@@ -100,7 +105,7 @@ class _PropertyNames(Keyword):
     def __init__(self, propertyNames: Instance):
         # add this to make sure that the type is string - I have seen it missing from
         # examples in the documentation so can only assume it's allowed
-        from .validator import build_validator
+        from jsonschema.draft_2019_09.validator import build_validator
 
         propertyNames.value["type"] = Instance(value="string", location="")
         self._validator = build_validator(schema=propertyNames)
