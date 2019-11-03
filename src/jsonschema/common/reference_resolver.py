@@ -1,10 +1,7 @@
 import typing as t
 
-from .ref import Ref
-from .validation_result import ValidationResult
+from .ref import Context, Ref
 from .validator import AValidator
-
-Context = t.Dict[str, AValidator]
 
 
 def generate_context(validator: AValidator) -> Context:

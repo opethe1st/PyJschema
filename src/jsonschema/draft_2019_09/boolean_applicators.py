@@ -1,12 +1,8 @@
-import typing as t
 
 from jsonschema.common import (
-    AValidator,
     Instance,
-    Keyword,
     KeywordGroup,
-    Type,
-    ValidationResult
+    ValidationResult,
 )
 
 
@@ -15,8 +11,16 @@ class If(KeywordGroup):
         from .validator import build_validator
 
         self._if_validator = build_validator(schema=schema.value["if"])
-        self._then_validator = build_validator(schema=schema.value["then"]) if schema.value.get("then") else None
-        self._else_validator = build_validator(schema=schema.value["else"]) if schema.value.get("else") else None
+        self._then_validator = (
+            build_validator(schema=schema.value["then"])
+            if schema.value.get("then")
+            else None
+        )
+        self._else_validator = (
+            build_validator(schema=schema.value["else"])
+            if schema.value.get("else")
+            else None
+        )
 
     def validate(self, instance):
         if self._if_validator.validate(instance=instance).ok:

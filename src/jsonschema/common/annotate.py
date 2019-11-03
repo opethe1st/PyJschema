@@ -1,6 +1,3 @@
-import dataclasses
-import typing as t
-
 from .instance import Instance
 from .utils import append
 

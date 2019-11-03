@@ -1,13 +1,7 @@
 import re
 import typing as t
 
-from jsonschema.common import (
-    Instance,
-    Keyword,
-    KeywordGroup,
-    Type,
-    ValidationResult
-)
+from jsonschema.common import Instance, Keyword, KeywordGroup, Type, ValidationResult
 
 from .common import Max, Min
 
@@ -140,7 +134,8 @@ class _MaxProperties(Max):
 class _DependentRequired(Keyword):
     def __init__(self, dependentRequired: Instance):
         self.dependentRequired = {
-            key: [val.value for val in value.value] for key, value in dependentRequired.value.items()
+            key: [val.value for val in value.value]
+            for key, value in dependentRequired.value.items()
         }
 
     def validate(self, instance):
@@ -157,7 +152,7 @@ class Object(Type):
         ("propertyNames",): _PropertyNames,
         ("minProperties",): _MinProperties,
         ("maxProperties",): _MaxProperties,
-        ("dependentRequired", ): _DependentRequired,
+        ("dependentRequired",): _DependentRequired,
         ("properties", "patternProperties", "additionalProperties"): _Property,
     }
     type_ = dict

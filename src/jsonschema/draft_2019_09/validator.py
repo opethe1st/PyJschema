@@ -4,10 +4,11 @@ from jsonschema.common import (
     AValidator,
     Instance,
     Ref,
+    Type,
     ValidationResult,
     add_context_to_ref_validators,
     attach_base_URIs,
-    generate_context
+    generate_context,
 )
 from jsonschema.common.annotate import annotate
 
@@ -24,7 +25,7 @@ from .types import (
     Number,
     Object,
     RejectAll,
-    String
+    String,
 )
 
 __all__ = ["validate_once", "build_validator", "Validator"]
@@ -117,9 +118,7 @@ class Types(AValidator):
 
         for type_ in types:
             if type_ in SCHEMA_TO_TYPE_VALIDATORS:
-                self._validators.append(
-                    SCHEMA_TO_TYPE_VALIDATORS[type_](schema=schema)
-                )
+                self._validators.append(SCHEMA_TO_TYPE_VALIDATORS[type_](schema=schema))
 
     def validate(self, instance):
         results = []

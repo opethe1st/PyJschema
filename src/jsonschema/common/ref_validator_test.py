@@ -1,6 +1,6 @@
 import unittest
 
-import parameterized
+import parameterized  # type: ignore
 
 from jsonschema.common.reference_resolver import (
     Ref,
@@ -28,12 +28,8 @@ class TestGenerateContext(unittest.TestCase):
         [
             (
                 "make sure context is generated properly",
-                {"$anchor": "blah", "type": "string", "$id": "https://example.com/ope",},
-                {
-                    "https://example.com/ope",
-                    "https://example.com/ope#blah",
-                    "#",
-                },
+                {"$anchor": "blah", "type": "string", "$id": "https://example.com/ope"},
+                {"https://example.com/ope", "https://example.com/ope#blah", "#"},
             ),
             (
                 "make sure context is generated properly with nested anchors",
@@ -53,10 +49,10 @@ class TestGenerateContext(unittest.TestCase):
                     "https://example.com/ope#astring",
                     "https://example.com/ope#anumber",
                     "https://example.com/ope#anobject",
-                    '#/items/2',
-                    '#/items/0',
-                    '#',
-                    '#/items/1',
+                    "#/items/2",
+                    "#/items/0",
+                    "#",
+                    "#/items/1",
                 },
             ),
         ]

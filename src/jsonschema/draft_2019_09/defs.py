@@ -1,5 +1,3 @@
-import typing as t
-
 from jsonschema.common import Instance, Keyword, ValidationResult
 
 

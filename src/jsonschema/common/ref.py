@@ -1,4 +1,10 @@
-from .validator import Keyword
+import typing as t
+
+from jsonschema.common import ValidationResult
+
+from .validator import AValidator, Keyword
+
+Context = t.Dict[str, AValidator]
 
 
 class Ref(Keyword):

@@ -1,19 +1,21 @@
 import typing as t
 
 from jsonschema.common import (
-    AValidator,
     Instance,
     Keyword,
     KeywordGroup,
     Type,
-    ValidationResult
+    ValidationResult,
 )
 from .common import Max, Min
 
 
 class _Items(KeywordGroup):
     def __init__(self, items: Instance, additionalItems: t.Optional[Instance] = None):
-        from jsonschema.draft_2019_09.validator import build_validator, BuildValidatorResultType
+        from jsonschema.draft_2019_09.validator import (
+            build_validator,
+            BuildValidatorResultType,
+        )
 
         self._items_validator: t.Optional[BuildValidatorResultType] = None
         self._items_validators: t.List[BuildValidatorResultType] = []

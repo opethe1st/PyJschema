@@ -1,12 +1,4 @@
-import typing as t
-
-from jsonschema.common import (
-    AValidator,
-    Instance,
-    Keyword,
-    Type,
-    ValidationResult
-)
+from jsonschema.common import AValidator, Instance, Keyword, Type, ValidationResult
 
 
 class Boolean(Type):
