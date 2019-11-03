@@ -8,9 +8,6 @@ from jsonschema.common import ValidationResult
 JsonType = t.Union[str, numbers.Number, bool, None, Mapping, Sequence]
 
 
-Schema = t.Dict
-
-
 class AValidator(abc.ABC):
     id = None
     anchor = None

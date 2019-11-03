@@ -1,9 +1,8 @@
 import unittest
 
-import parameterized  # type: ignore
-
 from .validator import all_keywords
 from jsonschema.common import Type, Keyword
+
 
 class ATypeClass(Type):
     KEYWORDS_TO_VALIDATOR = {
@@ -12,11 +11,10 @@ class ATypeClass(Type):
         ("cKeyword",): Keyword,
     }
 
-class TestAllKeywords(unittest.TestCase):
 
+class TestAllKeywords(unittest.TestCase):
     def test_array(self):
         keywords = all_keywords(ATypeClass)
         self.assertEqual(
-            keywords,
-            {"aKeyword", "anotherKeyword", "bKeyword", "cKeyword"}
+            keywords, {"aKeyword", "anotherKeyword", "bKeyword", "cKeyword"}
         )

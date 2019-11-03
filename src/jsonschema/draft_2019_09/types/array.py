@@ -1,14 +1,21 @@
 import typing as t
 
-from jsonschema.common import AValidator, Keyword, KeywordGroup, Type, ValidationResult
-
-from .annotate import Instance
+from jsonschema.common import (
+    Instance,
+    Keyword,
+    KeywordGroup,
+    Type,
+    ValidationResult,
+)
 from .common import Max, Min
 
 
 class _Items(KeywordGroup):
     def __init__(self, items: Instance, additionalItems: t.Optional[Instance] = None):
-        from .validator import build_validator, BuildValidatorResultType
+        from jsonschema.draft_2019_09.validator import (
+            build_validator,
+            BuildValidatorResultType,
+        )
 
         self._items_validator: t.Optional[BuildValidatorResultType] = None
         self._items_validators: t.List[BuildValidatorResultType] = []
@@ -88,7 +95,7 @@ class _Contains(Keyword):
     def __init__(
         self, contains: Instance, maxContains: Instance, minContains: Instance
     ):
-        from .validator import build_validator
+        from jsonschema.draft_2019_09.validator import build_validator
 
         self._contains_present = False if contains is None else True
         self._validator = None

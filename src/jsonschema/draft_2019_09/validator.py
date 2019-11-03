@@ -1,24 +1,29 @@
 import typing as t
 
-from jsonschema.common import (
-    AValidator,
+from jsonschema.common import AValidator, Instance, Type, ValidationResult
+from jsonschema.common.annotate import annotate
+from jsonschema.draft_2019_09.referencing import (
     Ref,
-    Schema,
-    Type,
-    ValidationResult,
     add_context_to_ref_validators,
     attach_base_URIs,
-    generate_context,
+    generate_context
 )
 
-from .annotate import annotate, Instance
-from .array import Array
-from .defs import Defs
-from .number import Integer, Number
-from .object_ import Object
-from .primitives import AcceptAll, Boolean, Const, Enum, Null, RejectAll
-from .string import String
 from .boolean_applicators import If
+from .defs import Defs
+from .types import (
+    AcceptAll,
+    Array,
+    Boolean,
+    Const,
+    Enum,
+    Integer,
+    Null,
+    Number,
+    Object,
+    RejectAll,
+    String
+)
 
 __all__ = ["validate_once", "build_validator", "Validator"]
 
@@ -110,9 +115,7 @@ class Types(AValidator):
 
         for type_ in types:
             if type_ in SCHEMA_TO_TYPE_VALIDATORS:
-                self._validators.append(
-                    SCHEMA_TO_TYPE_VALIDATORS[type_](schema=schema)
-                )
+                self._validators.append(SCHEMA_TO_TYPE_VALIDATORS[type_](schema=schema))
 
     def validate(self, instance):
         results = []

@@ -1,8 +1,4 @@
-import typing as t
-
-from jsonschema.common import Keyword, Schema, ValidationResult
-
-from .annotate import Instance
+from jsonschema.common import Instance, Keyword, ValidationResult
 
 
 class Defs(Keyword):

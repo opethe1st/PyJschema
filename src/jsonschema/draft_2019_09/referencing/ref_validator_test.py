@@ -1,17 +1,17 @@
 import unittest
 
-import parameterized
+import parameterized  # type: ignore
 
-from jsonschema.common.reference_resolver import (
+from jsonschema.common.annotate import Instance, annotate
+from jsonschema.draft_2019_09 import Validator, build_validator, validate_once
+from jsonschema.draft_2019_09.types.string import String
+
+from .reference_resolver import (
     Ref,
     add_context_to_ref_validators,
-    generate_context,
     attach_base_URIs,
+    generate_context
 )
-from jsonschema.draft_2019_09.annotate import annotate
-from jsonschema.draft_2019_09 import Validator, build_validator, validate_once
-from jsonschema.draft_2019_09.string import String
-from jsonschema.draft_2019_09.annotate import Instance
 
 
 class TestBuildValidator(unittest.TestCase):
@@ -28,12 +28,8 @@ class TestGenerateContext(unittest.TestCase):
         [
             (
                 "make sure context is generated properly",
-                {"$anchor": "blah", "type": "string", "$id": "https://example.com/ope",},
-                {
-                    "https://example.com/ope",
-                    "https://example.com/ope#blah",
-                    "#",
-                },
+                {"$anchor": "blah", "type": "string", "$id": "https://example.com/ope"},
+                {"https://example.com/ope", "https://example.com/ope#blah", "#"},
             ),
             (
                 "make sure context is generated properly with nested anchors",
@@ -53,10 +49,10 @@ class TestGenerateContext(unittest.TestCase):
                     "https://example.com/ope#astring",
                     "https://example.com/ope#anumber",
                     "https://example.com/ope#anobject",
-                    '#/items/2',
-                    '#/items/0',
-                    '#',
-                    '#/items/1',
+                    "#/items/2",
+                    "#/items/0",
+                    "#",
+                    "#/items/1",
                 },
             ),
         ]
