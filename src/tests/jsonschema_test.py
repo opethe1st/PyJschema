@@ -1,7 +1,7 @@
 import json
 import unittest
 
-from jsonschema.draft_2019_09 import validate_once
+from jschema.draft_2019_09 import validate_once
 import parameterized
 
 

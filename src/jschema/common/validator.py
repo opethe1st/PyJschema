@@ -3,7 +3,7 @@ import numbers
 import typing as t
 from collections.abc import Mapping, Sequence
 
-from jsonschema.common import ValidationResult
+from jschema.common import ValidationResult
 
 JsonType = t.Union[str, numbers.Number, bool, None, Mapping, Sequence]
 

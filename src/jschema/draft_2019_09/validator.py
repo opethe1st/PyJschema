@@ -1,8 +1,8 @@
 import typing as t
 
-from jsonschema.common import AValidator, Instance, Type, ValidationResult
-from jsonschema.common.annotate import annotate
-from jsonschema.draft_2019_09.referencing import (
+from jschema.common import AValidator, Instance, Type, ValidationResult
+from jschema.common.annotate import annotate
+from jschema.draft_2019_09.referencing import (
     Ref,
     add_context_to_ref_validators,
     attach_base_URIs,

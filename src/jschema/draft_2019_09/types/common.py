@@ -1,4 +1,4 @@
-from jsonschema.common import Keyword, ValidationResult
+from jschema.common import Keyword, ValidationResult
 
 
 class Max(Keyword):

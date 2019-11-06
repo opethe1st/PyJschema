@@ -2,9 +2,9 @@ import unittest
 
 import parameterized  # type: ignore
 
-from jsonschema.common.annotate import Instance, annotate
-from jsonschema.draft_2019_09 import Validator, build_validator, validate_once
-from jsonschema.draft_2019_09.types.string import String
+from jschema.common.annotate import Instance, annotate
+from jschema.draft_2019_09 import Validator, build_validator, validate_once
+from jschema.draft_2019_09.types.string import String
 
 from .reference_resolver import (
     Ref,

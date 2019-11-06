@@ -1,13 +1,13 @@
 import typing as t
 
-from jsonschema.common import (
+from jschema.common import (
     Instance,
     Keyword,
     KeywordGroup,
     Type,
     ValidationResult
 )
-from jsonschema.common.utils import re_compile
+from jschema.common.utils import re_compile
 
 from .common import Max, Min
 

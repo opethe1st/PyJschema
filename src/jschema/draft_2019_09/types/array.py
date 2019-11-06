@@ -1,6 +1,6 @@
 import typing as t
 
-from jsonschema.common import (
+from jschema.common import (
     Instance,
     Keyword,
     KeywordGroup,

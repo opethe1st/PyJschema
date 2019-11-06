@@ -1,6 +1,6 @@
 import numbers
 
-from jsonschema.common import Instance, Keyword, Type, ValidationResult
+from jschema.common import Instance, Keyword, Type, ValidationResult
 
 
 class _MultipleOf(Keyword):

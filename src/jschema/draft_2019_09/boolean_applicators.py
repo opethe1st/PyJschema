@@ -1,5 +1,5 @@
 
-from jsonschema.common import (
+from jschema.common import (
     Instance,
     KeywordGroup,
     ValidationResult,

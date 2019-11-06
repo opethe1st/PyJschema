@@ -1,4 +1,4 @@
-from jsonschema.common import Instance, Keyword, ValidationResult
+from jschema.common import Instance, Keyword, ValidationResult
 
 
 class Defs(Keyword):
