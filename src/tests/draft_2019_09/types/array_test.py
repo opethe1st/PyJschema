@@ -2,9 +2,7 @@ import unittest
 
 import parameterized
 
-from jsonschema.draft_2019_09 import validate_once
-
-# TODO: ope split this up into multiple files
+from jschema.draft_2019_09 import validate_once
 
 
 class TestArrayValidation(unittest.TestCase):

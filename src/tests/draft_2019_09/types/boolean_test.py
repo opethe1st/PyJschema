@@ -2,7 +2,7 @@ import unittest
 
 import parameterized
 
-from jsonschema.draft_2019_09 import validate_once
+from jschema.draft_2019_09 import validate_once
 
 
 class TestBoolean(unittest.TestCase):

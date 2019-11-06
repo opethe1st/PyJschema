@@ -1,8 +1,9 @@
 import json
 import unittest
 
-from jschema.draft_2019_09 import validate_once
 import parameterized
+
+from jschema.draft_2019_09 import validate_once
 
 
 class Test(unittest.TestCase):
