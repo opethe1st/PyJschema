@@ -1,6 +1,6 @@
 
-from jsonschema.common import Instance, Keyword, Type, ValidationResult
-from jsonschema.common.utils import re_compile
+from jschema.common import Instance, Keyword, Type, ValidationResult
+from jschema.common.utils import re_compile
 from .common import Max, Min
 
 

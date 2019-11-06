@@ -1,5 +1,5 @@
-from jsonschema.common import AValidator, Instance, Keyword, Type, ValidationResult
-from jsonschema.common.annotate import deannotate
+from jschema.common import AValidator, Instance, Keyword, Type, ValidationResult
+from jschema.common.annotate import deannotate
 
 
 class Boolean(Type):

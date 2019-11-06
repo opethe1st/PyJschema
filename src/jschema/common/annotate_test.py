@@ -2,8 +2,8 @@ import unittest
 
 import parameterized  # type: ignore
 
-from jsonschema.common import Instance
-from jsonschema.common.annotate import annotate
+from jschema.common import Instance
+from jschema.common.annotate import annotate
 
 
 class TestAnnotate(unittest.TestCase):

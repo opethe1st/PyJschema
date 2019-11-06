@@ -1,7 +1,8 @@
 import unittest
 
+from jschema.common import Keyword, Type
+
 from .validator import all_keywords
-from jsonschema.common import Type, Keyword
 
 
 class ATypeClass(Type):

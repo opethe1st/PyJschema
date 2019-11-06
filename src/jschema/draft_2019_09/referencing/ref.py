@@ -1,8 +1,7 @@
 import typing as t
 
-from jsonschema.common import ValidationResult
-
-from jsonschema.common.validator import AValidator, Keyword
+from jschema.common import ValidationResult
+from jschema.common.validator import AValidator, Keyword
 
 Context = t.Dict[str, AValidator]
 
