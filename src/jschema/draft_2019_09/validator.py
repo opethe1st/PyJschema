@@ -1,6 +1,6 @@
 import typing as t
 
-from jschema.common import AValidator, Instance, Type, ValidationResult
+from jschema.common import AValidator, Instance, ValidationResult
 from jschema.common.annotate import annotate
 from jschema.draft_2019_09.referencing import (
     Ref,
@@ -48,7 +48,7 @@ def validate_once(schema: t.Union[dict, bool], instance: dict) -> ValidationResu
     return validator.validate(instance=instance)
 
 
-SCHEMA_TO_TYPE_VALIDATORS: t.Dict[str, t.Type[AValidator]] = {
+TYPE_TO_TYPE_VALIDATORS: t.Dict[str, t.Type[AValidator]] = {
     "string": String,
     "number": Number,
     "integer": Integer,
@@ -56,6 +56,19 @@ SCHEMA_TO_TYPE_VALIDATORS: t.Dict[str, t.Type[AValidator]] = {
     "null": Null,
     "array": Array,
     "object": Object,
+}
+
+
+KEYWORDS_TO_VALIDATOR: t.Dict[str, t.Type[AValidator]] = {
+    "$ref": Ref,
+    "const": Const,
+    "enum": Enum,
+    "$defs": Defs,
+    "if": If,
+    "allOf": AllOf,
+    "anyOf": AnyOf,
+    "oneOf": OneOf,
+    "not": Not,
 }
 
 
@@ -72,46 +85,23 @@ def build_validator(schema: Instance) -> BuildValidatorResultType:
 
     validator = Validator()
 
-    if "$ref" in schema.value:
-        validator.add_validator(Ref(ref=schema.value["$ref"]))
+    for key, ValidatorClass in KEYWORDS_TO_VALIDATOR.items():
+        if key in schema.value:
+            validator.add_validator(ValidatorClass(schema=schema))
 
     if "$anchor" in schema.value:
         validator.anchor = "#" + schema.value["$anchor"].value
 
-    if "const" in schema.value:
-        validator.add_validator(Const(const=schema.value["const"]))
-
-    if "enum" in schema.value:
-        validator.add_validator(Enum(enum=schema.value["enum"]))
-
-    if "$defs" in schema.value:
-        validator.add_validator(Defs(defs=schema.value["$defs"]))
-
     if "$id" in schema.value:
         validator.id = schema.value["$id"].value
-
-    if "if" in schema.value:
-        validator.add_validator(If(schema=schema))
-
-    if "allOf" in schema.value:
-        validator.add_validator(AllOf(schema=schema))
-
-    if "anyOf" in schema.value:
-        validator.add_validator(AnyOf(schema=schema))
-
-    if "oneOf" in schema.value:
-        validator.add_validator(OneOf(schema=schema))
-
-    if "not" in schema.value:
-        validator.add_validator(Not(schema=schema))
 
     if "type" in schema.value:
         if isinstance(schema.value["type"].value, list):
             validator.add_validator(Types(schema=schema))
         else:
-            if schema.value["type"].value in SCHEMA_TO_TYPE_VALIDATORS:
+            if schema.value["type"].value in TYPE_TO_TYPE_VALIDATORS:
                 validator.add_validator(
-                    SCHEMA_TO_TYPE_VALIDATORS[schema.value["type"].value](schema=schema)
+                    TYPE_TO_TYPE_VALIDATORS[schema.value["type"].value](schema=schema)
                 )
     else:
         validator.add_validator(Types(schema=schema))
@@ -126,11 +116,11 @@ class Types(AValidator):
             types = [item.value for item in schema.value["type"].value]
         else:
             # if there is no type, then try all the types
-            types = SCHEMA_TO_TYPE_VALIDATORS.keys()
+            types = TYPE_TO_TYPE_VALIDATORS.keys()
 
         for type_ in types:
-            if type_ in SCHEMA_TO_TYPE_VALIDATORS:
-                self._validators.append(SCHEMA_TO_TYPE_VALIDATORS[type_](schema=schema))
+            if type_ in TYPE_TO_TYPE_VALIDATORS:
+                self._validators.append(TYPE_TO_TYPE_VALIDATORS[type_](schema=schema))
 
     def validate(self, instance):
         results = []
@@ -179,12 +169,3 @@ class Validator(AValidator):
     def subschema_validators(self):
         for validator in self._validators:
             yield validator
-
-
-def all_keywords(type_cls):
-    if issubclass(type_cls, Type):
-        res = []
-        for keywords in type_cls.KEYWORDS_TO_VALIDATOR.keys():
-            res.extend(list(keywords))
-        return set(res)
-    return set()

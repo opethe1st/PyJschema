@@ -2,7 +2,8 @@ from jschema.common import Instance, Keyword, ValidationResult
 
 
 class Defs(Keyword):
-    def __init__(self, defs: Instance):
+    def __init__(self, schema: Instance):
+        defs = schema.value["$defs"]
         from .validator import build_validator
 
         self._validators = {

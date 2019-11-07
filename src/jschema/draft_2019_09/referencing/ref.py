@@ -7,7 +7,8 @@ Context = t.Dict[str, AValidator]
 
 
 class Ref(Keyword):
-    def __init__(self, ref):
+    def __init__(self, schema):
+        ref = schema.value["$ref"]
         self.value = ref.value
         self.context: t.Optional[Context] = None
 
