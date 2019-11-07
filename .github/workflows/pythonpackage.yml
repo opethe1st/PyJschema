@@ -33,4 +33,4 @@ jobs:
         mypy src/jschema
     - name: Test with pytest
       run: |
-        pytest --cov=jschema
+        pytest --cov=src

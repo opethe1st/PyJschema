@@ -64,7 +64,7 @@ class Test(unittest.TestCase):
         # "refRemote",
     ])
     def tests(self, keyword):
-        with open(f"tests/json-schema-tests/tests/draft2019-09/{keyword}.json") as file:
+        with open(f"src/tests/json-schema-tests/tests/draft2019-09/{keyword}.json") as file:
             tests = json.load(file)
 
         for data in tests:
