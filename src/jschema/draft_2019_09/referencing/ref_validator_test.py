@@ -2,25 +2,14 @@ import unittest
 
 import parameterized  # type: ignore
 
-from jschema.common.annotate import Instance, annotate
-from jschema.draft_2019_09 import Validator, build_validator, validate_once
-from jschema.draft_2019_09.types.string import String
+from jschema.common.annotate import annotate
+from jschema.draft_2019_09 import build_validator, validate_once
 
 from .reference_resolver import (
-    Ref,
     add_context_to_ref_validators,
     attach_base_URIs,
     generate_context
 )
-
-
-class TestBuildValidator(unittest.TestCase):
-    @parameterized.parameterized.expand(
-        [("make sure there is a ref validator", {"$ref": "#blah"})]
-    )
-    def test(self, name, schema):
-        ref = build_validator(schema=annotate(obj=schema))
-        self.assertEqual(ref, Ref(ref=Instance(value="#blah", location="")))
 
 
 class TestGenerateContext(unittest.TestCase):
@@ -62,24 +51,6 @@ class TestGenerateContext(unittest.TestCase):
         attach_base_URIs(validator=validator, parent_URI=schema["$id"])
         context = generate_context(validator)
         self.assertEqual(set(context.keys()), keys)
-
-
-class TestAddContextToSchemaValidator(unittest.TestCase):
-    @parameterized.parameterized.expand(
-        [("make sure we add the context to add references", {"$ref": "#blah"})]
-    )
-    def test(self, name, schema):
-        #  not sure this is a valid test
-        schema = annotate(obj=schema)
-        ref = build_validator(schema=schema)
-        validator = Validator()
-        validator.add_validator(String(schema))
-
-        self.assertIsNone(ref.context)
-
-        add_context_to_ref_validators(ref, context={"#blah": validator})
-
-        self.assertIsNotNone(ref.context)
 
 
 class TestRefValidate(unittest.TestCase):

@@ -9,7 +9,7 @@ from jschema.draft_2019_09.referencing import (
     generate_context
 )
 
-from .boolean_applicators import If
+from .boolean_applicators import AllOf, AnyOf, If, Not, OneOf
 from .defs import Defs
 from .types import (
     AcceptAll,
@@ -70,10 +70,10 @@ def build_validator(schema: Instance) -> BuildValidatorResultType:
     elif not isinstance(schema.value, dict):
         raise Exception("schema must be either a boolean or a dictionary")
 
-    if "$ref" in schema.value:
-        return Ref(ref=schema.value["$ref"])
-
     validator = Validator()
+
+    if "$ref" in schema.value:
+        validator.add_validator(Ref(ref=schema.value["$ref"]))
 
     if "$anchor" in schema.value:
         validator.anchor = "#" + schema.value["$anchor"].value
@@ -92,6 +92,18 @@ def build_validator(schema: Instance) -> BuildValidatorResultType:
 
     if "if" in schema.value:
         validator.add_validator(If(schema=schema))
+
+    if "allOf" in schema.value:
+        validator.add_validator(AllOf(schema=schema))
+
+    if "anyOf" in schema.value:
+        validator.add_validator(AnyOf(schema=schema))
+
+    if "oneOf" in schema.value:
+        validator.add_validator(OneOf(schema=schema))
+
+    if "not" in schema.value:
+        validator.add_validator(Not(schema=schema))
 
     if "type" in schema.value:
         if isinstance(schema.value["type"].value, list):

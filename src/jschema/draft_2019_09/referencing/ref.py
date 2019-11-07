@@ -19,7 +19,7 @@ class Ref(Keyword):
             return self.context[self.value].validate(instance)
         else:
             # this is temporary, probably need to do something else
-            raise Exception(f"unable to find this reference. reference {self.value}")
+            raise Exception(f"unable to find this reference {self.value} in valid_references: {self.context.keys()}")
         return ValidationResult(ok=True)
 
     def set_context(self, context):
