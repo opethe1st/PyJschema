@@ -1,4 +1,10 @@
-from jschema.common import AValidator, Instance, Keyword, Type, ValidationResult
+from jschema.common import (
+    AValidator,
+    Instance,
+    Keyword,
+    Type,
+    ValidationResult
+)
 from jschema.common.annotate import deannotate
 
 
@@ -24,7 +30,8 @@ class Null(Type):
 
 
 class Const(Keyword):
-    def __init__(self, const: Instance):
+    def __init__(self, schema: Instance):
+        const = schema.value["const"]
         self.value = deannotate(const)
         self.location = const.location
 
@@ -49,9 +56,19 @@ class Const(Keyword):
 
 
 class Enum(Keyword):
-    def __init__(self, enum: Instance):
+    def __init__(self, schema: Instance):
+        enum = schema.value["enum"]
         self.location = enum.location
-        self._values_validators = [Const(const=item) for item in enum.value]
+
+        self._values_validators = [
+            Const(
+                schema=Instance(
+                    value={"const": item},
+                    location=""
+                )
+            )
+            for item in enum.value
+        ]
 
     def validate(self, instance):
         for validator in self._values_validators:

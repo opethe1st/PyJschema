@@ -25,9 +25,9 @@ class Test(unittest.TestCase):
         "additionalProperties",
         "uniqueItems",
 
-        # "anchor",
+        # "anchor",  # need to support non-canonical URIs - support relate pointers in $id
 
-        # "defs",
+        # "defs", # needs "https://json-schema.org/draft/2019-09/schema" in the ref
 
         # array
         "items",
@@ -52,16 +52,16 @@ class Test(unittest.TestCase):
         "boolean_schema",
         "required",
 
-        # "anyOf",
-        # "oneOf",
-        # "allOf",
-        # "dependencies", # is this still a thing in draft2019-09
-        # "default",
-        # "format",
-        # "not",
-        # "ref",
+        "anyOf",
+        "oneOf",
+        "allOf",
+        "default",
+        "format",  # not implemented anything here but it passes the tests
+        "not",
+        # "ref",  # need root ref - #, also escaped json-pointers,
+        # $ref not a reference, references that are not json pointer but relative
+        # to current base URI
         # "refRemote",
-
     ])
     def tests(self, keyword):
         with open(f"src/tests/json-schema-tests/tests/draft2019-09/{keyword}.json") as file:
