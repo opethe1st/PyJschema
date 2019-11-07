@@ -6,7 +6,6 @@ from jschema.common.annotate import annotate
 from jschema.draft_2019_09 import build_validator, validate_once
 
 from .reference_resolver import (
-    add_context_to_ref_validators,
     attach_base_URIs,
     generate_context
 )
