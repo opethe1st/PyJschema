@@ -34,5 +34,7 @@ jobs:
         mypy src/tests --config-file src/setup.cfg
     - name: Test with pytest
       run: |
+        cd src/
         pytest --cov=src/tests
         pytest --cov=src/jschema
+        cd ..
