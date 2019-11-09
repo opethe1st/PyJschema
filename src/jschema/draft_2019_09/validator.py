@@ -2,35 +2,41 @@ import typing as t
 
 from jschema.common import AValidator, Instance, ValidationResult
 from jschema.common.annotate import annotate
-from jschema.draft_2019_09.referencing import (
+
+from .constants import KEYWORDS_TO_VALIDATOR, TYPE_TO_TYPE_VALIDATORS
+from .referencing import (
     Ref,
     add_context_to_ref_validators,
     attach_base_URIs,
     generate_context
 )
-
-from .boolean_applicators import AllOf, AnyOf, If, Not, OneOf
-from .defs import Defs
-from .types import (
-    AcceptAll,
-    Array,
-    Boolean,
-    Const,
-    Enum,
-    Integer,
-    Null,
-    Number,
-    Object,
-    RejectAll,
-    String
-)
+from .types import AcceptAll, RejectAll
 
 __all__ = ["validate_once", "build_validator", "Validator"]
 
 
-def validate_once(schema: t.Union[dict, bool], instance: dict) -> ValidationResult:
-    schemaInstance = annotate(obj=schema)
+def construct_validator(schema):
+    schema_validator = get_schema_validator(schema=schema)
+    if schema_validator.validate(instance=schema).ok:
+        return build_validator_and_attach_context(schema=schema)
+    else:
+        raise Exception("Schema is invalid according to the meta-schema")
 
+
+def get_schema_validator(schema):
+    return AcceptAll()
+
+
+def validate_once(schema: t.Union[dict, bool], instance: dict) -> ValidationResult:
+    validator = build_validator_and_attach_context(schema=schema)
+    return validator.validate(instance=instance)
+
+
+BuildValidatorResultType = t.Union[AcceptAll, RejectAll, "Validator", Ref]
+
+
+def build_validator_and_attach_context(schema):
+    schemaInstance = annotate(obj=schema)
     validator = build_validator(schema=schemaInstance)
 
     if isinstance(schemaInstance.value, dict):
@@ -39,40 +45,13 @@ def validate_once(schema: t.Union[dict, bool], instance: dict) -> ValidationResu
                 validator=validator, parent_URI=schemaInstance.value["$id"].value
             )
         else:
-            # TODO(ope): properly fix this - the default is the latest schema
+            # TODO(ope): properly fix this
             attach_base_URIs(
                 validator=validator, parent_URI=""
             )
     context = generate_context(validator=validator)
     add_context_to_ref_validators(validator=validator, context=context)
-    return validator.validate(instance=instance)
-
-
-TYPE_TO_TYPE_VALIDATORS: t.Dict[str, t.Type[AValidator]] = {
-    "string": String,
-    "number": Number,
-    "integer": Integer,
-    "boolean": Boolean,
-    "null": Null,
-    "array": Array,
-    "object": Object,
-}
-
-
-KEYWORDS_TO_VALIDATOR: t.Dict[str, t.Type[AValidator]] = {
-    "$ref": Ref,
-    "const": Const,
-    "enum": Enum,
-    "$defs": Defs,
-    "if": If,
-    "allOf": AllOf,
-    "anyOf": AnyOf,
-    "oneOf": OneOf,
-    "not": Not,
-}
-
-
-BuildValidatorResultType = t.Union[AcceptAll, RejectAll, "Validator", Ref]
+    return validator
 
 
 def build_validator(schema: Instance) -> BuildValidatorResultType:
@@ -88,6 +67,8 @@ def build_validator(schema: Instance) -> BuildValidatorResultType:
     for key, ValidatorClass in KEYWORDS_TO_VALIDATOR.items():
         if key in schema.value:
             validator.add_validator(ValidatorClass(schema=schema))
+
+    validator.location = schema.location
 
     if "$anchor" in schema.value:
         validator.anchor = "#" + schema.value["$anchor"].value

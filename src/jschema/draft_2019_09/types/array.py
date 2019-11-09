@@ -100,7 +100,6 @@ class _Contains(Keyword):
         self._contains_present = False if contains is None else True
         self._validator = None
         if contains:
-            self.location = contains.location
             self._validator = build_validator(schema=contains)
         self.maxContainsValue = maxContains.value if maxContains else float("inf")
         self.minContainsValue = minContains.value if minContains else -float("inf")

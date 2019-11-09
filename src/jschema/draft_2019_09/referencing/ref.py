@@ -1,7 +1,6 @@
 import typing as t
 
-from jschema.common import ValidationResult
-from jschema.common.validator import AValidator, Keyword
+from jschema.common import AValidator, Keyword, ValidationResult
 
 Context = t.Dict[str, AValidator]
 

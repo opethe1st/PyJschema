@@ -107,8 +107,6 @@ class _PropertyNames(Keyword):
         # examples in the documentation so can only assume it's allowed
         from jschema.draft_2019_09.validator import build_validator
 
-        if isinstance(propertyNames.value, dict):
-            propertyNames.value["type"] = Instance(value="string", location="")
         self._validator = build_validator(schema=propertyNames)
 
     def validate(self, instance):

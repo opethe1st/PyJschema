@@ -10,7 +10,7 @@ from jschema.common import (
 class If(KeywordGroup):
 
     # TODO(ope): this accepts a schema, probably should accept if, then, else
-    # but that wont works since they are reserved keywords. Maybe the decision to pass in individual keywords was
+    # but that wont work since they are reserved keywords. Maybe the decision to pass in individual keywords was
     # misguided but I also wanted to document that a particular keyword group deals with these keywords
     def __init__(self, schema: Instance):
         from .validator import build_validator

@@ -33,50 +33,39 @@ class Const(Keyword):
     def __init__(self, schema: Instance):
         const = schema.value["const"]
         self.value = deannotate(const)
-        self.location = const.location
 
     def validate(self, instance):
-        # these special rules are required because bool is a number and that messes up the
-        # type checks
-        if isinstance(instance, bool) and isinstance(self.value, bool):
-            if instance == self.value:
-                return ValidationResult(ok=True)
-            else:
-                return ValidationResult(ok=False)
-        if isinstance(instance, bool) and isinstance(self.value, (int, float)):
-            return ValidationResult(ok=False)
-        if isinstance(self.value, bool) and isinstance(instance, (int, float)):
-            return ValidationResult(ok=False)
-
-        if instance == self.value:
-            return ValidationResult(ok=True)
-        else:
-            # TODO I should add message
-            return ValidationResult(ok=False)
+        ok = equals(self.value, instance)
+        return ValidationResult(ok=ok)
 
 
 class Enum(Keyword):
     def __init__(self, schema: Instance):
         enum = schema.value["enum"]
-        self.location = enum.location
-
-        self._values_validators = [
-            Const(
-                schema=Instance(
-                    value={"const": item},
-                    location=""
-                )
-            )
-            for item in enum.value
-        ]
+        self._values = [deannotate(instance=instance) for instance in enum.value]
 
     def validate(self, instance):
-        for validator in self._values_validators:
-            res = validator.validate(instance=instance)
-            if res.ok:
-                return res
-            # TODO I should add message
+        for value in self._values:
+            if equals(value, instance):
+                return ValidationResult(ok=True)
         return ValidationResult(ok=False)
+
+
+def equals(a, b):
+    # these special rules are required because bool is a number and that messes up the
+    # type checks
+    if isinstance(a, bool) and isinstance(b, bool):
+        return a is b
+    if isinstance(a, bool) and isinstance(b, (int, float)):
+        return False
+    if isinstance(b, bool) and isinstance(a, (int, float)):
+        return False
+
+    if a == b:
+        return True
+    else:
+        # TODO I should add message
+        return False
 
 
 class AcceptAll(AValidator):
