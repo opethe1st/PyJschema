@@ -1,3 +1,5 @@
+import typing as t
+
 from jschema.common import AValidator, Instance, ValidationResult
 
 from .constants import TYPE_TO_TYPE_VALIDATORS
@@ -5,9 +7,9 @@ from .constants import TYPE_TO_TYPE_VALIDATORS
 
 class Types(AValidator):
     def __init__(self, schema: Instance):
-        self._validators = []
+        self._validators: t.List[AValidator] = []
         if "type" in schema.value:
-            types = [item.value for item in schema.value["type"].value]
+            types: t.Iterable[str] = [item.value for item in schema.value["type"].value]
         else:
             # if there is no type, then try all the types
             types = TYPE_TO_TYPE_VALIDATORS.keys()

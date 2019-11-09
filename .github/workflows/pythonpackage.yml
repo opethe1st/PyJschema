@@ -31,6 +31,8 @@ jobs:
     - name: Lint with mypy
       run: |
         mypy src/jschema
+        mypy src/tests
     - name: Test with pytest
       run: |
-        pytest --cov=src
+        pytest --cov=src/tests
+        pytest --cov=src/jschema

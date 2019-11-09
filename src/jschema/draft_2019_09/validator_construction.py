@@ -20,7 +20,8 @@ __all__ = ["validate_once", "build_validator", "Validator"]
 def construct_validator(schema):
     schema_validator = get_schema_validator(schema=schema)
     if schema_validator.validate(instance=schema).ok:
-        return build_validator_and_attach_context(schema=schema)
+        validator, _ = build_validator_and_attach_context(schema=schema)
+        return validator
     else:
         raise Exception("Schema is invalid according to the meta-schema")
 
@@ -31,7 +32,7 @@ def get_schema_validator(schema):
 
 
 def validate_once(schema: t.Union[dict, bool], instance: dict) -> ValidationResult:
-    validator = build_validator_and_attach_context(schema=schema)
+    validator, _ = build_validator_and_attach_context(schema=schema)
     return validator.validate(instance=instance)
 
 
@@ -54,7 +55,7 @@ def build_validator_and_attach_context(schema):
             )
     context = generate_context(validator=validator)
     add_context_to_ref_validators(validator=validator, context=context)
-    return validator
+    return validator, context
 
 
 def build_validator(schema: Instance) -> BuildValidatorResultType:
