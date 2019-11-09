@@ -10,10 +10,10 @@ from jschema.common import (
 class If(KeywordGroup):
 
     # TODO(ope): this accepts a schema, probably should accept if, then, else
-    # but that wont works since they are reserved keywords. Maybe the decision to pass in individual keywords was
+    # but that wont work since they are reserved keywords. Maybe the decision to pass in individual keywords was
     # misguided but I also wanted to document that a particular keyword group deals with these keywords
     def __init__(self, schema: Instance):
-        from .validator import build_validator
+        from .validator_construction import build_validator
 
         self._if_validator = build_validator(schema=schema.value["if"])
         self._then_validator = (
@@ -47,7 +47,7 @@ class If(KeywordGroup):
 class AllOf(Keyword):
 
     def __init__(self, schema: Instance):
-        from .validator import build_validator
+        from .validator_construction import build_validator
 
         self._validators = [build_validator(schema=item) for item in schema.value["allOf"].value]
 
@@ -68,7 +68,7 @@ class AllOf(Keyword):
 class OneOf(Keyword):
 
     def __init__(self, schema: Instance):
-        from .validator import build_validator
+        from .validator_construction import build_validator
 
         self._validators = [build_validator(schema=item) for item in schema.value["oneOf"].value]
 
@@ -90,7 +90,7 @@ class OneOf(Keyword):
 class AnyOf(Keyword):
 
     def __init__(self, schema: Instance):
-        from .validator import build_validator
+        from .validator_construction import build_validator
 
         self._validators = [build_validator(schema=item) for item in schema.value["anyOf"].value]
 
@@ -110,7 +110,7 @@ class AnyOf(Keyword):
 class Not(Keyword):
 
     def __init__(self, schema: Instance):
-        from .validator import build_validator
+        from .validator_construction import build_validator
 
         self._validator = build_validator(schema=schema.value["not"])
 

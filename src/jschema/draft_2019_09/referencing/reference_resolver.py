@@ -1,6 +1,6 @@
 import typing as t
 
-from jschema.common.validator import AValidator
+from jschema.common import AValidator
 
 from .ref import Context, Ref
 

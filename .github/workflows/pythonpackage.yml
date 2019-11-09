@@ -30,7 +30,11 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Lint with mypy
       run: |
-        mypy src/jschema
+        mypy src/jschema --config-file src/setup.cfg
+        mypy src/tests --config-file src/setup.cfg
     - name: Test with pytest
       run: |
-        pytest --cov=src
+        cd src/
+        pytest --cov=src/tests
+        pytest --cov=src/jschema
+        cd ..

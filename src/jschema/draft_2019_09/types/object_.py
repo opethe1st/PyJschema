@@ -19,7 +19,7 @@ class _Property(KeywordGroup):
         additionalProperties: t.Optional[Instance] = None,
         patternProperties: t.Optional[Instance] = None,
     ):
-        from jschema.draft_2019_09.validator import build_validator
+        from jschema.draft_2019_09 import build_validator
 
         self._validators = (
             {key: build_validator(prop) for key, prop in properties.value.items()}
@@ -105,10 +105,8 @@ class _PropertyNames(Keyword):
     def __init__(self, propertyNames: Instance):
         # add this to make sure that the type is string - I have seen it missing from
         # examples in the documentation so can only assume it's allowed
-        from jschema.draft_2019_09.validator import build_validator
+        from jschema.draft_2019_09 import build_validator
 
-        if isinstance(propertyNames.value, dict):
-            propertyNames.value["type"] = Instance(value="string", location="")
         self._validator = build_validator(schema=propertyNames)
 
     def validate(self, instance):
