@@ -7,15 +7,14 @@ from jschema.common import (
     Type,
     ValidationResult,
 )
+
 from .common import Max, Min
 
 
 class _Items(KeywordGroup):
     def __init__(self, items: Instance, additionalItems: t.Optional[Instance] = None):
-        from jschema.draft_2019_09.validator import (
-            build_validator,
-            BuildValidatorResultType,
-        )
+        from jschema.draft_2019_09 import build_validator
+        from jschema.draft_2019_09.validator_construction import BuildValidatorResultType
 
         self._items_validator: t.Optional[BuildValidatorResultType] = None
         self._items_validators: t.List[BuildValidatorResultType] = []
@@ -95,7 +94,7 @@ class _Contains(Keyword):
     def __init__(
         self, contains: Instance, maxContains: Instance, minContains: Instance
     ):
-        from jschema.draft_2019_09.validator import build_validator
+        from jschema.draft_2019_09 import build_validator
 
         self._contains_present = False if contains is None else True
         self._validator = None
