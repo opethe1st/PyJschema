@@ -4,12 +4,22 @@ from jschema.common import AValidator, ValidationResult
 
 from .constants import KEYWORDS_TO_VALIDATOR, TYPE_TO_TYPE_VALIDATORS
 from .types_validator import Types
+from jschema.draft_2019_09.referencing import Ref
+from .defs import Defs
 
 
 class Validator(AValidator):
     def __init__(self, schema):
         self.location = schema.location
         self._validators: t.List[AValidator] = []
+
+        if "$defs" in schema.value:
+            self._validators.append(Defs(schema=schema))
+        if "$ref" in schema.value:
+            self._validators.append(Ref(schema=schema))
+            # return earlier because all other keywords are ignored when there is a $ref
+            # - kinda think this is actually different in draft_2019_09
+            return
 
         for key, ValidatorClass in KEYWORDS_TO_VALIDATOR.items():
             if key in schema.value:

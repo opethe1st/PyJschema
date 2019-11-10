@@ -1,10 +1,8 @@
 import typing as t
 
 from jschema.common import AValidator
-from jschema.draft_2019_09.referencing import Ref
 
 from .boolean_applicators import AllOf, AnyOf, If, Not, OneOf
-from .defs import Defs
 from .types import (
     Array,
     Boolean,
@@ -29,10 +27,8 @@ TYPE_TO_TYPE_VALIDATORS: t.Dict[str, t.Type[AValidator]] = {
 
 
 KEYWORDS_TO_VALIDATOR: t.Dict[str, t.Type[AValidator]] = {
-    "$ref": Ref,
     "const": Const,
     "enum": Enum,
-    "$defs": Defs,
     "if": If,
     "allOf": AllOf,
     "anyOf": AnyOf,

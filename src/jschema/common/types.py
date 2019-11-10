@@ -10,6 +10,7 @@ JsonType = t.Union[str, numbers.Number, bool, None, Mapping, Sequence]
 
 class AValidator(abc.ABC):
     id = None
+    base_uri = None  # if $id was set in the schema this Validator was created from
     anchor = None
     location: t.Optional[str] = None
 

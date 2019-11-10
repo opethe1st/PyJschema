@@ -3,12 +3,12 @@ import unittest
 import parameterized  # type: ignore
 
 from jschema.common.annotate import annotate
-from jschema.draft_2019_09 import build_validator, validate_once
-from jschema.draft_2019_09.validator_construction import build_validator_and_attach_context
+from jschema.draft_2019_09 import build_validator
+
 from .reference_resolver import (
     attach_base_URIs,
     generate_context,
-    get_base_URI_from_URI_part,
+    get_base_URI_from_URI_part
 )
 
 
@@ -79,7 +79,8 @@ class TestGenerateContext(unittest.TestCase):
             (
                 "make sure context is generated properly",
                 {"$anchor": "blah", "type": "string", "$id": "https://example.com/ope"},
-                {"https://example.com/ope", "https://example.com/ope#blah", "#"},
+                {"https://example.com/ope", "https://example.com/ope#blah", "https://example.com/ope#"},
+                [("https://example.com/ope", "https://example.com/ope#")]
             ),
             (
                 "make sure context is generated properly with nested anchors",
@@ -100,153 +101,32 @@ class TestGenerateContext(unittest.TestCase):
                     ],
                 },
                 {
-                    'https://example.com/ope#/items/1',
-                    'https://example.com/ope#',
-                    'https://example.com/ope#/items/2',
-                    'https://example.com/ope#/items/0',
-                    'https://example.com/ope#/items/2/properties/abc',
+                    "https://example.com/anobject",
                     "https://example.com/ope",
+                    'https://example.com/ope#',
+                    'https://example.com/ope#/items/0',
+                    'https://example.com/ope#/items/1',
+                    'https://example.com/ope#/items/2',
+                    'https://example.com/ope#/items/2/properties/abc',
                     "https://example.com/ope#anarray",
                     "https://example.com/ope#astring",
                     "https://example.com/ope#anumber",
-                    "https://example.com/anobject",
                 },
+                [
+                    ('https://example.com/ope#/items/0', "https://example.com/ope#astring"),
+                    ('https://example.com/ope#/items/1', "https://example.com/ope#anumber"),
+                    ('https://example.com/ope#/items/2', "https://example.com/anobject"),
+                    ('https://example.com/ope', "https://example.com/ope#"),
+                ]
             ),
         ]
     )
-    def test(self, name, schema, keys):
+    def test(self, name, schema, keys, same_keys):
         validator = build_validator(schema=annotate(obj=schema))
         attach_base_URIs(validator=validator, parent_URI=schema["$id"])
         context = generate_context(validator, root_base_uri=schema["$id"])
-        self.assertEqual(set(context.keys()), keys)
 
+        self.assertSetEqual(set(context.keys()), keys)
 
-class TestRefValidate(unittest.TestCase):
-    @parameterized.parameterized.expand(
-        [
-            (
-                "ref something in $defs",
-                {
-                    "type": "array",
-                    "$id": "https://example.com/ope",
-                    "items": {"$ref": "https://example.com/ope#StringWithmax20"},
-                    "$defs": {
-                        "string": {
-                            "$anchor": "StringWithmax20",
-                            "type": "string",
-                            "maxLength": 20,
-                        },
-                        "blah": {"$anchor": "blah", "type": "number"},
-                    },
-                },
-                ["12345", "67890"],
-            ),
-            (
-                "ref something in $defs with relative pointer",
-                {
-                    "type": "array",
-                    "$id": "https://example.com/ope",
-                    "items": {"$ref": "#/$defs/string"},
-                    "$defs": {
-                        "string": {
-                            "$anchor": "StringWithmax20",
-                            "type": "string",
-                            "maxLength": 20,
-                        },
-                        "blah": {"$anchor": "blah", "type": "number"},
-                    },
-                },
-                ["12345", "67890"],
-            ),
-        ]
-    )
-    def test_true(self, name, schema, instance):
-        result = validate_once(schema=schema, instance=instance)
-        self.assertTrue(result.ok)
-
-    @parameterized.parameterized.expand(
-        [
-            (
-                "ref something in $defs",
-                {
-                    "$id": "https://example.com/ope",
-                    "type": "array",
-                    "items": {"$ref": "https://example.com/ope#NumberMax20"},
-                    "$defs": {
-                        "blah": {
-                            "$anchor": "NumberMax20",
-                            "type": "number",
-                            "maximum": 20,
-                        }
-                    },
-                },
-                [23],
-            )
-        ]
-    )
-    def test_false(self, name, schema, instance):
-        result = validate_once(schema=schema, instance=instance)
-        self.assertFalse(result.ok)
-
-
-class Test(unittest.TestCase):
-
-    def test_xxx(self):
-        schema = {
-            "type": "array",
-            "$id": "https://example.com/ope",
-            "items": [{"$ref": "#/$defs/string"}],
-            "additionalItems": {"$ref": "#blah"},
-            "$defs": {
-                "string": {
-                    "$anchor": "StringWithmax20",
-                    "type": "string",
-                    "maxLength": 20,
-                },
-                "blah": {"$anchor": "blah", "type": "number"},
-            },
-        }
-        validator, context = build_validator_and_attach_context(
-            schema=schema
-        )
-        assert validator.validate(
-            ["01234567890123456789", 123]
-        ).ok
-
-    def test_yyy(self):
-        schema = {
-            "$id": "http://localhost:1234/tree",
-            "type": "object",
-            "properties": {
-                "meta": {"type": "string"},
-                "nodes": {
-                    "type": "array",
-                    "items": {"$ref": "node"}
-                }
-            },
-            "required": ["meta", "nodes"],
-            "$defs": {
-                "node": {
-                    "$id": "http://localhost:1234/node",
-                    "type": "object",
-                    "properties": {
-                        "value": {"type": "number"},
-                        "subtree": {"$ref": "tree"}
-                    },
-                    "required": ["value"]
-                }
-            }
-        }
-        validator, context = build_validator_and_attach_context(
-            schema=schema
-        )
-        instance = {
-            "meta": "root",
-            "nodes": [
-                {
-                    "value": 1,
-                }
-            ]
-        }
-        res = validator.validate(instance=instance)
-        assert res.ok
+        for ref1, ref2 in same_keys:
+            self.assertEqual(context[ref1], context[ref2])

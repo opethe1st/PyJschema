@@ -14,14 +14,9 @@ BASE_URI_REGEX = re.compile(pattern=r'http.*')
 class Ref(Keyword):
     def __init__(self, schema):
         ref = schema.value["$ref"]
-        # self.value = parse.quote(ref.value, safe=r'"/$#:\\')
-        # print(ref.value)
         value = ref.value.replace('~1', '/')
         value = value.replace('~0', '~')
         self.value = parse.unquote(value)
-        # print(self.value)
-        # print()
-        # print(ref.value, self.value, parse.unquote(ref.value))
         self.context: t.Optional[Context] = None
 
     def validate(self, instance):

@@ -26,7 +26,9 @@ def attach_base_URIs(validator: AValidator, parent_URI):
     if validator.id is None:
         validator.id = parent_URI
     else:
-        validator.id = get_base_URI_from_URI_part(parent_URI=parent_URI, base_URI=validator.id)
+        uri = get_base_URI_from_URI_part(parent_URI=parent_URI, base_URI=validator.id)
+        validator.base_uri = uri
+        validator.id = uri
 
     for sub_validator in validator.subschema_validators():
         attach_base_URIs(validator=sub_validator, parent_URI=validator.id)
@@ -42,9 +44,14 @@ def generate_context(validator: AValidator, root_base_uri) -> Context:
     """
     uri_to_validator: Context = {}
 
+    if validator.base_uri:
+        uri_to_validator[validator.base_uri] = validator
+
     # This supports just canonical URIs
     if validator.id is not None:
-        uri_to_validator[validator.id] = validator
+        # this is wrong because this validator.id is not unique across validators
+        # do I need a new variable? to say if id was actually set or if its from a parent?
+        #
         if validator.anchor is not None:
             uri_to_validator[validator.id + validator.anchor] = validator
 
