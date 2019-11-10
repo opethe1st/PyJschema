@@ -6,8 +6,8 @@ from jschema.common import AValidator
 from .ref import Context, Ref
 
 
-FRAGMENT_REGEX = re.compile(pattern=r'.*#.*')
-BASE_URI_REGEX = re.compile(pattern=r'http.*')
+FRAGMENT_REGEX = re.compile(pattern=r".*#.*")
+BASE_URI_REGEX = re.compile(pattern=r"http.*")
 
 
 def get_base_URI_from_URI_part(parent_URI, base_URI):
@@ -17,8 +17,8 @@ def get_base_URI_from_URI_part(parent_URI, base_URI):
     elif FRAGMENT_REGEX.match(base_URI):
         raise Exception("return $id should not contain a fragment")
     else:
-        parts = parent_URI.strip('/').split('/')
-        parts[-1] = base_URI.strip('/')
+        parts = parent_URI.strip("/").split("/")
+        parts[-1] = base_URI.strip("/")
         return "/".join(parts)
 
 
@@ -57,10 +57,12 @@ def generate_context(validator: AValidator, root_base_uri) -> Context:
 
         # save the relative location
         if validator.location is not None:
-            uri_to_validator[root_base_uri+validator.location] = validator
+            uri_to_validator[root_base_uri + validator.location] = validator
 
     for sub_validator in validator.subschema_validators():
-        sub_uri_to_validator = generate_context(validator=sub_validator, root_base_uri=root_base_uri)
+        sub_uri_to_validator = generate_context(
+            validator=sub_validator, root_base_uri=root_base_uri
+        )
         uri_to_validator.update(sub_uri_to_validator)
 
     return uri_to_validator

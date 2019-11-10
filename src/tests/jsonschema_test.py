@@ -11,9 +11,7 @@ KEYWORDS = [
     "minLength",
     "maxLength",
     "pattern",
-
     "type",
-
     # object
     "uniqueItems",
     "maxProperties",
@@ -23,34 +21,25 @@ KEYWORDS = [
     "patternProperties",
     "additionalProperties",
     "uniqueItems",
-
     "anchor",  # need to support non-canonical URIs - support relate pointers in $id
-
     # "defs", # needs "https://json-schema.org/draft/2019-09/schema" in the ref
-
     # array
     "items",
     "minItems",
     "maxItems",
     "additionalItems",
     "contains",
-
     # numbers
     "maximum",
     "exclusiveMaximum",
     "minimum",
     "exclusiveMinimum",
     "multipleOf",
-
     "const",
-
     "enum",
-
     "if-then-else",
-
     "boolean_schema",
     "required",
-
     "anyOf",
     "oneOf",
     "allOf",
@@ -76,7 +65,7 @@ for keyword in KEYWORDS:
 
 class Test(unittest.TestCase):
     @parameterized.parameterized.expand(
-        [(test["keyword"]+test["description"], test) for test in KEYWORD_TESTS]
+        [(test["keyword"] + test["description"], test) for test in KEYWORD_TESTS]
     )
     def tests(self, description, testcase):
         schema = testcase["schema"]
@@ -84,6 +73,5 @@ class Test(unittest.TestCase):
             # import pdb; pdb.set_trace()
             with self.subTest(test["description"]):
                 self.assertEqual(
-                    validate_once(schema, instance=test["data"]).ok,
-                    test["valid"]
+                    validate_once(schema, instance=test["data"]).ok, test["valid"]
                 )

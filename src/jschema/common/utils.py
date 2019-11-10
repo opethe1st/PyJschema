@@ -11,5 +11,5 @@ def re_compile(pattern):
     if pattern.startswith("^"):
         value = pattern
     else:
-        value = ".*"+pattern
+        value = ".*" + pattern
     return re.compile(value)

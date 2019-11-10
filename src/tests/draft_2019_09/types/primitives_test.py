@@ -1,4 +1,3 @@
-
 import unittest
 
 from jschema.draft_2019_09 import validate_once

@@ -3,17 +3,7 @@ import typing as t
 from jschema.common import AValidator
 
 from .boolean_applicators import AllOf, AnyOf, If, Not, OneOf
-from .types import (
-    Array,
-    Boolean,
-    Const,
-    Enum,
-    Integer,
-    Null,
-    Number,
-    Object,
-    String
-)
+from .types import Array, Boolean, Const, Enum, Integer, Null, Number, Object, String
 
 TYPE_TO_TYPE_VALIDATORS: t.Dict[str, t.Type[AValidator]] = {
     "string": String,

@@ -29,7 +29,7 @@ class Validator(AValidator):
             self.anchor = "#" + schema.value["$anchor"].value
 
         if "$id" in schema.value:
-            self.id = schema.value["$id"].value.rstrip('#')
+            self.id = schema.value["$id"].value.rstrip("#")
 
         if "type" in schema.value:
             if isinstance(schema.value["type"].value, list):
@@ -37,7 +37,9 @@ class Validator(AValidator):
             else:
                 if schema.value["type"].value in TYPE_TO_TYPE_VALIDATORS:
                     self._validators.append(
-                        TYPE_TO_TYPE_VALIDATORS[schema.value["type"].value](schema=schema)
+                        TYPE_TO_TYPE_VALIDATORS[schema.value["type"].value](
+                            schema=schema
+                        )
                     )
         else:
             # could be any of the types

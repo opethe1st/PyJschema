@@ -1,12 +1,6 @@
 import typing as t
 
-from jschema.common import (
-    Instance,
-    Keyword,
-    KeywordGroup,
-    Type,
-    ValidationResult
-)
+from jschema.common import Instance, Keyword, KeywordGroup, Type, ValidationResult
 from jschema.common.utils import re_compile
 
 from .common import Max, Min
@@ -63,7 +57,9 @@ class _Property(KeywordGroup):
                         results.append(result)
 
         # additionalProperties only applies to properties not in properties or patternProperties
-        additionalProperties = (remaining_properties - properties_validated_by_pattern) - set(self._validators.keys())
+        additionalProperties = (
+            remaining_properties - properties_validated_by_pattern
+        ) - set(self._validators.keys())
         if self._additional_validator:
             for key in additionalProperties:
                 result = self._additional_validator.validate(instance[key])

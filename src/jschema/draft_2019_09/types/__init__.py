@@ -6,15 +6,15 @@ from .string import String
 
 
 __all__ = [
-    'Array',
-    'Integer',
-    'Number',
-    'Object',
-    'AcceptAll',
-    'Boolean',
-    'Const',
-    'Enum',
-    'Null',
-    'RejectAll',
-    'String',
+    "Array",
+    "Integer",
+    "Number",
+    "Object",
+    "AcceptAll",
+    "Boolean",
+    "Const",
+    "Enum",
+    "Null",
+    "RejectAll",
+    "String",
 ]

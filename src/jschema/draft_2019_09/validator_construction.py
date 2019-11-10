@@ -7,7 +7,7 @@ from .referencing import (
     Ref,
     add_context_to_ref_validators,
     attach_base_URIs,
-    generate_context
+    generate_context,
 )
 from .types import AcceptAll, RejectAll
 from .validator import Validator
@@ -40,18 +40,14 @@ BuildValidatorResultType = t.Union[AcceptAll, RejectAll, "Validator", Ref]
 def build_validator_and_attach_context(schema):
     schemaInstance = annotate(obj=schema)
     validator = build_validator(schema=schemaInstance)
-    root_base_URI = ''
+    root_base_URI = ""
     if isinstance(schemaInstance.value, dict):
         if "$id" in schemaInstance.value:
-            root_base_URI = schemaInstance.value["$id"].value.rstrip('#')
-            attach_base_URIs(
-                validator=validator, parent_URI=root_base_URI
-            )
+            root_base_URI = schemaInstance.value["$id"].value.rstrip("#")
+            attach_base_URIs(validator=validator, parent_URI=root_base_URI)
         else:
             # TODO(ope): properly fix this
-            attach_base_URIs(
-                validator=validator, parent_URI=""
-            )
+            attach_base_URIs(validator=validator, parent_URI="")
     context = generate_context(validator=validator, root_base_uri=root_base_URI)
     add_context_to_ref_validators(validator=validator, context=context)
     return validator, context

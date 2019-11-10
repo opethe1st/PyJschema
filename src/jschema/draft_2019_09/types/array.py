@@ -1,12 +1,6 @@
 import typing as t
 
-from jschema.common import (
-    Instance,
-    Keyword,
-    KeywordGroup,
-    Type,
-    ValidationResult,
-)
+from jschema.common import Instance, Keyword, KeywordGroup, Type, ValidationResult
 
 from .common import Max, Min
 
@@ -14,7 +8,9 @@ from .common import Max, Min
 class _Items(KeywordGroup):
     def __init__(self, items: Instance, additionalItems: t.Optional[Instance] = None):
         from jschema.draft_2019_09 import build_validator
-        from jschema.draft_2019_09.validator_construction import BuildValidatorResultType
+        from jschema.draft_2019_09.validator_construction import (
+            BuildValidatorResultType,
+        )
 
         self._items_validator: t.Optional[BuildValidatorResultType] = None
         self._items_validators: t.List[BuildValidatorResultType] = []

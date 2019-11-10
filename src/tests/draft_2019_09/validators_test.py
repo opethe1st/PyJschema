@@ -17,7 +17,9 @@ class TestValidatorWithRef(unittest.TestCase):
                     "$id": "https://www.myschema.com/test",
                     "properties": {
                         "name": {"$anchor": "string_property", "type": "string"},
-                        "surname": {"$ref": "https://www.myschema.com/test#string_property"},
+                        "surname": {
+                            "$ref": "https://www.myschema.com/test#string_property"
+                        },
                     },
                 },
                 {"name": "abcd", "surname": "abcd"},
@@ -37,7 +39,9 @@ class TestValidatorWithRef(unittest.TestCase):
                     "$id": "https://www.myschema.com/test",
                     "properties": {
                         "name": {"$anchor": "string_property", "type": "string"},
-                        "surname": {"$ref": "https://www.myschema.com/test#string_property"},
+                        "surname": {
+                            "$ref": "https://www.myschema.com/test#string_property"
+                        },
                     },
                 },
                 {"name": "abcd", "surname": 123},
