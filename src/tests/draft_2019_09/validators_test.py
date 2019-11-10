@@ -14,10 +14,10 @@ class TestValidatorWithRef(unittest.TestCase):
                 "testing testing",
                 {
                     "type": "object",
-                    "$id": "www.myschema.com/test",
+                    "$id": "https://www.myschema.com/test",
                     "properties": {
                         "name": {"$anchor": "string_property", "type": "string"},
-                        "surname": {"$ref": "www.myschema.com/test#string_property"},
+                        "surname": {"$ref": "https://www.myschema.com/test#string_property"},
                     },
                 },
                 {"name": "abcd", "surname": "abcd"},
@@ -34,10 +34,10 @@ class TestValidatorWithRef(unittest.TestCase):
                 "testing testing",
                 {
                     "type": "object",
-                    "$id": "www.myschema.com/test",
+                    "$id": "https://www.myschema.com/test",
                     "properties": {
                         "name": {"$anchor": "string_property", "type": "string"},
-                        "surname": {"$ref": "www.myschema.com/test#string_property"},
+                        "surname": {"$ref": "https://www.myschema.com/test#string_property"},
                     },
                 },
                 {"name": "abcd", "surname": 123},
@@ -129,16 +129,16 @@ class TestCanonicalId(unittest.TestCase):
             (
                 "number",
                 {
-                    "$id": "mysite.org/array",
+                    "$id": "https://mysite.org/array",
                     "type": "object",
                     "properties": {
                         "name": {
-                            "$id": "mysite.org/name",
+                            "$id": "https://mysite.org/name",
                             "$anchor": "blah",
                             "type": "string",
                         },
-                        "surname": {"$ref": "mysite.org/name"},
-                        "firstname": {"$ref": "mysite.org/name"},
+                        "surname": {"$ref": "https://mysite.org/name"},
+                        "firstname": {"$ref": "https://mysite.org/name"},
                     },
                 },
                 {"name": "abc", "surname": "def", "firstname": "312"},

@@ -70,10 +70,10 @@ class _NumberOrInteger(Type):
         results = []
         messages = []
         if self.type_ is not None and not isinstance(instance, self.type_):
-            messages.append(f"instance is not a {self.type_}")
+            messages.append(f"instance: {instance} is not a {self.type_}")
 
         if isinstance(instance, bool):
-            messages.append(f"instance is not a {self.type_}")
+            messages.append(f"instance: {instance} is not a {self.type_}")
         if messages:
             return ValidationResult(ok=False, messages=messages)
 

@@ -45,7 +45,6 @@ class Type(AValidator):
     type_: t.Optional[t.Type] = None
 
     def __init__(self, schema):
-        self.location = schema.location
         self._validators: t.List[AValidator] = []
         for keywords in self.KEYWORDS_TO_VALIDATOR:
 

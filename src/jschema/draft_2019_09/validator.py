@@ -2,13 +2,36 @@ import typing as t
 
 from jschema.common import AValidator, ValidationResult
 
+from .constants import KEYWORDS_TO_VALIDATOR, TYPE_TO_TYPE_VALIDATORS
+from .types_validator import Types
+
 
 class Validator(AValidator):
-    def __init__(self):
+    def __init__(self, schema):
+        self.location = schema.location
         self._validators: t.List[AValidator] = []
 
-    def add_validator(self, validator: AValidator):
-        self._validators.append(validator)
+        for key, ValidatorClass in KEYWORDS_TO_VALIDATOR.items():
+            if key in schema.value:
+                self._validators.append(ValidatorClass(schema=schema))
+
+        if "$anchor" in schema.value:
+            self.anchor = "#" + schema.value["$anchor"].value
+
+        if "$id" in schema.value:
+            self.id = schema.value["$id"].value.rstrip('#')
+
+        if "type" in schema.value:
+            if isinstance(schema.value["type"].value, list):
+                self._validators.append(Types(schema=schema))
+            else:
+                if schema.value["type"].value in TYPE_TO_TYPE_VALIDATORS:
+                    self._validators.append(
+                        TYPE_TO_TYPE_VALIDATORS[schema.value["type"].value](schema=schema)
+                    )
+        else:
+            # could be any of the types
+            self._validators.append(Types(schema=schema))
 
     # hm.. this is the same as the method in Type.
     def validate(self, instance):

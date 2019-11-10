@@ -34,3 +34,8 @@ class Types(AValidator):
             messages=["error while validating this instance"],
             children=results,
         )
+
+    # Forgot this too - enforce with abc abstract?
+    def subschema_validators(self):
+        for validator in self._validators:
+            yield validator
