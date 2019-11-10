@@ -35,6 +35,6 @@ jobs:
     - name: Test with pytest
       run: |
         cd src/
-        pytest --cov=src/tests
-        pytest --cov=src/jschema
+        pytest --cov=tests
+        pytest --cov=jschema
         cd ..
