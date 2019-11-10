@@ -72,3 +72,8 @@ def add_context_to_ref_validators(validator: t.Union[AValidator], context: Conte
 
     for sub_validators in validator.subschema_validators():
         add_context_to_ref_validators(validator=sub_validators, context=context)
+
+
+def resolve_uri(context, uri):
+
+    return uri

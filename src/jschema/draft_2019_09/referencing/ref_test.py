@@ -8,7 +8,8 @@ from jschema.draft_2019_09 import build_validator
 from .reference_resolver import (
     attach_base_URIs,
     generate_context,
-    get_base_URI_from_URI_part
+    get_base_URI_from_URI_part,
+    resolve_uri,
 )
 
 
@@ -130,3 +131,16 @@ class TestGenerateContext(unittest.TestCase):
 
         for ref1, ref2 in same_keys:
             self.assertEqual(context[ref1], context[ref2])
+
+
+class TestResolveURI(unittest.TestCase):
+    @parameterized.parameterized.expand([
+        (
+            "description",
+            {"https://example.com/root.json/": True},
+            "https://example.com/other.json#/defs/string",
+            "https://example.com/root.json/$defs/other/defs/string"
+        ),
+    ])
+    def test(self, description, context, input_, output):
+        self.assertEqual(resolve_uri(context=context, uri=input_), output)
