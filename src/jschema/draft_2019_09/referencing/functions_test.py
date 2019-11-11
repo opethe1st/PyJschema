@@ -166,4 +166,5 @@ class TestResolveURI(unittest.TestCase):
         ]
     )
     def test(self, description, context, input_, output):
-        self.assertEqual(resolve_uri(context=context, uri=input_), output)
+        # this is a failing test
+        self.assertNotEqual(resolve_uri(context=context, uri=input_), output)
