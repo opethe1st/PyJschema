@@ -4,7 +4,6 @@ from jschema.common import Instance, ValidationResult
 from jschema.common.annotate import annotate
 
 from .referencing import (
-    Ref,
     add_context_to_ref_validators,
     attach_base_URIs,
     generate_context,
@@ -34,7 +33,7 @@ def validate_once(schema: t.Union[dict, bool], instance: dict) -> ValidationResu
     return validator.validate(instance=instance)
 
 
-BuildValidatorResultType = t.Union[AcceptAll, RejectAll, "Validator", Ref]
+BuildValidatorResultType = t.Union[AcceptAll, RejectAll, Validator]
 
 
 def build_validator_and_attach_context(schema):

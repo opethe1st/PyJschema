@@ -27,7 +27,7 @@ def attach_base_URIs(validator: AValidator, parent_URI):
         validator.id = parent_URI
     else:
         uri = get_base_URI_from_URI_part(parent_URI=parent_URI, base_URI=validator.id)
-        validator.base_uri = uri
+        validator.base_uri = uri  # this should probably be in the constructor
         validator.id = uri
 
     for sub_validator in validator.subschema_validators():
@@ -36,7 +36,7 @@ def attach_base_URIs(validator: AValidator, parent_URI):
 
 def generate_context(validator: AValidator, root_base_uri) -> Context:
     """
-    This needs to be run after attach_base_URIs so that the ids are
+    This needs to be run after attach_base_URIs because attach_base_URIs propagates
     propagated to the children schemas.
     This returns a dictionary with all the relative locations from the root schema +
     resolved anchors
@@ -49,9 +49,6 @@ def generate_context(validator: AValidator, root_base_uri) -> Context:
 
     # This supports just canonical URIs
     if validator.id is not None:
-        # this is wrong because this validator.id is not unique across validators
-        # do I need a new variable? to say if id was actually set or if its from a parent?
-        #
         if validator.anchor is not None:
             uri_to_validator[validator.id + validator.anchor] = validator
 

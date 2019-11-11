@@ -1,4 +1,4 @@
-from .reference_resolver import (
+from .functions import (
     add_context_to_ref_validators,
     attach_base_URIs,
     generate_context,

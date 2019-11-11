@@ -24,13 +24,16 @@ class Ref(Keyword):
             # Maybe have another state for not validated?
             return ValidationResult(ok=True)
 
+        # looks like this needs a resolver function here
         value = self.value
         if FRAGMENT_REGEX.match(value):
             value = self.id + value
+
         if not BASE_URI_REGEX.match(value):
             parts = self.id.split("/")
             parts[-1] = value
             value = "/".join(parts)
+
         if value in self.context:
             return self.context[value].validate(instance)
         else:
@@ -38,7 +41,6 @@ class Ref(Keyword):
             raise Exception(
                 f"unable to find this reference '{value}' in valid_references: {self.context.keys()}"
             )
-        return ValidationResult(ok=True)
 
     def set_context(self, context):
         self.context = context

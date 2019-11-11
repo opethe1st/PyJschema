@@ -9,6 +9,9 @@ from .defs import Defs
 
 
 class Validator(AValidator):
+    """
+    This corresponds to a schema
+    """
     def __init__(self, schema):
         self.location = schema.location
         self._validators: t.List[AValidator] = []
@@ -63,7 +66,7 @@ class Validator(AValidator):
                 children=results,
             )
 
-    # hm.. this is the same as the method in Type.
+    # TODO(ope): hm.. this is the same as the method in Type.
     def subschema_validators(self):
         for validator in self._validators:
             yield validator

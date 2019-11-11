@@ -12,6 +12,7 @@ class Types(AValidator):
             types: t.Iterable[str] = [item.value for item in schema.value["type"].value]
         else:
             # if there is no type, then try all the types
+            # TODO(ope): optimize this later
             types = TYPE_TO_TYPE_VALIDATORS.keys()
 
         for type_ in types:
