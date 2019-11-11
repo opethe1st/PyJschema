@@ -1,10 +1,4 @@
-
-from jschema.common import (
-    Instance,
-    Keyword,
-    KeywordGroup,
-    ValidationResult,
-)
+from jschema.common import Instance, Keyword, KeywordGroup, ValidationResult
 
 
 class If(KeywordGroup):
@@ -45,11 +39,12 @@ class If(KeywordGroup):
 
 
 class AllOf(Keyword):
-
     def __init__(self, schema: Instance):
         from .validator_construction import build_validator
 
-        self._validators = [build_validator(schema=item) for item in schema.value["allOf"].value]
+        self._validators = [
+            build_validator(schema=item) for item in schema.value["allOf"].value
+        ]
 
     def validate(self, instance):
         ok = all(
@@ -66,18 +61,24 @@ class AllOf(Keyword):
 
 
 class OneOf(Keyword):
-
     def __init__(self, schema: Instance):
         from .validator_construction import build_validator
 
-        self._validators = [build_validator(schema=item) for item in schema.value["oneOf"].value]
+        self._validators = [
+            build_validator(schema=item) for item in schema.value["oneOf"].value
+        ]
 
     def validate(self, instance):
-        oks = list(filter(
-            lambda res: res.ok,
-            (validator.validate(instance=instance) for validator in self._validators)
-        ))
-        ok = (len(oks) == 1)
+        oks = list(
+            filter(
+                lambda res: res.ok,
+                (
+                    validator.validate(instance=instance)
+                    for validator in self._validators
+                ),
+            )
+        )
+        ok = len(oks) == 1
         return ValidationResult(ok=ok)
 
     # WOAH: Not defining this resulted in an almost impossible to debug bug. SIGH!
@@ -88,11 +89,12 @@ class OneOf(Keyword):
 
 
 class AnyOf(Keyword):
-
     def __init__(self, schema: Instance):
         from .validator_construction import build_validator
 
-        self._validators = [build_validator(schema=item) for item in schema.value["anyOf"].value]
+        self._validators = [
+            build_validator(schema=item) for item in schema.value["anyOf"].value
+        ]
 
     def validate(self, instance):
         ok = any(
@@ -108,7 +110,6 @@ class AnyOf(Keyword):
 
 
 class Not(Keyword):
-
     def __init__(self, schema: Instance):
         from .validator_construction import build_validator
 

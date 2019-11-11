@@ -1,4 +1,4 @@
-name: Python package
+name: Jschema Workflow
 
 on: [push]
 
@@ -35,6 +35,5 @@ jobs:
     - name: Test with pytest
       run: |
         cd src/
-        pytest --cov=src/tests
-        pytest --cov=src/jschema
+        pytest --cov=.
         cd ..

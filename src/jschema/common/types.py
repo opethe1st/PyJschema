@@ -10,6 +10,7 @@ JsonType = t.Union[str, numbers.Number, bool, None, Mapping, Sequence]
 
 class AValidator(abc.ABC):
     id = None
+    base_uri = None  # if $id was set in the schema this Validator was created from
     anchor = None
     location: t.Optional[str] = None
 
@@ -45,7 +46,6 @@ class Type(AValidator):
     type_: t.Optional[t.Type] = None
 
     def __init__(self, schema):
-        self.location = schema.location
         self._validators: t.List[AValidator] = []
         for keywords in self.KEYWORDS_TO_VALIDATOR:
 

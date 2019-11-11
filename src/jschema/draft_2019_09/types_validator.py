@@ -12,6 +12,7 @@ class Types(AValidator):
             types: t.Iterable[str] = [item.value for item in schema.value["type"].value]
         else:
             # if there is no type, then try all the types
+            # TODO(ope): optimize this later
             types = TYPE_TO_TYPE_VALIDATORS.keys()
 
         for type_ in types:
@@ -34,3 +35,8 @@ class Types(AValidator):
             messages=["error while validating this instance"],
             children=results,
         )
+
+    # Forgot this too - enforce with abc abstract?
+    def subschema_validators(self):
+        for validator in self._validators:
+            yield validator
