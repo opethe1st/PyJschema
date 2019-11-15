@@ -34,7 +34,7 @@ def attach_base_URIs(validator: AValidator, parent_URI):
         attach_base_URIs(validator=sub_validator, parent_URI=validator.id)
 
 
-def generate_context(validator: AValidator, root_base_uri) -> Context:
+def generate_context(validator: AValidator, root_base_uri) -> t.Tuple[Context, t.Dict]:
     """
     This needs to be run after attach_base_URIs because attach_base_URIs propagates
     propagated to the children schemas.
@@ -43,9 +43,11 @@ def generate_context(validator: AValidator, root_base_uri) -> Context:
     To get the
     """
     uri_to_validator: Context = {}
+    base_uri_to_location: t.Dict = {}
 
     if validator.base_uri:
         uri_to_validator[validator.base_uri] = validator
+        base_uri_to_location[validator.base_uri] = validator.location
 
     # This supports just canonical URIs
     if validator.id is not None:
@@ -54,25 +56,28 @@ def generate_context(validator: AValidator, root_base_uri) -> Context:
 
         # save the relative location
         if validator.location is not None:
-            uri_to_validator[root_base_uri + validator.location] = validator
+            uri_to_validator[validator.location] = validator
 
     for sub_validator in validator.subschema_validators():
-        sub_uri_to_validator = generate_context(
+        sub_uri_to_validator, sub_base_uri_to_location = generate_context(
             validator=sub_validator, root_base_uri=root_base_uri
         )
         uri_to_validator.update(sub_uri_to_validator)
+        base_uri_to_location.update(sub_base_uri_to_location)
 
-    return uri_to_validator
+    return uri_to_validator, base_uri_to_location
 
 
-def add_context_to_ref_validators(validator: t.Union[AValidator], context: Context):
+def add_context_to_ref_validators(
+    validator: t.Union[AValidator], context: Context, base_uri_to_abs_location
+):
     if isinstance(validator, Ref):
         validator.set_context(context)
+        validator.set_base_uri_to_abs_location(base_uri_to_abs_location)
 
     for sub_validators in validator.subschema_validators():
-        add_context_to_ref_validators(validator=sub_validators, context=context)
-
-
-def resolve_uri(context, uri):
-
-    return uri
+        add_context_to_ref_validators(
+            validator=sub_validators,
+            context=context,
+            base_uri_to_abs_location=base_uri_to_abs_location,
+        )

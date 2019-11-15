@@ -9,7 +9,7 @@ from .functions import (
     attach_base_URIs,
     generate_context,
     get_base_URI_from_URI_part,
-    resolve_uri,
+    # resolve_uri,
 )
 
 
@@ -93,9 +93,9 @@ class TestGenerateContext(unittest.TestCase):
                 {
                     "https://example.com/ope",
                     "https://example.com/ope#blah",
-                    "https://example.com/ope#",
+                    "#",
                 },
-                [("https://example.com/ope", "https://example.com/ope#")],
+                [("https://example.com/ope", "#")],
             ),
             (
                 "make sure context is generated properly with nested anchors",
@@ -116,29 +116,29 @@ class TestGenerateContext(unittest.TestCase):
                 {
                     "https://example.com/anobject",
                     "https://example.com/ope",
-                    "https://example.com/ope#",
-                    "https://example.com/ope#/items/0",
-                    "https://example.com/ope#/items/1",
-                    "https://example.com/ope#/items/2",
-                    "https://example.com/ope#/items/2/properties/abc",
+                    "#",
+                    "#/items/0",
+                    "#/items/1",
+                    "#/items/2",
+                    "#/items/2/properties/abc",
                     "https://example.com/ope#anarray",
                     "https://example.com/ope#astring",
                     "https://example.com/ope#anumber",
                 },
                 [
                     (
-                        "https://example.com/ope#/items/0",
+                        "#/items/0",
                         "https://example.com/ope#astring",
                     ),
                     (
-                        "https://example.com/ope#/items/1",
+                        "#/items/1",
                         "https://example.com/ope#anumber",
                     ),
                     (
-                        "https://example.com/ope#/items/2",
+                        "#/items/2",
                         "https://example.com/anobject",
                     ),
-                    ("https://example.com/ope", "https://example.com/ope#"),
+                    ("https://example.com/ope", "#"),
                 ],
             ),
         ]
@@ -146,7 +146,7 @@ class TestGenerateContext(unittest.TestCase):
     def test(self, name, schema, keys, same_keys):
         validator = build_validator(schema=annotate(obj=schema))
         attach_base_URIs(validator=validator, parent_URI=schema["$id"])
-        context = generate_context(validator, root_base_uri=schema["$id"])
+        context, _ = generate_context(validator, root_base_uri=schema["$id"])
 
         self.assertSetEqual(set(context.keys()), keys)
 
@@ -154,17 +154,28 @@ class TestGenerateContext(unittest.TestCase):
             self.assertEqual(context[ref1], context[ref2])
 
 
-class TestResolveURI(unittest.TestCase):
-    @parameterized.parameterized.expand(
-        [
-            (
-                "description",
-                {"https://example.com/root.json/": True},
-                "https://example.com/other.json#/defs/string",
-                "https://example.com/root.json/$defs/other/defs/string",
-            )
-        ]
-    )
-    def test(self, description, context, input_, output):
-        # this is a failing test
-        self.assertNotEqual(resolve_uri(context=context, uri=input_), output)
+# class TestResolveURI(unittest.TestCase):
+#     @parameterized.parameterized.expand(
+#         [
+#             (
+#                 "resolve ",
+#                 {
+#                     "https://example.com/root.json": True,
+#                     "https://example.com/other.json": False,
+#                     "#/$defs/other/defs/string": None,
+#                 },
+#                 {'https://example.com/other.json': '#/$defs/other'},
+#                 "https://example.com/other.json#/defs/string",
+#                 None,
+#             ),
+#         ]
+#     )
+#     def test(self, description, context, base_uri_to_abs_location, input_, output):
+#         self.assertEqual(
+#             resolve_uri(
+#                 context=context,
+#                 base_uri_to_abs_location=base_uri_to_abs_location,
+#                 uri=input_
+#             ),
+#             output
+#         )
