@@ -3,6 +3,7 @@ import typing as t
 from urllib import parse
 
 from jschema.common import AValidator, Keyword, ValidationResult
+
 Context = t.Dict[str, AValidator]
 
 
@@ -50,7 +51,11 @@ class Ref(Keyword):
         self.base_uri_to_abs_location = base_uri_to_abs_location
 
     def _resolve_uri(self, uri):
-        return resolve_uri(uri=uri, context=self.context, base_uri_to_abs_location=self.base_uri_to_abs_location)
+        return resolve_uri(
+            uri=uri,
+            context=self.context,
+            base_uri_to_abs_location=self.base_uri_to_abs_location,
+        )
 
     def __eq__(self, other) -> bool:
         if not isinstance(other, Ref):
@@ -61,18 +66,18 @@ class Ref(Keyword):
 import re
 
 
-BASE_URI_AND_FRAGMENT_REGEX = re.compile(pattern=r'http.*#[a-zA-Z].*')
+BASE_URI_AND_FRAGMENT_REGEX = re.compile(pattern=r"http.*#[a-zA-Z].*")
 
 
 def resolve_uri(context, uri, base_uri_to_abs_location):
-    base_uri, fragment = uri.split("#") if ("#" in uri and uri != '#') else [uri, '']
+    base_uri, fragment = uri.split("#") if ("#" in uri and uri != "#") else [uri, ""]
     if BASE_URI_AND_FRAGMENT_REGEX.match(uri):
         return context[uri]
     if (base_uri and not fragment) or (not base_uri and fragment):
         if base_uri:
             return context[base_uri]
         else:
-            return context["#"+fragment]
+            return context["#" + fragment]
     else:
         uri_location = base_uri_to_abs_location.get(base_uri)
         return context[f"{uri_location}{fragment}"]

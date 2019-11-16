@@ -8,7 +8,7 @@ from jschema.common.annotate import annotate
 from .referencing import (
     add_context_to_ref_validators,
     attach_base_URIs,
-    generate_context
+    generate_context,
 )
 from .types import AcceptAll, RejectAll
 from .validator import Validator
@@ -29,7 +29,7 @@ def construct_validator(schema):
 def meta_schema_validator():
     # assume the schema is valid
     base_dir = os.path.dirname(__file__)
-    with open(os.path.join(base_dir, 'validator-schema.json'), 'r') as file:
+    with open(os.path.join(base_dir, "validator-schema.json"), "r") as file:
         schema = json.load(file)
     validator, _ = build_validator_and_attach_context(schema)
     return validator
@@ -56,8 +56,14 @@ def build_validator_and_attach_context(schema):
             # TODO(ope): properly fix this
             attach_base_URIs(validator=validator, parent_URI="")
 
-    context, base_uri_to_abs_location = generate_context(validator=validator, root_base_uri=root_base_URI)
-    add_context_to_ref_validators(validator=validator, context=context, base_uri_to_abs_location=base_uri_to_abs_location)
+    context, base_uri_to_abs_location = generate_context(
+        validator=validator, root_base_uri=root_base_URI
+    )
+    add_context_to_ref_validators(
+        validator=validator,
+        context=context,
+        base_uri_to_abs_location=base_uri_to_abs_location,
+    )
     return validator, context
 
 

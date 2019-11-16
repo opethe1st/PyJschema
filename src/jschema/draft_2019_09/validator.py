@@ -12,6 +12,7 @@ class Validator(AValidator):
     """
     This corresponds to a schema
     """
+
     def __init__(self, schema):
         self.location = schema.location
         self._validators: t.List[AValidator] = []
