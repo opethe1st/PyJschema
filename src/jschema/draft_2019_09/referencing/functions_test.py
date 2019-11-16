@@ -152,30 +152,3 @@ class TestGenerateContext(unittest.TestCase):
 
         for ref1, ref2 in same_keys:
             self.assertEqual(context[ref1], context[ref2])
-
-
-# class TestResolveURI(unittest.TestCase):
-#     @parameterized.parameterized.expand(
-#         [
-#             (
-#                 "resolve ",
-#                 {
-#                     "https://example.com/root.json": True,
-#                     "https://example.com/other.json": False,
-#                     "#/$defs/other/defs/string": None,
-#                 },
-#                 {'https://example.com/other.json': '#/$defs/other'},
-#                 "https://example.com/other.json#/defs/string",
-#                 None,
-#             ),
-#         ]
-#     )
-#     def test(self, description, context, base_uri_to_abs_location, input_, output):
-#         self.assertEqual(
-#             resolve_uri(
-#                 context=context,
-#                 base_uri_to_abs_location=base_uri_to_abs_location,
-#                 uri=input_
-#             ),
-#             output
-#         )

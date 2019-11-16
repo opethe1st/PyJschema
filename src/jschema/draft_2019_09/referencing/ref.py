@@ -63,21 +63,25 @@ class Ref(Keyword):
         return self.value == other.value
 
 
-import re
+# TODO(ope): need to fix this
+BASE_URI_AND_ANCHOR_REGEX = re.compile(pattern=r"http.*#[a-zA-Z].*")
 
 
-BASE_URI_AND_FRAGMENT_REGEX = re.compile(pattern=r"http.*#[a-zA-Z].*")
-
-
+# TODO(ope): this needs to be refactored a lot!!
 def resolve_uri(context, uri, base_uri_to_abs_location):
-    base_uri, fragment = uri.split("#") if ("#" in uri and uri != "#") else [uri, ""]
-    if BASE_URI_AND_FRAGMENT_REGEX.match(uri):
+    if uri in context:
         return context[uri]
+    if BASE_URI_AND_ANCHOR_REGEX.match(uri):
+        return context[uri]
+    base_uri, fragment = uri.split("#") if ("#" in uri and uri != "#") else [uri, ""]
     if (base_uri and not fragment) or (not base_uri and fragment):
         if base_uri:
             return context[base_uri]
         else:
             return context["#" + fragment]
     else:
-        uri_location = base_uri_to_abs_location.get(base_uri)
-        return context[f"{uri_location}{fragment}"]
+        if base_uri in base_uri_to_abs_location:
+            uri_location = base_uri_to_abs_location[base_uri]
+            return context[f"{uri_location}{fragment}"]
+        else:
+            return context[f"#{fragment}"]
