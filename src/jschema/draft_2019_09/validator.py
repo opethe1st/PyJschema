@@ -12,6 +12,7 @@ class Validator(AValidator):
     """
     This corresponds to a schema
     """
+
     def __init__(self, schema):
         self.location = schema.location
         self._validators: t.List[AValidator] = []
@@ -50,6 +51,8 @@ class Validator(AValidator):
 
     # hm.. this is the same as the method in Type.
     def validate(self, instance):
+        # can move this to a function that take in a list of validators and an instance
+        # then yield the errors as they occur
         results = []
         for validator in self._validators:
             result = validator.validate(instance)

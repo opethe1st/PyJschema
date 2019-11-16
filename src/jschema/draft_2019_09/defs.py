@@ -5,6 +5,7 @@ class Defs(Keyword):
     """
     This is corresponds to the $defs keyword
     """
+
     def __init__(self, schema: Instance):
         defs = schema.value["$defs"]
         from .validator_construction import build_validator
