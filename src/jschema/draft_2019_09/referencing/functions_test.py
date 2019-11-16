@@ -9,7 +9,6 @@ from .functions import (
     attach_base_URIs,
     generate_context,
     get_base_URI_from_URI_part,
-    # resolve_uri,
 )
 
 
