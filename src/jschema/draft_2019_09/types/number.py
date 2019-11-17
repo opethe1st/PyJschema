@@ -13,6 +13,7 @@ class _MultipleOf(Keyword):
         instance = instance * multiplier
         value = self.value * multiplier
         if (instance % value) != 0:
+            raise Exception()
             return ValidationResult(ok=False)
         return ValidationResult(ok=True)
 
@@ -23,6 +24,7 @@ class _Minimum(Keyword):
 
     def validate(self, instance):
         if instance < self.value:
+            raise Exception()
             return ValidationResult(ok=False)
         return ValidationResult(ok=True)
 
@@ -33,6 +35,7 @@ class _Maximum(Keyword):
 
     def validate(self, instance):
         if self.value < instance:
+            raise Exception()
             return ValidationResult(ok=False)
         return ValidationResult(ok=True)
 
@@ -43,6 +46,7 @@ class _ExclusiveMinimum(Keyword):
 
     def validate(self, instance):
         if instance <= self.value:
+            raise Exception()
             return ValidationResult(ok=False)
         return ValidationResult(ok=True)
 
@@ -53,6 +57,7 @@ class _ExclusiveMaximum(Keyword):
 
     def validate(self, instance):
         if self.value <= instance:
+            raise Exception()
             return ValidationResult(ok=False)
         return ValidationResult(ok=True)
 
@@ -75,6 +80,7 @@ class _NumberOrInteger(Type):
         if isinstance(instance, bool):
             messages.append(f"instance: {instance} is not a {self.type_}")
         if messages:
+            raise Exception()
             return ValidationResult(ok=False, messages=messages)
 
         results = list(
@@ -87,6 +93,7 @@ class _NumberOrInteger(Type):
         if not results and not messages:
             return ValidationResult(ok=True)
         else:
+            raise Exception()
             return ValidationResult(ok=False, messages=messages, children=results)
 
 

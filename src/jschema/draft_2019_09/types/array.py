@@ -45,6 +45,7 @@ class _Items(KeywordGroup):
         if not children:
             return ValidationResult(ok=True)
         else:
+            raise Exception()
             return ValidationResult(ok=False, children=children)
 
     def _validate_items_list(self, instance):
@@ -73,6 +74,7 @@ class _Items(KeywordGroup):
                 i += 1
 
         if children:
+            raise Exception()
             return ValidationResult(ok=False, children=children)
         else:
             return ValidationResult(ok=True)
@@ -117,13 +119,14 @@ class _Contains(Keyword):
                 return ValidationResult(ok=True)
 
             if not (self.minContainsValue <= count <= self.maxContainsValue):
+                raise Exception()
                 return ValidationResult(
                     ok=False,
                     messages=[
                         f"The number of items matching the contains keyword is not less than or equal to {self.minContainsValue} or greater than or equal to {self.maxContainsValue}"
                     ],
                 )
-
+            raise Exception()
             return ValidationResult(
                 ok=False,
                 messages=[
@@ -157,6 +160,7 @@ class _UniqueItems(Keyword):
             itemsset = set([str(value) for value in instance])
 
             if len(itemsset) != len(instance):
+                raise Exception()
                 return ValidationResult(ok=False)
             # TODO(ope) - actually make sure the values are unique
 

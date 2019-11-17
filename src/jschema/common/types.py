@@ -62,6 +62,7 @@ class Type(AValidator):
         if self.type_ is not None and not isinstance(instance, self.type_):
             messages.append(f"instance is not a {self.type_}")
         if messages:
+            raise Exception()
             return ValidationResult(ok=False, messages=messages)
 
         results = list(
@@ -74,6 +75,7 @@ class Type(AValidator):
         if not results and not messages:
             return ValidationResult(ok=True)
         else:
+            raise Exception()
             return ValidationResult(ok=False, messages=messages, children=results)
 
     def subschema_validators(self):

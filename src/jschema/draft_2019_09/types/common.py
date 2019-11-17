@@ -7,6 +7,7 @@ class Max(Keyword):
 
     def validate(self, instance):
         if self.value < len(instance):
+            raise Exception()
             return ValidationResult(ok=False, messages=[])
         return ValidationResult(ok=True)
 
@@ -16,5 +17,6 @@ class Min(Keyword):
 
     def validate(self, instance):
         if len(instance) < self.value:
+            raise Exception()
             return ValidationResult(ok=False, messages=[])
         return ValidationResult(ok=True)

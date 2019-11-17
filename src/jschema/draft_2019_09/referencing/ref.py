@@ -12,6 +12,7 @@ BASE_URI_REGEX = re.compile(pattern=r"http.*")
 
 
 class Ref(Keyword):
+
     def __init__(self, schema):
         ref = schema.value["$ref"]
         value = ref.value.replace("~1", "/")
