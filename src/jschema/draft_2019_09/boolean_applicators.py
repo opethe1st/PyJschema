@@ -1,4 +1,4 @@
-from jschema.common import Instance, Keyword, KeywordGroup, ValidationResult
+from jschema.common import Instance, KeywordGroup, KeywordGroup, ValidationResult
 
 
 class If(KeywordGroup):
@@ -38,7 +38,7 @@ class If(KeywordGroup):
             yield self._else_validator
 
 
-class AllOf(Keyword):
+class AllOf(KeywordGroup):
     def __init__(self, schema: Instance):
         from .validator_construction import build_validator
 
@@ -60,7 +60,7 @@ class AllOf(Keyword):
             yield validator
 
 
-class OneOf(Keyword):
+class OneOf(KeywordGroup):
     def __init__(self, schema: Instance):
         from .validator_construction import build_validator
 
@@ -88,7 +88,7 @@ class OneOf(Keyword):
             yield validator
 
 
-class AnyOf(Keyword):
+class AnyOf(KeywordGroup):
     def __init__(self, schema: Instance):
         from .validator_construction import build_validator
 
@@ -109,7 +109,7 @@ class AnyOf(Keyword):
             yield validator
 
 
-class Not(Keyword):
+class Not(KeywordGroup):
     def __init__(self, schema: Instance):
         from .validator_construction import build_validator
 

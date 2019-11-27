@@ -1,7 +1,6 @@
 import typing as t
 
-from jschema.common import Instance, Keyword, KeywordGroup, Type, ValidationResult
-from jschema.common.utils import re_compile
+from jschema.common import Instance, KeywordGroup, KeywordGroup, Type, ValidationResult
 
 from .common import Max, Min
 
@@ -14,6 +13,7 @@ class _Property(KeywordGroup):
         patternProperties: t.Optional[Instance] = None,
     ):
         from jschema.draft_2019_09 import build_validator
+        import re
 
         self._validators = (
             {key: build_validator(prop) for key, prop in properties.value.items()}
@@ -27,7 +27,7 @@ class _Property(KeywordGroup):
         )
         self._pattern_validators = (
             {
-                re_compile(key): build_validator(schema=properties)
+                re.compile(key): build_validator(schema=properties)
                 for key, properties in patternProperties.value.items()
             }
             if patternProperties
@@ -50,7 +50,7 @@ class _Property(KeywordGroup):
         properties_validated_by_pattern = set()
         for regex in self._pattern_validators:
             for key in remaining_properties:
-                if regex.match(key):
+                if regex.search(key):
                     properties_validated_by_pattern.add(key)
                     result = self._pattern_validators[regex].validate(instance[key])
                     if not result.ok:
@@ -80,7 +80,7 @@ class _Property(KeywordGroup):
             yield validator
 
 
-class _Required(Keyword):
+class _Required(KeywordGroup):
     def __init__(self, required: Instance):
         self.value = [item.value for item in required.value]
 
@@ -97,7 +97,7 @@ class _Required(Keyword):
             return ValidationResult(ok=False, messages=messages)
 
 
-class _PropertyNames(Keyword):
+class _PropertyNames(KeywordGroup):
     def __init__(self, propertyNames: Instance):
         # add this to make sure that the type is string - I have seen it missing from
         # examples in the documentation so can only assume it's allowed
@@ -132,7 +132,7 @@ class _MaxProperties(Max):
         self.value = maxProperties.value
 
 
-class _DependentRequired(Keyword):
+class _DependentRequired(KeywordGroup):
     def __init__(self, dependentRequired: Instance):
         self.dependentRequired = {
             key: [val.value for val in value.value]

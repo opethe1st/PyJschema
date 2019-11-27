@@ -1,9 +1,9 @@
 import numbers
 
-from jschema.common import Instance, Keyword, Type, ValidationResult
+from jschema.common import Instance, KeywordGroup, Type, ValidationResult
 
 
-class _MultipleOf(Keyword):
+class _MultipleOf(KeywordGroup):
     def __init__(self, multipleOf: Instance):
         self.value = multipleOf.value
 
@@ -17,7 +17,7 @@ class _MultipleOf(Keyword):
         return ValidationResult(ok=True)
 
 
-class _Minimum(Keyword):
+class _Minimum(KeywordGroup):
     def __init__(self, minimum: Instance):
         self.value = minimum.value
 
@@ -27,7 +27,7 @@ class _Minimum(Keyword):
         return ValidationResult(ok=True)
 
 
-class _Maximum(Keyword):
+class _Maximum(KeywordGroup):
     def __init__(self, maximum: Instance):
         self.value = maximum.value
 
@@ -37,7 +37,7 @@ class _Maximum(Keyword):
         return ValidationResult(ok=True)
 
 
-class _ExclusiveMinimum(Keyword):
+class _ExclusiveMinimum(KeywordGroup):
     def __init__(self, exclusiveMinimum: Instance):
         self.value = exclusiveMinimum.value
 
@@ -47,7 +47,7 @@ class _ExclusiveMinimum(Keyword):
         return ValidationResult(ok=True)
 
 
-class _ExclusiveMaximum(Keyword):
+class _ExclusiveMaximum(KeywordGroup):
     def __init__(self, exclusiveMaximum: Instance):
         self.value = exclusiveMaximum.value
 

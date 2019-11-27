@@ -2,7 +2,7 @@ import re
 import typing as t
 from urllib import parse
 
-from jschema.common import AValidator, Keyword, ValidationResult
+from jschema.common import AValidator, KeywordGroup, ValidationResult
 
 Context = t.Dict[str, AValidator]
 
@@ -11,7 +11,7 @@ FRAGMENT_REGEX = re.compile(pattern=r"#.*")
 BASE_URI_REGEX = re.compile(pattern=r"http.*")
 
 
-class Ref(Keyword):
+class Ref(KeywordGroup):
     def __init__(self, schema):
         ref = schema.value["$ref"]
         value = ref.value.replace("~1", "/")

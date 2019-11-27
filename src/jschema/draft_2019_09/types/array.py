@@ -1,6 +1,6 @@
 import typing as t
 
-from jschema.common import Instance, Keyword, KeywordGroup, Type, ValidationResult
+from jschema.common import Instance, KeywordGroup, KeywordGroup, Type, ValidationResult
 
 from .common import Max, Min
 
@@ -86,7 +86,7 @@ class _Items(KeywordGroup):
             yield self._additional_items_validator
 
 
-class _Contains(Keyword):
+class _Contains(KeywordGroup):
     def __init__(
         self, contains: Instance, maxContains: Instance, minContains: Instance
     ):
@@ -148,7 +148,7 @@ class _MaxItems(Max):
         self.value = maxItems.value
 
 
-class _UniqueItems(Keyword):
+class _UniqueItems(KeywordGroup):
     def __init__(self, uniqueItems: Instance):
         self.value = uniqueItems.value
 

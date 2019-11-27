@@ -1,7 +1,7 @@
-from jschema.common import Instance, Keyword, ValidationResult
+from jschema.common import Instance, KeywordGroup, ValidationResult
 
 
-class Defs(Keyword):
+class Defs(KeywordGroup):
     """
     This is corresponds to the $defs keyword
     """

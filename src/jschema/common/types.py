@@ -31,17 +31,11 @@ class KeywordGroup(AValidator):
     pass
 
 
-class Keyword(AValidator):
-    """Validator for a keyword"""
-
-    pass
-
-
 class Type(AValidator):
     """Validator for a type"""
 
     KEYWORDS_TO_VALIDATOR: t.Dict[
-        t.Tuple[str, ...], t.Union[t.Type[Keyword], t.Type[KeywordGroup]]
+        t.Tuple[str, ...], t.Union[t.Type[KeywordGroup], t.Type[KeywordGroup]]
     ] = {}
     type_: t.Optional[t.Type] = None
 
