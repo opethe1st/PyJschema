@@ -1,4 +1,4 @@
-from jschema.common import Instance, KeywordGroup, KeywordGroup, ValidationResult
+from jschema.common import Instance, KeywordGroup, ValidationResult
 
 
 class If(KeywordGroup):

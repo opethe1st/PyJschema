@@ -1,8 +1,9 @@
+import re
 import typing as t
 
-from jschema.common import Instance, KeywordGroup, KeywordGroup, Type, ValidationResult
+from jschema.common import Instance, KeywordGroup, Type, ValidationResult
 
-from .common import Max, Min
+from .common import validate_max, validate_min
 
 
 class _Property(KeywordGroup):
@@ -13,7 +14,6 @@ class _Property(KeywordGroup):
         patternProperties: t.Optional[Instance] = None,
     ):
         from jschema.draft_2019_09 import build_validator
-        import re
 
         self._validators = (
             {key: build_validator(prop) for key, prop in properties.value.items()}
@@ -122,14 +122,20 @@ class _PropertyNames(KeywordGroup):
         yield self._validator
 
 
-class _MinProperties(Min):
+class _MinProperties(KeywordGroup):
     def __init__(self, minProperties: Instance):
         self.value = minProperties.value
 
+    def validate(self, instance):
+        return validate_min(instance=instance, value=self.value)
 
-class _MaxProperties(Max):
+
+class _MaxProperties(KeywordGroup):
     def __init__(self, maxProperties: Instance):
         self.value = maxProperties.value
+
+    def validate(self, instance):
+        return validate_max(instance=instance, value=self.value)
 
 
 class _DependentRequired(KeywordGroup):

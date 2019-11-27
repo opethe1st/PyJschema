@@ -1,8 +1,8 @@
 import typing as t
 
-from jschema.common import Instance, KeywordGroup, KeywordGroup, Type, ValidationResult
+from jschema.common import Instance, KeywordGroup, Type, ValidationResult
 
-from .common import Max, Min
+from .common import validate_max, validate_min
 
 
 class _Items(KeywordGroup):
@@ -93,18 +93,17 @@ class _Contains(KeywordGroup):
         from jschema.draft_2019_09 import build_validator
 
         self._contains_present = False if contains is None else True
-        self._validator = None
-        if contains:
-            self._validator = build_validator(schema=contains)
+        self._validator = build_validator(schema=contains) if contains else None
         self.maxContainsValue = maxContains.value if maxContains else float("inf")
         self.minContainsValue = minContains.value if minContains else -float("inf")
 
     def validate(self, instance):
 
-        if self._contains_present:
+        if self._validator:
             contains = False
             count = 0
             for value in instance:
+                # should just be one validator
                 res = self._validator.validate(value)
 
                 if res.ok:
@@ -138,14 +137,20 @@ class _Contains(KeywordGroup):
             yield self._validator
 
 
-class _MinItems(Min):
+class _MinItems(KeywordGroup):
     def __init__(self, minItems: Instance):
         self.value = minItems.value
 
+    def validate(self, instance):
+        return validate_min(value=self.value, instance=instance)
 
-class _MaxItems(Max):
+
+class _MaxItems(KeywordGroup):
     def __init__(self, maxItems: Instance):
         self.value = maxItems.value
+
+    def validate(self, instance):
+        return validate_max(value=self.value, instance=instance)
 
 
 class _UniqueItems(KeywordGroup):
