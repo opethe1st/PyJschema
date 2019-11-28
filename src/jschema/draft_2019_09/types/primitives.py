@@ -1,4 +1,11 @@
-from jschema.common import AValidator, Dict, Primitive, KeywordGroup, Type, ValidationResult
+from jschema.common import (
+    AValidator,
+    Dict,
+    Primitive,
+    KeywordGroup,
+    Type,
+    ValidationResult,
+)
 from jschema.common.annotate import deannotate
 
 

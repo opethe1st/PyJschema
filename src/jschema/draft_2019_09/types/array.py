@@ -6,7 +6,9 @@ from .common import validate_max, validate_min
 
 
 class _Items(KeywordGroup):
-    def __init__(self, items: t.Union[Primitive, List], additionalItems: t.Optional[Dict] = None):
+    def __init__(
+        self, items: t.Union[Primitive, List], additionalItems: t.Optional[Dict] = None
+    ):
         from jschema.draft_2019_09 import build_validator
         from jschema.draft_2019_09.validator_construction import (
             BuildValidatorResultType,
@@ -89,7 +91,10 @@ class _Items(KeywordGroup):
 
 class _Contains(KeywordGroup):
     def __init__(
-        self, contains: t.Union[Primitive, Dict], maxContains: Primitive, minContains: Primitive
+        self,
+        contains: t.Union[Primitive, Dict],
+        maxContains: Primitive,
+        minContains: Primitive,
     ):
         from jschema.draft_2019_09 import build_validator
 

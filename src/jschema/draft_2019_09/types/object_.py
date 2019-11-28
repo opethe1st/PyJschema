@@ -10,7 +10,7 @@ class _Property(KeywordGroup):
     def __init__(
         self,
         properties: t.Optional[Dict] = None,
-        additionalProperties: t.Optional[Primitive] = None,
+        additionalProperties: t.Optional[Dict] = None,
         patternProperties: t.Optional[Dict] = None,
     ):
         from jschema.draft_2019_09 import build_validator

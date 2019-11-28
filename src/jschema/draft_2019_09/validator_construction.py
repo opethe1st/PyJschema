@@ -82,5 +82,7 @@ def build_validator(schema: t.Union[Primitive, Dict]) -> BuildValidatorResultTyp
         else:
             raise Exception("schema must be either a boolean or a dictionary")
     else:
-        raise Exception(f"schema needs to an instance of Instance or Dict, schema is {schema}")
-    return AcceptAll(schema=Primitive(value=True, location='#'))  # just to satisfy mypy
+        raise Exception(
+            f"schema needs to an instance of Instance or Dict, schema is {schema}"
+        )
+    return AcceptAll(schema=Primitive(value=True, location="#"))  # just to satisfy mypy

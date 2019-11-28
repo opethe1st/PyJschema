@@ -21,6 +21,7 @@ class _MinLength(KeywordGroup):
 class _Pattern(KeywordGroup):
     def __init__(self, pattern: Primitive):
         import re
+
         self.regex = re.compile(pattern=pattern.value)
 
     def validate(self, instance):

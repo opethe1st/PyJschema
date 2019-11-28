@@ -30,8 +30,6 @@ def deannotate(instance: Primitive):
     if isinstance(instance, List):
         return [deannotate(instance=value) for value in instance]
     elif isinstance(instance, Dict):
-        return {
-            key: deannotate(instance=value) for key, value in instance.items()
-        }
+        return {key: deannotate(instance=value) for key, value in instance.items()}
     else:
         return instance.value

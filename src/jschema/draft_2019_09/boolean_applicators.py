@@ -11,14 +11,10 @@ class If(KeywordGroup):
 
         self._if_validator = build_validator(schema=schema["if"])
         self._then_validator = (
-            build_validator(schema=schema["then"])
-            if schema.get("then")
-            else None
+            build_validator(schema=schema["then"]) if schema.get("then") else None
         )
         self._else_validator = (
-            build_validator(schema=schema["else"])
-            if schema.get("else")
-            else None
+            build_validator(schema=schema["else"]) if schema.get("else") else None
         )
 
     def validate(self, instance):
@@ -42,9 +38,7 @@ class AllOf(KeywordGroup):
     def __init__(self, schema: Dict):
         from .validator_construction import build_validator
 
-        self._validators = [
-            build_validator(schema=item) for item in schema["allOf"]
-        ]
+        self._validators = [build_validator(schema=item) for item in schema["allOf"]]
 
     def validate(self, instance):
         ok = all(
@@ -63,9 +57,7 @@ class OneOf(KeywordGroup):
     def __init__(self, schema: Dict):
         from .validator_construction import build_validator
 
-        self._validators = [
-            build_validator(schema=item) for item in schema["oneOf"]
-        ]
+        self._validators = [build_validator(schema=item) for item in schema["oneOf"]]
 
     def validate(self, instance):
         oks = list(
@@ -90,9 +82,7 @@ class AnyOf(KeywordGroup):
     def __init__(self, schema: Dict):
         from .validator_construction import build_validator
 
-        self._validators = [
-            build_validator(schema=item) for item in schema["anyOf"]
-        ]
+        self._validators = [build_validator(schema=item) for item in schema["anyOf"]]
 
     def validate(self, instance):
         ok = any(

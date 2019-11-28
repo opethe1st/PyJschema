@@ -41,9 +41,7 @@ class Validator(AValidator):
             else:
                 if schema["type"].value in TYPE_TO_TYPE_VALIDATORS:
                     self._validators.append(
-                        TYPE_TO_TYPE_VALIDATORS[schema["type"].value](
-                            schema=schema
-                        )
+                        TYPE_TO_TYPE_VALIDATORS[schema["type"].value](schema=schema)
                     )
         else:
             # could be any of the types
