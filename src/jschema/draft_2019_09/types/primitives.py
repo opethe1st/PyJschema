@@ -1,4 +1,4 @@
-from jschema.common import AValidator, Instance, KeywordGroup, Type, ValidationResult
+from jschema.common import AValidator, Dict, Instance, KeywordGroup, Type, ValidationResult
 from jschema.common.annotate import deannotate
 
 
@@ -24,8 +24,8 @@ class Null(Type):
 
 
 class Const(KeywordGroup):
-    def __init__(self, schema: Instance):
-        const = schema.value["const"]
+    def __init__(self, schema: Dict):
+        const = schema["const"]
         self.value = deannotate(const)
 
     def validate(self, instance):
@@ -34,9 +34,9 @@ class Const(KeywordGroup):
 
 
 class Enum(KeywordGroup):
-    def __init__(self, schema: Instance):
-        enum = schema.value["enum"]
-        self._values = [deannotate(instance=instance) for instance in enum.value]
+    def __init__(self, schema: Dict):
+        enum = schema["enum"]
+        self._values = [deannotate(instance=instance) for instance in enum]
 
     def validate(self, instance):
         for value in self._values:

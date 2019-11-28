@@ -1,7 +1,7 @@
 import re
 import typing as t
 
-from jschema.common import Instance, KeywordGroup, Type, ValidationResult
+from jschema.common import Instance, List, Dict, KeywordGroup, Type, ValidationResult
 
 from .common import validate_max, validate_min
 
@@ -9,14 +9,14 @@ from .common import validate_max, validate_min
 class _Property(KeywordGroup):
     def __init__(
         self,
-        properties: t.Optional[Instance] = None,
+        properties: t.Optional[Dict] = None,
         additionalProperties: t.Optional[Instance] = None,
-        patternProperties: t.Optional[Instance] = None,
+        patternProperties: t.Optional[Dict] = None,
     ):
         from jschema.draft_2019_09 import build_validator
 
         self._validators = (
-            {key: build_validator(prop) for key, prop in properties.value.items()}
+            {key: build_validator(prop) for key, prop in properties.items()}
             if properties
             else {}
         )
@@ -28,7 +28,7 @@ class _Property(KeywordGroup):
         self._pattern_validators = (
             {
                 re.compile(key): build_validator(schema=properties)
-                for key, properties in patternProperties.value.items()
+                for key, properties in patternProperties.items()
             }
             if patternProperties
             else {}
@@ -81,8 +81,8 @@ class _Property(KeywordGroup):
 
 
 class _Required(KeywordGroup):
-    def __init__(self, required: Instance):
-        self.value = [item.value for item in required.value]
+    def __init__(self, required: List):
+        self.value = [item.value for item in required]
 
     def validate(self, instance):
         messages = []
@@ -139,10 +139,10 @@ class _MaxProperties(KeywordGroup):
 
 
 class _DependentRequired(KeywordGroup):
-    def __init__(self, dependentRequired: Instance):
+    def __init__(self, dependentRequired: Dict):
         self.dependentRequired = {
-            key: [val.value for val in value.value]
-            for key, value in dependentRequired.value.items()
+            key: [val.value for val in value]
+            for key, value in dependentRequired.items()
         }
 
     def validate(self, instance):

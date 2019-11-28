@@ -2,7 +2,7 @@ import json
 import os
 import typing as t
 
-from jschema.common import Instance, ValidationResult
+from jschema.common import Instance, Dict, ValidationResult
 from jschema.common.annotate import annotate
 
 from .referencing import (
@@ -47,10 +47,10 @@ def build_validator_and_attach_context(schema):
     schemaInstance = annotate(obj=schema)
     validator = build_validator(schema=schemaInstance)
     root_base_URI = ""
-    if isinstance(schemaInstance.value, dict):
+    if isinstance(schemaInstance, Dict):
 
-        if "$id" in schemaInstance.value:
-            root_base_URI = schemaInstance.value["$id"].value.rstrip("#")
+        if "$id" in schemaInstance:
+            root_base_URI = schemaInstance["$id"].value.rstrip("#")
             attach_base_URIs(validator=validator, parent_URI=root_base_URI)
         else:
             # TODO(ope): properly fix this
@@ -67,13 +67,20 @@ def build_validator_and_attach_context(schema):
     return validator, context
 
 
-def build_validator(schema: Instance) -> BuildValidatorResultType:
-    if schema.value is True or schema.value == {}:
-        return AcceptAll(schema=schema)
-    elif schema.value is False:
-        return RejectAll(schema=schema)
-    elif not isinstance(schema.value, dict):
-        # this should never happen
-        raise Exception("schema must be either a boolean or a dictionary")
+def build_validator(schema: t.Union[Instance, Dict]) -> BuildValidatorResultType:
+    if isinstance(schema, Dict):
+        if schema.items():
+            return Validator(schema=schema)
+        else:
+            return AcceptAll(schema=Instance(value=True, location=schema.location))
+    elif isinstance(schema, Instance):
+        if isinstance(schema.value, bool):
+            if schema.value is True:
+                return AcceptAll(schema=schema)
+            elif schema.value is False:
+                return RejectAll(schema=schema)
+        else:
+            raise Exception("schema must be either a boolean or a dictionary")
     else:
-        return Validator(schema=schema)
+        raise Exception(f"schema needs to an instance of Instance or Dict, schema is {schema}")
+    return AcceptAll(schema=Instance(value=True, location='#'))  # just to satisfy mypy

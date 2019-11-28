@@ -19,14 +19,17 @@ class AValidator(abc.ABC):
 
     @abc.abstractmethod
     def validate(self, instance: JsonType) -> ValidationResult:
-        pass
+        raise NotImplementedError
 
     def subschema_validators(self) -> t.Iterable["AValidator"]:
-        return []
+        yield from []
 
 
 class KeywordGroup(AValidator):
-    """Validator for a group of keyword that are dependent on each other"""
+    """
+    Validator for a group of keywords that are dependent on each other.
+    This also included the case where there is one validator
+    """
 
     pass
 
@@ -43,10 +46,10 @@ class Type(AValidator):
         self._validators: t.List[AValidator] = []
         for keywords in self.KEYWORDS_TO_VALIDATOR:
 
-            if any(schema.value.get(keyword) is not None for keyword in keywords):
+            if any(schema.get(keyword) is not None for keyword in keywords):
                 self._validators.append(
                     self.KEYWORDS_TO_VALIDATOR[keywords](
-                        **{keyword: schema.value.get(keyword) for keyword in keywords}
+                        **{keyword: schema.get(keyword) for keyword in keywords}
                     )
                 )
 
@@ -71,6 +74,4 @@ class Type(AValidator):
             return ValidationResult(ok=False, messages=messages, children=results)
 
     def subschema_validators(self):
-        # maybe optimize by not returning validators that don't have schemas embedded
-        for validator in self._validators:
-            yield validator
+        yield from self._validators

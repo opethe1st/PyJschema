@@ -1,6 +1,6 @@
 import typing as t
 
-from jschema.common import Instance, KeywordGroup, Type, ValidationResult
+from jschema.common import Instance, List, KeywordGroup, Type, ValidationResult
 
 from .common import validate_max, validate_min
 
@@ -15,9 +15,9 @@ class _Items(KeywordGroup):
         self._items_validator: t.Optional[BuildValidatorResultType] = None
         self._items_validators: t.List[BuildValidatorResultType] = []
         self._additional_items_validator: t.Optional[BuildValidatorResultType] = None
-        if items and isinstance(items.value, list):
+        if items and isinstance(items, List):
             self._items_validators = [
-                build_validator(schema=schema) for schema in items.value
+                build_validator(schema=schema) for schema in items
             ]
             if items and additionalItems:
                 self._additional_items_validator = build_validator(

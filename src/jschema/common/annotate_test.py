@@ -2,7 +2,7 @@ import unittest
 
 import parameterized  # type: ignore
 
-from jschema.common import Instance
+from jschema.common import Instance, Dict, List
 from jschema.common.annotate import annotate
 
 
@@ -11,30 +11,30 @@ class TestAnnotate(unittest.TestCase):
         [
             ("empty string", "", Instance("", "#")),
             ("string", "str", Instance("str", "#")),
-            ("array with one item", ["item"], Instance([Instance("item", "#/0")], "#")),
+            ("array with one item", ["item"], List([Instance("item", "#/0")], "#")),
             (
                 "dictionary with one item",
                 {"key": "value"},
-                Instance({"key": Instance("value", "#/key")}, location="#"),
+                Dict({"key": Instance("value", "#/key")}, location="#"),
             ),
             (
                 "dictionary with more than one item",
                 {"key": "value", "key2": "value2"},
-                Instance(
+                Dict(
                     {
                         "key": Instance("value", "#/key"),
                         "key2": Instance("value2", "#/key2"),
                     },
-                    "#",
+                    location="#",
                 ),
             ),
             (
                 "nested array",
                 ["item", ["item1", "item2"]],
-                Instance(
+                List(
                     [
                         Instance("item", "#/0"),
-                        Instance(
+                        List(
                             [Instance("item1", "#/1/0"), Instance("item2", "#/1/1")],
                             "#/1",
                         ),

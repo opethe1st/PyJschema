@@ -2,13 +2,15 @@
 from .validation_result import ValidationResult  # isort:skip
 
 from .types import AValidator, KeywordGroup, Type
-from .instance import Instance
+from .instance import Instance, Dict, List
 
 __all__ = [
     "AValidator",
     "ValidationResult",
     "Ref",
     "Instance",
+    "Dict",
+    "List",
     "KeywordGroup",
     "Type",
 ]

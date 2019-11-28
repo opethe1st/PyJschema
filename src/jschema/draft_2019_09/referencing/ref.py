@@ -13,7 +13,7 @@ BASE_URI_REGEX = re.compile(pattern=r"http.*")
 
 class Ref(KeywordGroup):
     def __init__(self, schema):
-        ref = schema.value["$ref"]
+        ref = schema["$ref"]
         value = ref.value.replace("~1", "/")
         value = value.replace("~0", "~")
         self.value = parse.unquote(value)

@@ -1,4 +1,4 @@
-from jschema.common import Instance, KeywordGroup, ValidationResult
+from jschema.common import Dict, KeywordGroup, ValidationResult
 
 
 class If(KeywordGroup):
@@ -6,18 +6,18 @@ class If(KeywordGroup):
     # TODO(ope): this accepts a schema, probably should accept if, then, else
     # but that wont work since they are reserved keywords. Maybe the decision to pass in individual keywords was
     # misguided but I also wanted to document that a particular keyword group deals with these keywords
-    def __init__(self, schema: Instance):
+    def __init__(self, schema: Dict):
         from .validator_construction import build_validator
 
-        self._if_validator = build_validator(schema=schema.value["if"])
+        self._if_validator = build_validator(schema=schema["if"])
         self._then_validator = (
-            build_validator(schema=schema.value["then"])
-            if schema.value.get("then")
+            build_validator(schema=schema["then"])
+            if schema.get("then")
             else None
         )
         self._else_validator = (
-            build_validator(schema=schema.value["else"])
-            if schema.value.get("else")
+            build_validator(schema=schema["else"])
+            if schema.get("else")
             else None
         )
 
@@ -39,11 +39,11 @@ class If(KeywordGroup):
 
 
 class AllOf(KeywordGroup):
-    def __init__(self, schema: Instance):
+    def __init__(self, schema: Dict):
         from .validator_construction import build_validator
 
         self._validators = [
-            build_validator(schema=item) for item in schema.value["allOf"].value
+            build_validator(schema=item) for item in schema["allOf"]
         ]
 
     def validate(self, instance):
@@ -56,16 +56,15 @@ class AllOf(KeywordGroup):
     # How do I prevent that in future
     # this is required if a keyword
     def subschema_validators(self):
-        for validator in self._validators:
-            yield validator
+        yield from self._validators
 
 
 class OneOf(KeywordGroup):
-    def __init__(self, schema: Instance):
+    def __init__(self, schema: Dict):
         from .validator_construction import build_validator
 
         self._validators = [
-            build_validator(schema=item) for item in schema.value["oneOf"].value
+            build_validator(schema=item) for item in schema["oneOf"]
         ]
 
     def validate(self, instance):
@@ -84,16 +83,15 @@ class OneOf(KeywordGroup):
     # WOAH: Not defining this resulted in an almost impossible to debug bug. SIGH!
     # How do I prevent that in future
     def subschema_validators(self):
-        for validator in self._validators:
-            yield validator
+        yield from self._validators
 
 
 class AnyOf(KeywordGroup):
-    def __init__(self, schema: Instance):
+    def __init__(self, schema: Dict):
         from .validator_construction import build_validator
 
         self._validators = [
-            build_validator(schema=item) for item in schema.value["anyOf"].value
+            build_validator(schema=item) for item in schema["anyOf"]
         ]
 
     def validate(self, instance):
@@ -105,15 +103,14 @@ class AnyOf(KeywordGroup):
     # WOAH: Not defining this resulted in an almost impossible to debug bug. SIGH!
     # How do I prevent that in future
     def subschema_validators(self):
-        for validator in self._validators:
-            yield validator
+        yield from self._validators
 
 
 class Not(KeywordGroup):
-    def __init__(self, schema: Instance):
+    def __init__(self, schema: Dict):
         from .validator_construction import build_validator
 
-        self._validator = build_validator(schema=schema.value["not"])
+        self._validator = build_validator(schema=schema["not"])
 
     def validate(self, instance):
         ok = not self._validator.validate(instance=instance).ok
