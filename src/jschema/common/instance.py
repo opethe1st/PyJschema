@@ -14,6 +14,8 @@ class List(list):
         super().__init__(value)
 
     def __eq__(self, other):
+        if isinstance(other, dict):
+            return super().__eq__(other)
         if not isinstance(other, List):
             return False
         return super().__eq__(other) and self.location == other.location
@@ -28,6 +30,8 @@ class Dict(dict):
         super().__init__(value)
 
     def __eq__(self, other):
+        if isinstance(other, dict):
+            return super().__eq__(other)
         if not isinstance(other, Dict):
             return False
         return super().__eq__(other) and self.location == other.location
