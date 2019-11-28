@@ -49,6 +49,7 @@ class Enum(KeywordGroup):
         for value in self._values:
             if equals(value, instance):
                 return ValidationResult(ok=True)
+        raise Exception
         return ValidationResult(ok=False)
 
 
@@ -82,4 +83,5 @@ class RejectAll(AValidator):
         self.location = schema.location.rstrip("#")
 
     def validate(self, instance):
+        raise Exception
         return ValidationResult(ok=False, messages=["This fails for every value"])

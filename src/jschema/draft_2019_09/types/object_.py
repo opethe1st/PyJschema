@@ -69,6 +69,7 @@ class _Property(KeywordGroup):
         if not results and not messages:
             return ValidationResult(ok=True)
         else:
+            raise Exception
             return ValidationResult(ok=False, messages=messages, children=results)
 
     def subschema_validators(self):
@@ -94,6 +95,7 @@ class _Required(KeywordGroup):
         if not messages:
             return ValidationResult(ok=True)
         else:
+            raise Exception
             return ValidationResult(ok=False, messages=messages)
 
 
@@ -116,6 +118,7 @@ class _PropertyNames(KeywordGroup):
         if not children:
             return ValidationResult(ok=True)
         else:
+            raise Exception
             return ValidationResult(ok=False, children=children)
 
     def subschema_validators(self):
@@ -149,6 +152,7 @@ class _DependentRequired(KeywordGroup):
         for prop, dependentProperties in self.dependentRequired.items():
             if prop in instance:
                 if not (set(dependentProperties) < set(instance.keys())):
+                    raise Exception
                     return ValidationResult(ok=False)
         return ValidationResult(ok=True)
 
@@ -172,6 +176,7 @@ class Object(Type):
                 # TODO(ope) this seems wrong to me
                 if len(keyTypes) != 1 or not (str in keyTypes):
                     res.messages.append("all the keys of the object need to be strings")
+                    raise Exception
                     return ValidationResult(ok=False, messages=res.messages)
             return res
         else:

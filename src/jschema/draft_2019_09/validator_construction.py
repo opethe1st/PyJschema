@@ -37,7 +37,10 @@ def meta_schema_validator():
 
 def validate_once(schema: t.Union[dict, bool], instance: dict) -> ValidationResult:
     validator, _ = build_validator_and_attach_context(schema=schema)
-    return validator.validate(instance=instance)
+    try:
+        return validator.validate(instance=instance)
+    except Exception:
+        return ValidationResult(ok=False)
 
 
 BuildValidatorResultType = t.Union[AcceptAll, RejectAll, Validator]
