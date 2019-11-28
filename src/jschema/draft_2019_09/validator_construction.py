@@ -2,7 +2,7 @@ import json
 import os
 import typing as t
 
-from jschema.common import Instance, Dict, ValidationResult
+from jschema.common import Primitive, Dict, ValidationResult
 from jschema.common.annotate import annotate
 
 from .referencing import (
@@ -67,13 +67,13 @@ def build_validator_and_attach_context(schema):
     return validator, context
 
 
-def build_validator(schema: t.Union[Instance, Dict]) -> BuildValidatorResultType:
+def build_validator(schema: t.Union[Primitive, Dict]) -> BuildValidatorResultType:
     if isinstance(schema, Dict):
         if schema.items():
             return Validator(schema=schema)
         else:
-            return AcceptAll(schema=Instance(value=True, location=schema.location))
-    elif isinstance(schema, Instance):
+            return AcceptAll(schema=Primitive(value=True, location=schema.location))
+    elif isinstance(schema, Primitive):
         if isinstance(schema.value, bool):
             if schema.value is True:
                 return AcceptAll(schema=schema)
@@ -83,4 +83,4 @@ def build_validator(schema: t.Union[Instance, Dict]) -> BuildValidatorResultType
             raise Exception("schema must be either a boolean or a dictionary")
     else:
         raise Exception(f"schema needs to an instance of Instance or Dict, schema is {schema}")
-    return AcceptAll(schema=Instance(value=True, location='#'))  # just to satisfy mypy
+    return AcceptAll(schema=Primitive(value=True, location='#'))  # just to satisfy mypy

@@ -1,4 +1,4 @@
-from jschema.common import AValidator, Dict, Instance, KeywordGroup, Type, ValidationResult
+from jschema.common import AValidator, Dict, Primitive, KeywordGroup, Type, ValidationResult
 from jschema.common.annotate import deannotate
 
 
@@ -63,7 +63,7 @@ def equals(a, b):
 
 
 class AcceptAll(AValidator):
-    def __init__(self, schema: Instance):
+    def __init__(self, schema: Primitive):
         self.location = schema.location.rstrip("#")
 
     def validate(self, instance):
@@ -71,7 +71,7 @@ class AcceptAll(AValidator):
 
 
 class RejectAll(AValidator):
-    def __init__(self, schema: Instance):
+    def __init__(self, schema: Primitive):
         self.location = schema.location.rstrip("#")
 
     def validate(self, instance):

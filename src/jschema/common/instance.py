@@ -2,8 +2,12 @@ import dataclasses as d
 import typing as t
 
 
+# wanted to make this similar to List and Dict
+# so instances of this class could be used as drop in
+# replacements for the native types
+# but it seems impossible to do
 @d.dataclass
-class Instance:
+class Primitive:
     value: t.Any
     location: str
 
@@ -21,7 +25,7 @@ class List(list):
         return super().__eq__(other) and self.location == other.location
 
     def __str__(self):
-        return f"List({self!r}, location={self.location})"
+        return f"{self.__class__.__name__}({self!r}, location={self.location})"
 
 
 class Dict(dict):
@@ -37,4 +41,4 @@ class Dict(dict):
         return super().__eq__(other) and self.location == other.location
 
     def __str__(self):
-        return f"Dict({self!r}, location={self.location})"
+        return f"{self.__class__.__name__}({self!r}, location={self.location})"

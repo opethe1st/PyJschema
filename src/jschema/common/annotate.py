@@ -1,10 +1,10 @@
 import typing as t
 
-from .instance import Dict, Instance, List
+from .instance import Dict, Primitive, List
 from .utils import append
 
 
-def annotate(obj, location="#") -> t.Union[Instance, Dict, List]:
+def annotate(obj, location="#") -> t.Union[Primitive, Dict, List]:
     if isinstance(obj, list):
         return List(
             [
@@ -22,11 +22,11 @@ def annotate(obj, location="#") -> t.Union[Instance, Dict, List]:
             location=location,
         )
     else:
-        return Instance(value=obj, location=location)
+        return Primitive(value=obj, location=location)
 
 
 # TODO(ope): use deannotate wherever it is useful, + Add tests
-def deannotate(instance: Instance):
+def deannotate(instance: Primitive):
     if isinstance(instance, List):
         return [deannotate(instance=value) for value in instance]
     elif isinstance(instance, Dict):

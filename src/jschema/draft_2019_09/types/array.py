@@ -1,12 +1,12 @@
 import typing as t
 
-from jschema.common import Instance, List, KeywordGroup, Type, ValidationResult
+from jschema.common import Dict, Primitive, List, KeywordGroup, Type, ValidationResult
 
 from .common import validate_max, validate_min
 
 
 class _Items(KeywordGroup):
-    def __init__(self, items: Instance, additionalItems: t.Optional[Instance] = None):
+    def __init__(self, items: t.Union[Primitive, List], additionalItems: t.Optional[Dict] = None):
         from jschema.draft_2019_09 import build_validator
         from jschema.draft_2019_09.validator_construction import (
             BuildValidatorResultType,
@@ -15,16 +15,17 @@ class _Items(KeywordGroup):
         self._items_validator: t.Optional[BuildValidatorResultType] = None
         self._items_validators: t.List[BuildValidatorResultType] = []
         self._additional_items_validator: t.Optional[BuildValidatorResultType] = None
-        if items and isinstance(items, List):
-            self._items_validators = [
-                build_validator(schema=schema) for schema in items
-            ]
-            if items and additionalItems:
-                self._additional_items_validator = build_validator(
-                    schema=additionalItems
-                )
-        elif items:
-            self._items_validator = build_validator(schema=items)
+        if items:
+            if isinstance(items, List):
+                self._items_validators = [
+                    build_validator(schema=schema) for schema in items
+                ]
+                if items and additionalItems:
+                    self._additional_items_validator = build_validator(
+                        schema=additionalItems
+                    )
+            else:  # add to add this condition
+                self._items_validator = build_validator(schema=items)
 
     def validate(self, instance):
         if self._items_validator:
@@ -88,7 +89,7 @@ class _Items(KeywordGroup):
 
 class _Contains(KeywordGroup):
     def __init__(
-        self, contains: Instance, maxContains: Instance, minContains: Instance
+        self, contains: t.Union[Primitive, Dict], maxContains: Primitive, minContains: Primitive
     ):
         from jschema.draft_2019_09 import build_validator
 
@@ -138,7 +139,7 @@ class _Contains(KeywordGroup):
 
 
 class _MinItems(KeywordGroup):
-    def __init__(self, minItems: Instance):
+    def __init__(self, minItems: Primitive):
         self.value = minItems.value
 
     def validate(self, instance):
@@ -146,7 +147,7 @@ class _MinItems(KeywordGroup):
 
 
 class _MaxItems(KeywordGroup):
-    def __init__(self, maxItems: Instance):
+    def __init__(self, maxItems: Primitive):
         self.value = maxItems.value
 
     def validate(self, instance):
@@ -154,7 +155,7 @@ class _MaxItems(KeywordGroup):
 
 
 class _UniqueItems(KeywordGroup):
-    def __init__(self, uniqueItems: Instance):
+    def __init__(self, uniqueItems: Primitive):
         self.value = uniqueItems.value
 
     def validate(self, instance):

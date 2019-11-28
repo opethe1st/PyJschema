@@ -1,9 +1,9 @@
-from jschema.common import Instance, KeywordGroup, Type, ValidationResult
+from jschema.common import Primitive, KeywordGroup, Type, ValidationResult
 from .common import validate_max, validate_min
 
 
 class _MaxLength(KeywordGroup):
-    def __init__(self, maxLength: Instance):
+    def __init__(self, maxLength: Primitive):
         self.value = maxLength.value
 
     def validate(self, instance):
@@ -11,7 +11,7 @@ class _MaxLength(KeywordGroup):
 
 
 class _MinLength(KeywordGroup):
-    def __init__(self, minLength: Instance):
+    def __init__(self, minLength: Primitive):
         self.value = minLength.value
 
     def validate(self, instance):
@@ -19,7 +19,7 @@ class _MinLength(KeywordGroup):
 
 
 class _Pattern(KeywordGroup):
-    def __init__(self, pattern: Instance):
+    def __init__(self, pattern: Primitive):
         import re
         self.regex = re.compile(pattern=pattern.value)
 

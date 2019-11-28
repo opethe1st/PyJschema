@@ -1,7 +1,7 @@
 import re
 import typing as t
 
-from jschema.common import Instance, List, Dict, KeywordGroup, Type, ValidationResult
+from jschema.common import Primitive, List, Dict, KeywordGroup, Type, ValidationResult
 
 from .common import validate_max, validate_min
 
@@ -10,7 +10,7 @@ class _Property(KeywordGroup):
     def __init__(
         self,
         properties: t.Optional[Dict] = None,
-        additionalProperties: t.Optional[Instance] = None,
+        additionalProperties: t.Optional[Primitive] = None,
         patternProperties: t.Optional[Dict] = None,
     ):
         from jschema.draft_2019_09 import build_validator
@@ -98,7 +98,7 @@ class _Required(KeywordGroup):
 
 
 class _PropertyNames(KeywordGroup):
-    def __init__(self, propertyNames: Instance):
+    def __init__(self, propertyNames: Dict):
         # add this to make sure that the type is string - I have seen it missing from
         # examples in the documentation so can only assume it's allowed
         from jschema.draft_2019_09 import build_validator
@@ -123,7 +123,7 @@ class _PropertyNames(KeywordGroup):
 
 
 class _MinProperties(KeywordGroup):
-    def __init__(self, minProperties: Instance):
+    def __init__(self, minProperties: Primitive):
         self.value = minProperties.value
 
     def validate(self, instance):
@@ -131,7 +131,7 @@ class _MinProperties(KeywordGroup):
 
 
 class _MaxProperties(KeywordGroup):
-    def __init__(self, maxProperties: Instance):
+    def __init__(self, maxProperties: Primitive):
         self.value = maxProperties.value
 
     def validate(self, instance):
