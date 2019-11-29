@@ -72,12 +72,10 @@ class _Property(KeywordGroup):
             return ValidationResult(ok=False, messages=messages, children=results)
 
     def subschema_validators(self):
-        for validator in self._validators.values():
-            yield validator
+        yield from self._validators.values()
         if self._additional_validator:
             yield self._additional_validator
-        for validator in self._pattern_validators.values():
-            yield validator
+        yield from self._pattern_validators.values()
 
 
 class _Required(KeywordGroup):

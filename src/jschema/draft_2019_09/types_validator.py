@@ -38,5 +38,4 @@ class Types(AValidator):
 
     # Forgot this too - enforce with abc abstract?
     def subschema_validators(self):
-        for validator in self._validators:
-            yield validator
+        yield from self._validators
