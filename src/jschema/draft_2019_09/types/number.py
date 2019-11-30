@@ -1,6 +1,8 @@
 import numbers
 
-from jschema.common import Primitive, KeywordGroup, Type, ValidationError
+from jschema.common import KeywordGroup, Primitive, ValidationError
+
+from .type_base import Type
 
 
 class _MultipleOf(KeywordGroup):

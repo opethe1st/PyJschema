@@ -1,12 +1,13 @@
 from jschema.common import (
     AValidator,
     Dict,
-    Primitive,
     KeywordGroup,
-    Type,
-    ValidationError,
+    Primitive,
+    ValidationError
 )
 from jschema.common.annotate import deannotate
+
+from .type_base import Type
 
 
 class Boolean(Type):

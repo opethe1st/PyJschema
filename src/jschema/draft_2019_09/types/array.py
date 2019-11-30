@@ -1,8 +1,9 @@
 import typing as t
 
-from jschema.common import Dict, Primitive, List, KeywordGroup, Type, ValidationError
+from jschema.common import Dict, KeywordGroup, List, Primitive, ValidationError
 
 from .common import validate_max, validate_min
+from .type_base import Type
 
 
 class _Items(KeywordGroup):
