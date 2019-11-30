@@ -25,13 +25,13 @@ class Types(AValidator):
         errors = validate_instance_against_any_validator(
             validators=self._validators, instance=instance
         )
-        first_error = next(errors, True)
-        if first_error:
+        first_result = next(errors, True)
+        if first_result:
             return True
         else:
             return ValidationError(
                 messages=["error while validating this instance"],
-                children=itertools.chain([first_error], errors),
+                children=itertools.chain([first_result], errors),
             )
 
     # Forgot this too - enforce with abc abstract?

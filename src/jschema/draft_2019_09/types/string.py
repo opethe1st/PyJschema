@@ -35,7 +35,7 @@ class _Pattern(KeywordGroup):
     def validate(self, instance):
         if not self.regex.search(instance):
             return ValidationError(
-                messages=[f"{instance} faild {self}"]
+                messages=[f"{instance} failed {self}"]
             )
         return True
 

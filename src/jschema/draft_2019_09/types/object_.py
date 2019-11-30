@@ -44,11 +44,11 @@ class _Property(KeywordGroup):
             pattern_validators=self._pattern_validators,
             instance=instance,
         )
-        first_error = next(errors, True)
-        if first_error:
+        first_result = next(errors, True)
+        if first_result:
             return True
         else:
-            return ValidationError(children=itertools.chain([first_error], errors))
+            return ValidationError(children=itertools.chain([first_result], errors))
 
     def subschema_validators(self):
         yield from self._validators.values()
@@ -117,11 +117,11 @@ class _PropertyNames(KeywordGroup):
         errors = validate_property_names(
             validator=self._validator, instance=instance
         )
-        first_error = next(errors, True)
-        if first_error:
+        first_result = next(errors, True)
+        if first_result:
             return True
         else:
-            return ValidationError(children=itertools.chain([first_error], errors))
+            return ValidationError(children=itertools.chain([first_result], errors))
 
     def subschema_validators(self):
         yield self._validator

@@ -43,11 +43,11 @@ class _Items(KeywordGroup):
             lambda res: not res,
             (self._items_validator.validate(value) for value in instance),
         )
-        first_error = next(errors, True)
-        if first_error:
+        first_result = next(errors, True)
+        if first_result:
             return True
         else:
-            return ValidationError(children=itertools.chain([first_error], errors))
+            return ValidationError(children=itertools.chain([first_result], errors))
 
     def _validate_items_list(self, instance):
         results = _validate_item_list(items_validators=self._items_validators, additional_items_validator=self._additional_items_validator, instance=instance)

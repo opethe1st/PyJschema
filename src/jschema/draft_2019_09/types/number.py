@@ -83,12 +83,12 @@ class _NumberOrInteger(Type):
         errors = validate_instance_against_all_validators(
             validators=self._validators, instance=instance
         )
-        first_error = next(errors, True)
-        if first_error and not messages:
+        first_result = next(errors, True)
+        if first_result and not messages:
             return True
         else:
             return ValidationError(
-                messages=messages, children=itertools.chain([first_error], errors)
+                messages=messages, children=itertools.chain([first_result], errors)
             )
 
 

@@ -53,16 +53,16 @@ class Validator(AValidator):
     def validate(self, instance):
         # can move this to a function that take in a list of validators and an instance
         # then yield the errors as they occur
-        error_generator = validate_instance_against_all_validators(
+        errors = validate_instance_against_all_validators(
             validators=self._validators, instance=instance
         )
-        first_error = next(error_generator, True)
-        if first_error:
+        first_result = next(errors, True)
+        if first_result:
             return True
         else:
             return ValidationError(
                 messages=["error while validating this instance"],
-                children=itertools.chain([first_error], error_generator),
+                children=itertools.chain([first_result], errors),
             )
 
     # TODO(ope): hm.. this is the same as the method in Type.

@@ -32,19 +32,19 @@ class Type(AValidator):
         if messages:
             return ValidationError(messages=messages)
 
-        error_generator = validate_instance_against_all_validators(
+        errors = validate_instance_against_all_validators(
             validators=self._validators, instance=instance
         )
         # default to True if exhausted since that means that there were no errors
-        first_error = next(error_generator, True)
+        first_result = next(errors, True)
 
-        # needs to be not - because bool(first_error) evaluates to True
-        if first_error and not messages:
+        # needs to be not - because bool(first_result) evaluates to True
+        if first_result and not messages:
             return True
         else:
             return ValidationError(
                 messages=messages,
-                children=itertools.chain([first_error], error_generator),
+                children=itertools.chain([first_result], errors),
             )
 
     def subschema_validators(self):
