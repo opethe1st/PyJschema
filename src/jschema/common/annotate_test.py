@@ -55,20 +55,11 @@ class TestDeAnnotate(unittest.TestCase):
             ("empty string", ""),
             ("string", "str"),
             ("array with one item", ["item"]),
-            (
-                "dictionary with one item",
-                {"key": "value"},
-            ),
-            (
-                "dictionary with more than one item",
-                {"key": "value", "key2": 2},
-            ),
-            (
-                "nested array",
-                ["item", ["item1", "item2"]],
-            ),
+            ("dictionary with one item", {"key": "value"}),
+            ("dictionary with more than one item", {"key": "value", "key2": 2}),
+            ("nested array", ["item", ["item1", "item2"]]),
         ]
     )
-    def test_true(self, name, obj,):
+    def test_true(self, name, obj):
         res = deannotate(annotate(obj=obj))
         self.assertEqual(res, obj)

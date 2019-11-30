@@ -9,7 +9,9 @@ class _MaxLength(KeywordGroup):
         self.value = maxLength.value
 
     def validate(self, instance):
-        return validate_max(value=self.value, instance=instance, message=f"{instance} failed {self}")
+        return validate_max(
+            value=self.value, instance=instance, message=f"{instance} failed {self}"
+        )
 
     def __repr__(self):
         return f"Maximum(value={self.value})"
@@ -20,7 +22,9 @@ class _MinLength(KeywordGroup):
         self.value = minLength.value
 
     def validate(self, instance):
-        return validate_min(value=self.value, instance=instance, message=f"{instance} failed {self}")
+        return validate_min(
+            value=self.value, instance=instance, message=f"{instance} failed {self}"
+        )
 
     def __repr__(self):
         return f"Minimum(value={self.value})"
@@ -29,14 +33,13 @@ class _MinLength(KeywordGroup):
 class _Pattern(KeywordGroup):
     def __init__(self, pattern: Primitive):
         import re
+
         self.value = pattern
         self.regex = re.compile(pattern=pattern.value)
 
     def validate(self, instance):
         if not self.regex.search(instance):
-            return ValidationError(
-                messages=[f"{instance} failed {self}"]
-            )
+            return ValidationError(messages=[f"{instance} failed {self}"])
         return True
 
     def __repr__(self):

@@ -43,8 +43,7 @@ class Type(AValidator):
             return True
         else:
             return ValidationError(
-                messages=messages,
-                children=itertools.chain([first_result], errors),
+                messages=messages, children=itertools.chain([first_result], errors)
             )
 
     def subschema_validators(self):

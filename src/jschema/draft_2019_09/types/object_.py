@@ -114,9 +114,7 @@ class _PropertyNames(KeywordGroup):
         self._validator = build_validator(schema=propertyNames)
 
     def validate(self, instance):
-        errors = validate_property_names(
-            validator=self._validator, instance=instance
-        )
+        errors = validate_property_names(validator=self._validator, instance=instance)
         first_result = next(errors, True)
         if first_result:
             return True

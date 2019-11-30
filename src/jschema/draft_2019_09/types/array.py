@@ -50,7 +50,11 @@ class _Items(KeywordGroup):
             return ValidationError(children=itertools.chain([first_result], errors))
 
     def _validate_items_list(self, instance):
-        results = _validate_item_list(items_validators=self._items_validators, additional_items_validator=self._additional_items_validator, instance=instance)
+        results = _validate_item_list(
+            items_validators=self._items_validators,
+            additional_items_validator=self._additional_items_validator,
+            instance=instance,
+        )
         first_res = next(results, True)
 
         if first_res:
