@@ -1,5 +1,5 @@
 import typing as t
-
+import itertools
 from jschema.common import Dict, KeywordGroup, List, Primitive, ValidationError
 
 from .common import validate_max, validate_min
@@ -38,18 +38,19 @@ class _Items(KeywordGroup):
         return True
 
     def _validate_items(self, instance):
-        children = []
 
-        for value in instance:
-            res = self._items_validator.validate(value)
-
-            if not res:
-                children.append(res)
-
-        if not children:
+        errors = filter(
+            lambda res: not res,
+            (
+                self._items_validator.validate(value)
+                for value in instance
+            )
+        )
+        first_error = next(errors, True)
+        if first_error:
             return True
         else:
-            return ValidationError(children=children)
+            return ValidationError(children=itertools.chain([first_error], errors))
 
     def _validate_items_list(self, instance):
         children = []
@@ -99,7 +100,6 @@ class _Contains(KeywordGroup):
     ):
         from jschema.draft_2019_09 import build_validator
 
-        self._contains_present = False if contains is None else True
         self._validator = build_validator(schema=contains) if contains else None
         self.maxContainsValue = maxContains.value if maxContains else float("inf")
         self.minContainsValue = minContains.value if minContains else -float("inf")
@@ -168,7 +168,7 @@ class _UniqueItems(KeywordGroup):
 
             if len(itemsset) != len(instance):
                 return ValidationError()
-            # TODO(ope) - actually make sure the values are unique
+            # TODO(ope) - actually make sure the values are unique - is this even possible?
 
         return True
 

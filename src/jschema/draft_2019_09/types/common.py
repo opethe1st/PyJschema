@@ -34,8 +34,3 @@ def validate_instance_against_any_validator(validators, instance):
             errors.append(res)
 
     yield from errors
-
-
-def append_to_generator(item, generator):
-    yield item
-    yield from generator

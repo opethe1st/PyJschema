@@ -4,8 +4,6 @@ import parameterized
 
 from jschema.draft_2019_09 import validate_once
 
-# TODO: ope split this up into multiple files
-
 
 class TestString(unittest.TestCase):
     @parameterized.parameterized.expand(

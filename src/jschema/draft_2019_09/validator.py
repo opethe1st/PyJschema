@@ -1,11 +1,13 @@
+import itertools
 import typing as t
 
-from jschema.common import AValidator, ValidationError, List
+from jschema.common import AValidator, List, ValidationError
+from jschema.draft_2019_09.referencing import Ref
 
 from .constants import KEYWORDS_TO_VALIDATOR, TYPE_TO_TYPE_VALIDATORS
-from .types_validator import Types
-from jschema.draft_2019_09.referencing import Ref
 from .defs import Defs
+from .types.common import validate_instance_against_all_validators
+from .types_validator import Types
 
 
 class Validator(AValidator):
@@ -51,19 +53,14 @@ class Validator(AValidator):
     def validate(self, instance):
         # can move this to a function that take in a list of validators and an instance
         # then yield the errors as they occur
-        results = []
-        for validator in self._validators:
-            result = validator.validate(instance)
-
-            if not result:
-                results.append(result)
-
-        if not results:
+        error_generator = validate_instance_against_all_validators(validators=self._validators, instance=instance)
+        first_error = next(error_generator, True)
+        if first_error:
             return True
         else:
             return ValidationError(
                 messages=["error while validating this instance"],
-                children=results,
+                children=itertools.chain([first_error], error_generator),
             )
 
     # TODO(ope): hm.. this is the same as the method in Type.

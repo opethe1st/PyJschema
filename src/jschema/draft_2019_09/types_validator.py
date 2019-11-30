@@ -1,8 +1,10 @@
+import itertools
 import typing as t
 
 from jschema.common import AValidator, Dict, ValidationError
 
 from .constants import TYPE_TO_TYPE_VALIDATORS
+from .types.common import validate_instance_against_any_validator
 
 
 class Types(AValidator):
@@ -20,20 +22,15 @@ class Types(AValidator):
                 self._validators.append(TYPE_TO_TYPE_VALIDATORS[type_](schema=schema))
 
     def validate(self, instance):
-        results = []
-
-        for validator in self._validators:
-            result = validator.validate(instance)
-
-            if result:
-                return result
-            else:
-                results.append(result)
-
-        return ValidationError(
-            messages=["error while validating this instance"],
-            children=results,
-        )
+        errors = validate_instance_against_any_validator(validators=self._validators, instance=instance)
+        first_error = next(errors, True)
+        if first_error:
+            return True
+        else:
+            return ValidationError(
+                messages=["error while validating this instance"],
+                children=itertools.chain([first_error], errors),
+            )
 
     # Forgot this too - enforce with abc abstract?
     def subschema_validators(self):
