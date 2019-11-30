@@ -1,10 +1,4 @@
-from jschema.common import (
-    AValidator,
-    Dict,
-    KeywordGroup,
-    Primitive,
-    ValidationError
-)
+from jschema.common import AValidator, Dict, KeywordGroup, Primitive, ValidationError
 from jschema.common.annotate import deannotate
 
 from .type_base import Type
@@ -20,9 +14,7 @@ class Boolean(Type):
             if (instance is True) or (instance is False):
                 return True
             else:
-                return ValidationError(
-                    messages=["instance is not a valid boolean"]
-                )
+                return ValidationError(messages=["instance is not a valid boolean"])
         else:
             return res
 

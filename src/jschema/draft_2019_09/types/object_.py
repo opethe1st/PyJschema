@@ -38,7 +38,12 @@ class _Property(KeywordGroup):
 
     def validate(self, instance):
 
-        errors = _validate(property_validators=self._validators, additional_validator=self._additional_validator, pattern_validators=self._pattern_validators, instance=instance)
+        errors = _validate(
+            property_validators=self._validators,
+            additional_validator=self._additional_validator,
+            pattern_validators=self._pattern_validators,
+            instance=instance,
+        )
         first_error = next(errors, True)
         if first_error:
             return True
@@ -109,7 +114,9 @@ class _PropertyNames(KeywordGroup):
         self._validator = build_validator(schema=propertyNames)
 
     def validate(self, instance):
-        errors = yield_property_name_errors(validator=self._validator, instance=instance)
+        errors = yield_property_name_errors(
+            validator=self._validator, instance=instance
+        )
         first_error = next(errors, True)
         if first_error:
             return True

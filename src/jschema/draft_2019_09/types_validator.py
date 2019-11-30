@@ -22,7 +22,9 @@ class Types(AValidator):
                 self._validators.append(TYPE_TO_TYPE_VALIDATORS[type_](schema=schema))
 
     def validate(self, instance):
-        errors = validate_instance_against_any_validator(validators=self._validators, instance=instance)
+        errors = validate_instance_against_any_validator(
+            validators=self._validators, instance=instance
+        )
         first_error = next(errors, True)
         if first_error:
             return True

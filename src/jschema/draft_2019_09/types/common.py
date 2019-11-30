@@ -1,4 +1,6 @@
-from jschema.common import ValidationError
+import typing
+
+from jschema.common import AValidator, ValidationError
 
 
 def validate_min(value, instance):
@@ -13,17 +15,18 @@ def validate_max(value, instance):
     return True
 
 
-def validate_instance_against_all_validators(validators, instance):
+def validate_instance_against_all_validators(
+    validators: typing.List[AValidator], instance
+):
     yield from filter(
         lambda res: not res,
-        (
-            validator.validate(instance=instance)
-            for validator in validators
-        )
+        (validator.validate(instance=instance) for validator in validators),
     )
 
 
-def validate_instance_against_any_validator(validators, instance):
+def validate_instance_against_any_validator(
+    validators: typing.List[AValidator], instance
+):
     errors = []
 
     for validator in validators:

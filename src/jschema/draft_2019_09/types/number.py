@@ -80,12 +80,16 @@ class _NumberOrInteger(Type):
             messages.append(f"instance: {instance} is not a {self.type_}")
         if messages:
             return ValidationError(messages=messages)
-        errors = validate_instance_against_all_validators(validators=self._validators, instance=instance)
+        errors = validate_instance_against_all_validators(
+            validators=self._validators, instance=instance
+        )
         first_error = next(errors, True)
         if first_error and not messages:
             return True
         else:
-            return ValidationError(messages=messages, children=itertools.chain([first_error], errors))
+            return ValidationError(
+                messages=messages, children=itertools.chain([first_error], errors)
+            )
 
 
 class Number(_NumberOrInteger):

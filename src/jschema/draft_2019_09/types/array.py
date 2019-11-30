@@ -41,10 +41,7 @@ class _Items(KeywordGroup):
 
         errors = filter(
             lambda res: not res,
-            (
-                self._items_validator.validate(value)
-                for value in instance
-            )
+            (self._items_validator.validate(value) for value in instance),
         )
         first_error = next(errors, True)
         if first_error:
@@ -107,7 +104,6 @@ class _Contains(KeywordGroup):
     def validate(self, instance):
 
         if self._validator:
-            contains = False
             count = 0
             for value in instance:
                 # should just be one validator
@@ -116,23 +112,20 @@ class _Contains(KeywordGroup):
                 if res:
                     count += 1
 
-                    if not contains:
-                        contains = True
-
-            if contains and (self.minContainsValue <= count <= self.maxContainsValue):
+            if count and (self.minContainsValue <= count <= self.maxContainsValue):
                 return True
 
             if not (self.minContainsValue <= count <= self.maxContainsValue):
                 return ValidationError(
                     messages=[
                         f"The number of items matching the contains keyword is not less than or equal to {self.minContainsValue} or greater than or equal to {self.maxContainsValue}"
-                    ],
+                    ]
                 )
 
             return ValidationError(
                 messages=[
                     "No item in this array matches the schema in the contains keyword"
-                ],
+                ]
             )
         else:
             return True

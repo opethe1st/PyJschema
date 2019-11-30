@@ -32,5 +32,3 @@ class KeywordGroup(AValidator):
     """
 
     pass
-
-

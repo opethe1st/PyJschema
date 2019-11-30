@@ -42,14 +42,10 @@ class Type(AValidator):
         if not first_error:
             return ValidationError(
                 messages=messages,
-                children=itertools.chain(
-                    [first_error], error_generator
-                ),
+                children=itertools.chain([first_error], error_generator),
             )
         elif messages:
-            return ValidationError(
-                messages=messages
-            )
+            return ValidationError(messages=messages)
         else:
             return True
 
