@@ -1,5 +1,7 @@
-from jschema.common import Primitive, KeywordGroup, Type, ValidationError
+from jschema.common import KeywordGroup, Primitive, ValidationError
+
 from .common import validate_max, validate_min
+from .type_base import Type
 
 
 class _MaxLength(KeywordGroup):
@@ -7,7 +9,12 @@ class _MaxLength(KeywordGroup):
         self.value = maxLength.value
 
     def validate(self, instance):
-        return validate_max(value=self.value, instance=instance)
+        return validate_max(
+            value=self.value, instance=instance, message=f"{instance} failed {self}"
+        )
+
+    def __repr__(self):
+        return f"Maximum(value={self.value})"
 
 
 class _MinLength(KeywordGroup):
@@ -15,21 +22,28 @@ class _MinLength(KeywordGroup):
         self.value = minLength.value
 
     def validate(self, instance):
-        return validate_min(value=self.value, instance=instance)
+        return validate_min(
+            value=self.value, instance=instance, message=f"{instance} failed {self}"
+        )
+
+    def __repr__(self):
+        return f"Minimum(value={self.value})"
 
 
 class _Pattern(KeywordGroup):
     def __init__(self, pattern: Primitive):
         import re
 
+        self.value = pattern
         self.regex = re.compile(pattern=pattern.value)
 
     def validate(self, instance):
         if not self.regex.search(instance):
-            return ValidationError(
-                messages=["instance doesn't match the pattern given"]
-            )
+            return ValidationError(messages=[f"{instance} failed {self}"])
         return True
+
+    def __repr__(self):
+        return f"Pattern(value={self.value})"
 
 
 class String(Type):

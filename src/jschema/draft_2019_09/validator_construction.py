@@ -13,7 +13,7 @@ from .referencing import (
 from .types import AcceptAll, RejectAll
 from .validator import Validator
 
-__all__ = ["validate_once", "build_validator", "Validator"]
+__all__ = ["validate_once", "build_validator", "Validator", "construct_validator"]
 
 
 def construct_validator(schema):

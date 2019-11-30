@@ -1,6 +1,10 @@
+import itertools
 import numbers
 
-from jschema.common import Primitive, KeywordGroup, Type, ValidationError
+from jschema.common import KeywordGroup, Primitive, ValidationError
+
+from .common import validate_instance_against_all_validators
+from .type_base import Type
 
 
 class _MultipleOf(KeywordGroup):
@@ -67,27 +71,25 @@ class _NumberOrInteger(Type):
     }
 
     def validate(self, instance):
-        results = []
         messages = []
         if self.type_ is not None and not isinstance(instance, self.type_):
             messages.append(f"instance: {instance} is not a {self.type_}")
 
+        # TODO: this looks weird to me. Needs a closer look
         if isinstance(instance, bool):
             messages.append(f"instance: {instance} is not a {self.type_}")
         if messages:
             return ValidationError(messages=messages)
-
-        results = list(
-            filter(
-                (lambda res: not res),
-                (validator.validate(instance) for validator in self._validators),
-            )
+        errors = validate_instance_against_all_validators(
+            validators=self._validators, instance=instance
         )
-
-        if not results and not messages:
+        first_result = next(errors, True)
+        if first_result and not messages:
             return True
         else:
-            return ValidationError(messages=messages, children=results)
+            return ValidationError(
+                messages=messages, children=itertools.chain([first_result], errors)
+            )
 
 
 class Number(_NumberOrInteger):
