@@ -1,10 +1,10 @@
 import numbers
 
-from jschema.common import Instance, Keyword, Type, ValidationResult
+from jschema.common import Primitive, KeywordGroup, Type, ValidationError
 
 
-class _MultipleOf(Keyword):
-    def __init__(self, multipleOf: Instance):
+class _MultipleOf(KeywordGroup):
+    def __init__(self, multipleOf: Primitive):
         self.value = multipleOf.value
 
     def validate(self, instance):
@@ -13,48 +13,48 @@ class _MultipleOf(Keyword):
         instance = instance * multiplier
         value = self.value * multiplier
         if (instance % value) != 0:
-            return ValidationResult(ok=False)
-        return ValidationResult(ok=True)
+            return ValidationError()
+        return True
 
 
-class _Minimum(Keyword):
-    def __init__(self, minimum: Instance):
+class _Minimum(KeywordGroup):
+    def __init__(self, minimum: Primitive):
         self.value = minimum.value
 
     def validate(self, instance):
         if instance < self.value:
-            return ValidationResult(ok=False)
-        return ValidationResult(ok=True)
+            return ValidationError()
+        return True
 
 
-class _Maximum(Keyword):
-    def __init__(self, maximum: Instance):
+class _Maximum(KeywordGroup):
+    def __init__(self, maximum: Primitive):
         self.value = maximum.value
 
     def validate(self, instance):
         if self.value < instance:
-            return ValidationResult(ok=False)
-        return ValidationResult(ok=True)
+            return ValidationError()
+        return True
 
 
-class _ExclusiveMinimum(Keyword):
-    def __init__(self, exclusiveMinimum: Instance):
+class _ExclusiveMinimum(KeywordGroup):
+    def __init__(self, exclusiveMinimum: Primitive):
         self.value = exclusiveMinimum.value
 
     def validate(self, instance):
         if instance <= self.value:
-            return ValidationResult(ok=False)
-        return ValidationResult(ok=True)
+            return ValidationError()
+        return True
 
 
-class _ExclusiveMaximum(Keyword):
-    def __init__(self, exclusiveMaximum: Instance):
+class _ExclusiveMaximum(KeywordGroup):
+    def __init__(self, exclusiveMaximum: Primitive):
         self.value = exclusiveMaximum.value
 
     def validate(self, instance):
         if self.value <= instance:
-            return ValidationResult(ok=False)
-        return ValidationResult(ok=True)
+            return ValidationError()
+        return True
 
 
 class _NumberOrInteger(Type):
@@ -75,19 +75,19 @@ class _NumberOrInteger(Type):
         if isinstance(instance, bool):
             messages.append(f"instance: {instance} is not a {self.type_}")
         if messages:
-            return ValidationResult(ok=False, messages=messages)
+            return ValidationError(messages=messages)
 
         results = list(
             filter(
-                (lambda res: not res.ok),
+                (lambda res: not res),
                 (validator.validate(instance) for validator in self._validators),
             )
         )
 
         if not results and not messages:
-            return ValidationResult(ok=True)
+            return True
         else:
-            return ValidationResult(ok=False, messages=messages, children=results)
+            return ValidationError(messages=messages, children=results)
 
 
 class Number(_NumberOrInteger):

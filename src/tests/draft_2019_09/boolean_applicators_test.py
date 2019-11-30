@@ -32,7 +32,7 @@ class TestBooleanLogic(unittest.TestCase):
     )
     def test_true(self, name, schema, instance):
         res = validate_once(schema, instance)
-        self.assertTrue(res.ok)
+        self.assertTrue(res)
 
     @parameterized.parameterized.expand(
         [
@@ -60,4 +60,4 @@ class TestBooleanLogic(unittest.TestCase):
     )
     def test_false(self, name, schema, instance):
         res = validate_once(schema, instance)
-        self.assertFalse(res.ok)
+        self.assertFalse(res)

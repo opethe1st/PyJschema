@@ -28,7 +28,7 @@ class TestValidatorWithRef(unittest.TestCase):
     )
     def test_true(self, name, schema, instance):
         res = validate_once(schema, instance)
-        self.assertTrue(res.ok)
+        self.assertTrue(res)
 
     @parameterized.parameterized.expand(
         [
@@ -50,7 +50,7 @@ class TestValidatorWithRef(unittest.TestCase):
     )
     def test_false(self, name, schema, instance):
         res = validate_once(schema, instance)
-        self.assertFalse(res.ok)
+        self.assertFalse(res)
 
 
 class TestTypes(unittest.TestCase):
@@ -88,7 +88,7 @@ class TestTypes(unittest.TestCase):
     )
     def test_true(self, name, schema, instance):
         res = validate_once(schema, instance)
-        self.assertTrue(res.ok)
+        self.assertTrue(res)
 
     @parameterized.parameterized.expand(
         [
@@ -124,7 +124,7 @@ class TestTypes(unittest.TestCase):
     )
     def test_false(self, name, schema, instance):
         res = validate_once(schema, instance)
-        self.assertFalse(res.ok)
+        self.assertFalse(res)
 
 
 class TestCanonicalId(unittest.TestCase):
@@ -151,7 +151,7 @@ class TestCanonicalId(unittest.TestCase):
     )
     def test_true(self, name, schema, instance):
         res = validate_once(schema, instance)
-        self.assertTrue(res.ok)
+        self.assertTrue(res)
 
 
 class TestKeywordValidationWithoutType(unittest.TestCase):
@@ -172,4 +172,4 @@ class TestKeywordValidationWithoutType(unittest.TestCase):
     )
     def test_true(self, name, schema, instance):
         res = validate_once(schema, instance)
-        self.assertTrue(res.ok)
+        self.assertTrue(res)

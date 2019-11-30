@@ -13,10 +13,10 @@ class TestBoolean(unittest.TestCase):
         ]
     )
     def test_instance_true(self, name, schema, instance):
-        self.assertTrue(validate_once(schema=schema, instance=instance).ok)
+        self.assertTrue(validate_once(schema=schema, instance=instance))
 
     def test_instance_not_boolean(self):
-        ok = validate_once(
+        res = validate_once(
             schema={"$id": "https://example.com/ope", "type": "boolean"}, instance=123
-        ).ok
-        self.assertFalse(ok)
+        )
+        self.assertFalse(res)

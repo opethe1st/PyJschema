@@ -3,7 +3,7 @@ import numbers
 import typing as t
 from collections.abc import Mapping, Sequence
 
-from jschema.common import ValidationResult
+from jschema.common import ValidationError
 
 JsonType = t.Union[str, numbers.Number, bool, None, Mapping, Sequence]
 
@@ -18,21 +18,18 @@ class AValidator(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def validate(self, instance: JsonType) -> ValidationResult:
-        pass
+    def validate(self, instance: JsonType) -> ValidationError:
+        raise NotImplementedError
 
     def subschema_validators(self) -> t.Iterable["AValidator"]:
-        return []
+        yield from []
 
 
 class KeywordGroup(AValidator):
-    """Validator for a group of keyword that are dependent on each other"""
-
-    pass
-
-
-class Keyword(AValidator):
-    """Validator for a keyword"""
+    """
+    Validator for a group of keywords that are dependent on each other.
+    This also included the case where there is one validator
+    """
 
     pass
 
@@ -41,7 +38,7 @@ class Type(AValidator):
     """Validator for a type"""
 
     KEYWORDS_TO_VALIDATOR: t.Dict[
-        t.Tuple[str, ...], t.Union[t.Type[Keyword], t.Type[KeywordGroup]]
+        t.Tuple[str, ...], t.Union[t.Type[KeywordGroup], t.Type[KeywordGroup]]
     ] = {}
     type_: t.Optional[t.Type] = None
 
@@ -49,10 +46,10 @@ class Type(AValidator):
         self._validators: t.List[AValidator] = []
         for keywords in self.KEYWORDS_TO_VALIDATOR:
 
-            if any(schema.value.get(keyword) is not None for keyword in keywords):
+            if any(schema.get(keyword) is not None for keyword in keywords):
                 self._validators.append(
                     self.KEYWORDS_TO_VALIDATOR[keywords](
-                        **{keyword: schema.value.get(keyword) for keyword in keywords}
+                        **{keyword: schema.get(keyword) for keyword in keywords}
                     )
                 )
 
@@ -62,21 +59,19 @@ class Type(AValidator):
         if self.type_ is not None and not isinstance(instance, self.type_):
             messages.append(f"instance is not a {self.type_}")
         if messages:
-            return ValidationResult(ok=False, messages=messages)
+            return ValidationError(messages=messages)
 
         results = list(
             filter(
-                (lambda res: not res.ok),
+                (lambda res: not res),
                 (validator.validate(instance) for validator in self._validators),
             )
         )
 
         if not results and not messages:
-            return ValidationResult(ok=True)
+            return True
         else:
-            return ValidationResult(ok=False, messages=messages, children=results)
+            return ValidationError(messages=messages, children=results)
 
     def subschema_validators(self):
-        # maybe optimize by not returning validators that don't have schemas embedded
-        for validator in self._validators:
-            yield validator
+        yield from self._validators

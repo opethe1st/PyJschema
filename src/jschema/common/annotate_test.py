@@ -2,40 +2,40 @@ import unittest
 
 import parameterized  # type: ignore
 
-from jschema.common import Instance
+from jschema.common import Primitive, Dict, List
 from jschema.common.annotate import annotate
 
 
 class TestAnnotate(unittest.TestCase):
     @parameterized.parameterized.expand(
         [
-            ("empty string", "", Instance("", "#")),
-            ("string", "str", Instance("str", "#")),
-            ("array with one item", ["item"], Instance([Instance("item", "#/0")], "#")),
+            ("empty string", "", Primitive("", "#")),
+            ("string", "str", Primitive("str", "#")),
+            ("array with one item", ["item"], List([Primitive("item", "#/0")], "#")),
             (
                 "dictionary with one item",
                 {"key": "value"},
-                Instance({"key": Instance("value", "#/key")}, location="#"),
+                Dict({"key": Primitive("value", "#/key")}, location="#"),
             ),
             (
                 "dictionary with more than one item",
-                {"key": "value", "key2": "value2"},
-                Instance(
+                {"key": "value", "key2": 2},
+                Dict(
                     {
-                        "key": Instance("value", "#/key"),
-                        "key2": Instance("value2", "#/key2"),
+                        "key": Primitive("value", "#/key"),
+                        "key2": Primitive(2, "#/key2"),
                     },
-                    "#",
+                    location="#",
                 ),
             ),
             (
                 "nested array",
                 ["item", ["item1", "item2"]],
-                Instance(
+                List(
                     [
-                        Instance("item", "#/0"),
-                        Instance(
-                            [Instance("item1", "#/1/0"), Instance("item2", "#/1/1")],
+                        Primitive("item", "#/0"),
+                        List(
+                            [Primitive("item1", "#/1/0"), Primitive("item2", "#/1/1")],
                             "#/1",
                         ),
                     ],

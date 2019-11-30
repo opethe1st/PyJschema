@@ -1,22 +1,21 @@
-from jschema.common import Instance, Keyword, ValidationResult
+from jschema.common import Dict, KeywordGroup
 
 
-class Defs(Keyword):
+class Defs(KeywordGroup):
     """
     This is corresponds to the $defs keyword
     """
 
-    def __init__(self, schema: Instance):
-        defs = schema.value["$defs"]
+    def __init__(self, schema: Dict):
+        defs = schema["$defs"]
         from .validator_construction import build_validator
 
         self._validators = {
-            key: build_validator(schema=value) for key, value in defs.value.items()
+            key: build_validator(schema=value) for key, value in defs.items()
         }
 
     def validate(self, instance):
-        return ValidationResult(ok=True)
+        return True
 
     def subschema_validators(self):
-        for validator in self._validators.values():
-            yield validator
+        yield from self._validators.values()

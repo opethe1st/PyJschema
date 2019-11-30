@@ -1,15 +1,15 @@
 import typing as t
 
-from jschema.common import AValidator, Instance, ValidationResult
+from jschema.common import AValidator, Dict, ValidationError
 
 from .constants import TYPE_TO_TYPE_VALIDATORS
 
 
 class Types(AValidator):
-    def __init__(self, schema: Instance):
+    def __init__(self, schema: Dict):
         self._validators: t.List[AValidator] = []
-        if "type" in schema.value:
-            types: t.Iterable[str] = [item.value for item in schema.value["type"].value]
+        if "type" in schema:
+            types: t.Iterable[str] = [item.value for item in schema["type"]]
         else:
             # if there is no type, then try all the types
             # TODO(ope): optimize this later
@@ -25,18 +25,16 @@ class Types(AValidator):
         for validator in self._validators:
             result = validator.validate(instance)
 
-            if result.ok:
+            if result:
                 return result
             else:
                 results.append(result)
 
-        return ValidationResult(
-            ok=False,
+        return ValidationError(
             messages=["error while validating this instance"],
             children=results,
         )
 
     # Forgot this too - enforce with abc abstract?
     def subschema_validators(self):
-        for validator in self._validators:
-            yield validator
+        yield from self._validators

@@ -15,7 +15,7 @@ class TestResolveURI(unittest.TestCase):
                     "https://example.com/other.json": False,
                     "#/$defs/other/defs/string": None,
                 },
-                {'https://example.com/other.json': '#/$defs/other'},
+                {"https://example.com/other.json": "#/$defs/other"},
                 "https://example.com/other.json#/defs/string",
                 None,
             ),
@@ -26,7 +26,7 @@ class TestResolveURI(unittest.TestCase):
                     "https://example.com/other.json": False,
                     "#/$defs/other/defs/string": None,
                 },
-                {'https://example.com/other.json': '#/$defs/other'},
+                {"https://example.com/other.json": "#/$defs/other"},
                 "https://example.com/root.json",
                 True,
             ),
@@ -37,7 +37,7 @@ class TestResolveURI(unittest.TestCase):
                     "https://example.com/other.json": False,
                     "#/$defs/other": False,
                 },
-                {'https://example.com/other.json': '#/$defs/other'},
+                {"https://example.com/other.json": "#/$defs/other"},
                 "https://example.com/root.json#/$defs/other",
                 False,
             ),
@@ -48,7 +48,7 @@ class TestResolveURI(unittest.TestCase):
                     "https://example.com/other.json": False,
                     "#/$defs/other/defs/string": None,
                 },
-                {'https://example.com/other.json': '#/$defs/other'},
+                {"https://example.com/other.json": "#/$defs/other"},
                 "https://example.com/other.json",
                 False,
             ),
@@ -59,7 +59,7 @@ class TestResolveURI(unittest.TestCase):
             resolve_uri(
                 context=context,
                 base_uri_to_abs_location=base_uri_to_abs_location,
-                uri=input_
+                uri=input_,
             ),
-            output
+            output,
         )

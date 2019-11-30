@@ -1,4 +1,11 @@
-from jschema.common import AValidator, Instance, Keyword, Type, ValidationResult
+from jschema.common import (
+    AValidator,
+    Dict,
+    Primitive,
+    KeywordGroup,
+    Type,
+    ValidationError,
+)
 from jschema.common.annotate import deannotate
 
 
@@ -8,12 +15,12 @@ class Boolean(Type):
     def validate(self, instance):
         # is this faster than an isinstance check?
         res = super().validate(instance=instance)
-        if res.ok:
+        if res:
             if (instance is True) or (instance is False):
-                return ValidationResult(ok=True)
+                return True
             else:
-                return ValidationResult(
-                    ok=False, messages=["instance is not a valid boolean"]
+                return ValidationError(
+                    messages=["instance is not a valid boolean"]
                 )
         else:
             return res
@@ -23,26 +30,26 @@ class Null(Type):
     type_ = type(None)
 
 
-class Const(Keyword):
-    def __init__(self, schema: Instance):
-        const = schema.value["const"]
+class Const(KeywordGroup):
+    def __init__(self, schema: Dict):
+        const = schema["const"]
         self.value = deannotate(const)
 
     def validate(self, instance):
         ok = equals(self.value, instance)
-        return ValidationResult(ok=ok)
+        return True if ok else ValidationError()
 
 
-class Enum(Keyword):
-    def __init__(self, schema: Instance):
-        enum = schema.value["enum"]
-        self._values = [deannotate(instance=instance) for instance in enum.value]
+class Enum(KeywordGroup):
+    def __init__(self, schema: Dict):
+        enum = schema["enum"]
+        self._values = [deannotate(instance=instance) for instance in enum]
 
     def validate(self, instance):
         for value in self._values:
             if equals(value, instance):
-                return ValidationResult(ok=True)
-        return ValidationResult(ok=False)
+                return True
+        return ValidationError()
 
 
 def equals(a, b):
@@ -63,16 +70,16 @@ def equals(a, b):
 
 
 class AcceptAll(AValidator):
-    def __init__(self, schema: Instance):
+    def __init__(self, schema: Primitive):
         self.location = schema.location.rstrip("#")
 
     def validate(self, instance):
-        return ValidationResult(ok=True)
+        return True
 
 
 class RejectAll(AValidator):
-    def __init__(self, schema: Instance):
+    def __init__(self, schema: Primitive):
         self.location = schema.location.rstrip("#")
 
     def validate(self, instance):
-        return ValidationResult(ok=False, messages=["This fails for every value"])
+        return ValidationError(messages=["This fails for every value"])

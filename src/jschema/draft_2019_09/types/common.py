@@ -1,20 +1,13 @@
-from jschema.common import Keyword, ValidationResult
+from jschema.common import ValidationError
 
 
-class Max(Keyword):
-    value: int
-    # TODO(ope): should I make this constructor, abstract?
-
-    def validate(self, instance):
-        if self.value < len(instance):
-            return ValidationResult(ok=False, messages=[])
-        return ValidationResult(ok=True)
+def validate_min(value, instance):
+    if len(instance) < value:
+        return ValidationError(messages=[])
+    return True
 
 
-class Min(Keyword):
-    value: int
-
-    def validate(self, instance):
-        if len(instance) < self.value:
-            return ValidationResult(ok=False, messages=[])
-        return ValidationResult(ok=True)
+def validate_max(value, instance):
+    if value < len(instance):
+        return ValidationError(messages=[])
+    return True

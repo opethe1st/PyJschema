@@ -5,11 +5,7 @@ import parameterized  # type: ignore
 from jschema.common.annotate import annotate
 from jschema.draft_2019_09 import build_validator
 
-from .functions import (
-    attach_base_URIs,
-    generate_context,
-    get_base_URI_from_URI_part,
-)
+from .functions import attach_base_URIs, generate_context, get_base_URI_from_URI_part
 
 
 class TestGetBaseURIfromURIpart(unittest.TestCase):
@@ -89,11 +85,7 @@ class TestGenerateContext(unittest.TestCase):
             (
                 "make sure context is generated properly",
                 {"$anchor": "blah", "type": "string", "$id": "https://example.com/ope"},
-                {
-                    "https://example.com/ope",
-                    "https://example.com/ope#blah",
-                    "#",
-                },
+                {"https://example.com/ope", "https://example.com/ope#blah", "#"},
                 [("https://example.com/ope", "#")],
             ),
             (
@@ -125,18 +117,9 @@ class TestGenerateContext(unittest.TestCase):
                     "https://example.com/ope#anumber",
                 },
                 [
-                    (
-                        "#/items/0",
-                        "https://example.com/ope#astring",
-                    ),
-                    (
-                        "#/items/1",
-                        "https://example.com/ope#anumber",
-                    ),
-                    (
-                        "#/items/2",
-                        "https://example.com/anobject",
-                    ),
+                    ("#/items/0", "https://example.com/ope#astring"),
+                    ("#/items/1", "https://example.com/ope#anumber"),
+                    ("#/items/2", "https://example.com/anobject"),
                     ("https://example.com/ope", "#"),
                 ],
             ),

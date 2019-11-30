@@ -137,7 +137,7 @@ class TestArrayValidation(unittest.TestCase):
     )
     def test_true(self, name, schema, instance):
         res = validate_once(schema=schema, instance=instance)
-        self.assertTrue(res.ok)
+        self.assertTrue(res)
 
     @parameterized.parameterized.expand(
         [
@@ -224,4 +224,4 @@ class TestArrayValidation(unittest.TestCase):
         ]
     )
     def test_false(self, name, schema, instance):
-        self.assertFalse(validate_once(schema=schema, instance=instance).ok)
+        self.assertFalse(validate_once(schema=schema, instance=instance))

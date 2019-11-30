@@ -5,7 +5,7 @@ from jschema.draft_2019_09 import validate_once
 
 class TestRand(unittest.TestCase):
     def test(self):
-        ok = validate_once(
+        res = validate_once(
             schema={
                 "$schema": "http://json-schema.org/draft-07/schema#",
                 "$id": "http://example.com/product.schema.json",
@@ -40,5 +40,5 @@ class TestRand(unittest.TestCase):
                 "price": 12.50,
                 "tags": ["home", "green"],
             },
-        ).ok
-        self.assertTrue(ok)
+        )
+        self.assertTrue(res)

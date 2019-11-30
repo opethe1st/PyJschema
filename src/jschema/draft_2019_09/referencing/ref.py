@@ -2,7 +2,7 @@ import re
 import typing as t
 from urllib import parse
 
-from jschema.common import AValidator, Keyword, ValidationResult
+from jschema.common import AValidator, KeywordGroup
 
 Context = t.Dict[str, AValidator]
 
@@ -11,9 +11,9 @@ FRAGMENT_REGEX = re.compile(pattern=r"#.*")
 BASE_URI_REGEX = re.compile(pattern=r"http.*")
 
 
-class Ref(Keyword):
+class Ref(KeywordGroup):
     def __init__(self, schema):
-        ref = schema.value["$ref"]
+        ref = schema["$ref"]
         value = ref.value.replace("~1", "/")
         value = value.replace("~0", "~")
         self.value = parse.unquote(value)
@@ -22,7 +22,7 @@ class Ref(Keyword):
     def validate(self, instance):
         if self.context is None:
             # Maybe have another state for not validated?
-            return ValidationResult(ok=True)
+            return True
 
         # looks like this needs a resolver function here
         value = self.value

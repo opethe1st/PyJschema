@@ -46,7 +46,7 @@ class TestRefValidate(unittest.TestCase):
     )
     def test_true(self, name, schema, instance):
         result = validate_once(schema=schema, instance=instance)
-        self.assertTrue(result.ok)
+        self.assertTrue(result)
 
     @parameterized.parameterized.expand(
         [
@@ -70,4 +70,4 @@ class TestRefValidate(unittest.TestCase):
     )
     def test_false(self, name, schema, instance):
         result = validate_once(schema=schema, instance=instance)
-        self.assertFalse(result.ok)
+        self.assertFalse(result)
