@@ -1,4 +1,4 @@
-from jschema.common import Primitive, KeywordGroup, Type, ValidationResult
+from jschema.common import Primitive, KeywordGroup, Type, ValidationError
 from .common import validate_max, validate_min
 
 
@@ -26,10 +26,10 @@ class _Pattern(KeywordGroup):
 
     def validate(self, instance):
         if not self.regex.search(instance):
-            return ValidationResult(
-                ok=False, messages=["instance doesn't match the pattern given"]
+            return ValidationError(
+                messages=["instance doesn't match the pattern given"]
             )
-        return ValidationResult(ok=True)
+        return True
 
 
 class String(Type):

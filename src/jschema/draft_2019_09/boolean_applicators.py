@@ -1,4 +1,4 @@
-from jschema.common import Dict, KeywordGroup, ValidationResult
+from jschema.common import Dict, KeywordGroup, ValidationError
 
 
 class If(KeywordGroup):
@@ -18,13 +18,13 @@ class If(KeywordGroup):
         )
 
     def validate(self, instance):
-        if self._if_validator.validate(instance=instance).ok:
+        if self._if_validator.validate(instance=instance):
             if self._then_validator:
                 return self._then_validator.validate(instance=instance)
         else:
             if self._else_validator:
                 return self._else_validator.validate(instance=instance)
-        return ValidationResult(ok=True)
+        return True
 
     def subschema_validators(self):
         yield self._if_validator
@@ -42,9 +42,9 @@ class AllOf(KeywordGroup):
 
     def validate(self, instance):
         ok = all(
-            validator.validate(instance=instance).ok for validator in self._validators
+            validator.validate(instance=instance) for validator in self._validators
         )
-        return ValidationResult(ok=ok)
+        return True if ok else ValidationError()
 
     # WOAH: Not defining this resulted in an almost impossible to debug bug. SIGH!
     # How do I prevent that in future
@@ -62,15 +62,14 @@ class OneOf(KeywordGroup):
     def validate(self, instance):
         oks = list(
             filter(
-                lambda res: res.ok,
+                lambda res: res,
                 (
                     validator.validate(instance=instance)
                     for validator in self._validators
                 ),
             )
         )
-        ok = len(oks) == 1
-        return ValidationResult(ok=ok)
+        return True if len(oks) == 1 else ValidationError()
 
     # WOAH: Not defining this resulted in an almost impossible to debug bug. SIGH!
     # How do I prevent that in future
@@ -86,9 +85,9 @@ class AnyOf(KeywordGroup):
 
     def validate(self, instance):
         ok = any(
-            validator.validate(instance=instance).ok for validator in self._validators
+            validator.validate(instance=instance) for validator in self._validators
         )
-        return ValidationResult(ok=ok)
+        return True if ok else ValidationError()
 
     # WOAH: Not defining this resulted in an almost impossible to debug bug. SIGH!
     # How do I prevent that in future
@@ -103,8 +102,8 @@ class Not(KeywordGroup):
         self._validator = build_validator(schema=schema["not"])
 
     def validate(self, instance):
-        ok = not self._validator.validate(instance=instance).ok
-        return ValidationResult(ok=ok)
+        result = self._validator.validate(instance=instance)
+        return ValidationError(messages=["not"]) if result else True
 
     # WOAH: Not defining this resulted in an almost impossible to debug bug. SIGH!
     # How do I prevent that in future

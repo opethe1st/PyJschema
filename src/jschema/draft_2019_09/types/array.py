@@ -1,6 +1,6 @@
 import typing as t
 
-from jschema.common import Dict, Primitive, List, KeywordGroup, Type, ValidationResult
+from jschema.common import Dict, Primitive, List, KeywordGroup, Type, ValidationError
 
 from .common import validate_max, validate_min
 
@@ -34,7 +34,7 @@ class _Items(KeywordGroup):
             return self._validate_items(instance=instance)
         elif self._items_validators:
             return self._validate_items_list(instance=instance)
-        return ValidationResult(ok=True)
+        return True
 
     def _validate_items(self, instance):
         children = []
@@ -42,13 +42,13 @@ class _Items(KeywordGroup):
         for value in instance:
             res = self._items_validator.validate(value)
 
-            if not res.ok:
+            if not res:
                 children.append(res)
 
         if not children:
-            return ValidationResult(ok=True)
+            return True
         else:
-            return ValidationResult(ok=False, children=children)
+            return ValidationError(children=children)
 
     def _validate_items_list(self, instance):
         children = []
@@ -60,7 +60,7 @@ class _Items(KeywordGroup):
 
             res = self._items_validators[i].validate(instance[i])
 
-            if not res.ok:
+            if not res:
                 children.append(res)
 
             i += 1
@@ -70,15 +70,15 @@ class _Items(KeywordGroup):
             while i < len(instance):
                 res = self._additional_items_validator.validate(instance[i])
 
-                if not res.ok:
+                if not res:
                     children.append(res)
 
                 i += 1
 
         if children:
-            return ValidationResult(ok=False, children=children)
+            return ValidationError(children=children)
         else:
-            return ValidationResult(ok=True)
+            return True
 
     def subschema_validators(self):
         if self._items_validator:
@@ -112,31 +112,29 @@ class _Contains(KeywordGroup):
                 # should just be one validator
                 res = self._validator.validate(value)
 
-                if res.ok:
+                if res:
                     count += 1
 
                     if not contains:
                         contains = True
 
             if contains and (self.minContainsValue <= count <= self.maxContainsValue):
-                return ValidationResult(ok=True)
+                return True
 
             if not (self.minContainsValue <= count <= self.maxContainsValue):
-                return ValidationResult(
-                    ok=False,
+                return ValidationError(
                     messages=[
                         f"The number of items matching the contains keyword is not less than or equal to {self.minContainsValue} or greater than or equal to {self.maxContainsValue}"
                     ],
                 )
 
-            return ValidationResult(
-                ok=False,
+            return ValidationError(
                 messages=[
                     "No item in this array matches the schema in the contains keyword"
                 ],
             )
         else:
-            return ValidationResult(ok=True)
+            return True
 
     def subschema_validators(self):
         if self._validator:
@@ -168,10 +166,10 @@ class _UniqueItems(KeywordGroup):
             itemsset = set([str(value) for value in instance])
 
             if len(itemsset) != len(instance):
-                return ValidationResult(ok=False)
+                return ValidationError()
             # TODO(ope) - actually make sure the values are unique
 
-        return ValidationResult(ok=True)
+        return True
 
 
 class Array(Type):

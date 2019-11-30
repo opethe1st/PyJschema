@@ -1,6 +1,6 @@
 import typing as t
 
-from jschema.common import AValidator, ValidationResult, List
+from jschema.common import AValidator, ValidationError, List
 
 from .constants import KEYWORDS_TO_VALIDATOR, TYPE_TO_TYPE_VALIDATORS
 from .types_validator import Types
@@ -55,14 +55,13 @@ class Validator(AValidator):
         for validator in self._validators:
             result = validator.validate(instance)
 
-            if not result.ok:
+            if not result:
                 results.append(result)
 
         if not results:
-            return ValidationResult(ok=True)
+            return True
         else:
-            return ValidationResult(
-                ok=False,
+            return ValidationError(
                 messages=["error while validating this instance"],
                 children=results,
             )

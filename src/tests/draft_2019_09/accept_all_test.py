@@ -17,7 +17,7 @@ class TestTrue(unittest.TestCase):
         ]
     )
     def test_true(self, name, schema, instance):
-        self.assertTrue(validate_once(schema=schema, instance=instance).ok)
+        self.assertTrue(validate_once(schema=schema, instance=instance))
 
     @parameterized.parameterized.expand(
         [
@@ -38,4 +38,4 @@ class TestTrue(unittest.TestCase):
         ]
     )
     def test_empty_schema(self, name, schema, instance):
-        self.assertTrue(validate_once(schema=schema, instance=instance).ok)
+        self.assertTrue(validate_once(schema=schema, instance=instance))

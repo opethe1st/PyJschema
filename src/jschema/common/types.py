@@ -3,7 +3,7 @@ import numbers
 import typing as t
 from collections.abc import Mapping, Sequence
 
-from jschema.common import ValidationResult
+from jschema.common import ValidationError
 
 JsonType = t.Union[str, numbers.Number, bool, None, Mapping, Sequence]
 
@@ -18,7 +18,7 @@ class AValidator(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def validate(self, instance: JsonType) -> ValidationResult:
+    def validate(self, instance: JsonType) -> ValidationError:
         raise NotImplementedError
 
     def subschema_validators(self) -> t.Iterable["AValidator"]:
@@ -59,19 +59,19 @@ class Type(AValidator):
         if self.type_ is not None and not isinstance(instance, self.type_):
             messages.append(f"instance is not a {self.type_}")
         if messages:
-            return ValidationResult(ok=False, messages=messages)
+            return ValidationError(messages=messages)
 
         results = list(
             filter(
-                (lambda res: not res.ok),
+                (lambda res: not res),
                 (validator.validate(instance) for validator in self._validators),
             )
         )
 
         if not results and not messages:
-            return ValidationResult(ok=True)
+            return True
         else:
-            return ValidationResult(ok=False, messages=messages, children=results)
+            return ValidationError(messages=messages, children=results)
 
     def subschema_validators(self):
         yield from self._validators

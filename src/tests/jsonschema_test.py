@@ -70,8 +70,7 @@ class Test(unittest.TestCase):
     def tests(self, description, testcase):
         schema = testcase["schema"]
         for test in testcase["tests"]:
-            # import pdb; pdb.set_trace()
             with self.subTest(test["description"]):
                 self.assertEqual(
-                    validate_once(schema, instance=test["data"]).ok, test["valid"]
+                    bool(validate_once(schema, instance=test["data"])), test["valid"]
                 )

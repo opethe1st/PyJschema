@@ -1,6 +1,6 @@
 import typing as t
 
-from jschema.common import AValidator, Dict, ValidationResult
+from jschema.common import AValidator, Dict, ValidationError
 
 from .constants import TYPE_TO_TYPE_VALIDATORS
 
@@ -25,13 +25,12 @@ class Types(AValidator):
         for validator in self._validators:
             result = validator.validate(instance)
 
-            if result.ok:
+            if result:
                 return result
             else:
                 results.append(result)
 
-        return ValidationResult(
-            ok=False,
+        return ValidationError(
             messages=["error while validating this instance"],
             children=results,
         )

@@ -2,7 +2,7 @@ import re
 import typing as t
 from urllib import parse
 
-from jschema.common import AValidator, KeywordGroup, ValidationResult
+from jschema.common import AValidator, KeywordGroup
 
 Context = t.Dict[str, AValidator]
 
@@ -22,7 +22,7 @@ class Ref(KeywordGroup):
     def validate(self, instance):
         if self.context is None:
             # Maybe have another state for not validated?
-            return ValidationResult(ok=True)
+            return True
 
         # looks like this needs a resolver function here
         value = self.value

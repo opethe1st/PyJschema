@@ -1,6 +1,6 @@
 import numbers
 
-from jschema.common import Primitive, KeywordGroup, Type, ValidationResult
+from jschema.common import Primitive, KeywordGroup, Type, ValidationError
 
 
 class _MultipleOf(KeywordGroup):
@@ -13,8 +13,8 @@ class _MultipleOf(KeywordGroup):
         instance = instance * multiplier
         value = self.value * multiplier
         if (instance % value) != 0:
-            return ValidationResult(ok=False)
-        return ValidationResult(ok=True)
+            return ValidationError()
+        return True
 
 
 class _Minimum(KeywordGroup):
@@ -23,8 +23,8 @@ class _Minimum(KeywordGroup):
 
     def validate(self, instance):
         if instance < self.value:
-            return ValidationResult(ok=False)
-        return ValidationResult(ok=True)
+            return ValidationError()
+        return True
 
 
 class _Maximum(KeywordGroup):
@@ -33,8 +33,8 @@ class _Maximum(KeywordGroup):
 
     def validate(self, instance):
         if self.value < instance:
-            return ValidationResult(ok=False)
-        return ValidationResult(ok=True)
+            return ValidationError()
+        return True
 
 
 class _ExclusiveMinimum(KeywordGroup):
@@ -43,8 +43,8 @@ class _ExclusiveMinimum(KeywordGroup):
 
     def validate(self, instance):
         if instance <= self.value:
-            return ValidationResult(ok=False)
-        return ValidationResult(ok=True)
+            return ValidationError()
+        return True
 
 
 class _ExclusiveMaximum(KeywordGroup):
@@ -53,8 +53,8 @@ class _ExclusiveMaximum(KeywordGroup):
 
     def validate(self, instance):
         if self.value <= instance:
-            return ValidationResult(ok=False)
-        return ValidationResult(ok=True)
+            return ValidationError()
+        return True
 
 
 class _NumberOrInteger(Type):
@@ -75,19 +75,19 @@ class _NumberOrInteger(Type):
         if isinstance(instance, bool):
             messages.append(f"instance: {instance} is not a {self.type_}")
         if messages:
-            return ValidationResult(ok=False, messages=messages)
+            return ValidationError(messages=messages)
 
         results = list(
             filter(
-                (lambda res: not res.ok),
+                (lambda res: not res),
                 (validator.validate(instance) for validator in self._validators),
             )
         )
 
         if not results and not messages:
-            return ValidationResult(ok=True)
+            return True
         else:
-            return ValidationResult(ok=False, messages=messages, children=results)
+            return ValidationError(messages=messages, children=results)
 
 
 class Number(_NumberOrInteger):

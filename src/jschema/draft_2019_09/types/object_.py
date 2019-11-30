@@ -1,7 +1,7 @@
 import re
 import typing as t
 
-from jschema.common import Primitive, List, Dict, KeywordGroup, Type, ValidationResult
+from jschema.common import Primitive, List, Dict, KeywordGroup, Type, ValidationError
 
 from .common import validate_max, validate_min
 
@@ -42,7 +42,7 @@ class _Property(KeywordGroup):
             if key in instance:
                 result = self._validators[key].validate(instance[key])
 
-                if not result.ok:
+                if not result:
                     results.append(result)
 
         remaining_properties = set(instance.keys())
@@ -53,7 +53,7 @@ class _Property(KeywordGroup):
                 if regex.search(key):
                     properties_validated_by_pattern.add(key)
                     result = self._pattern_validators[regex].validate(instance[key])
-                    if not result.ok:
+                    if not result:
                         results.append(result)
 
         # additionalProperties only applies to properties not in properties or patternProperties
@@ -63,13 +63,13 @@ class _Property(KeywordGroup):
         if self._additional_validator:
             for key in additionalProperties:
                 result = self._additional_validator.validate(instance[key])
-                if not result.ok:
+                if not result:
                     results.append(result)
 
         if not results and not messages:
-            return ValidationResult(ok=True)
+            return True
         else:
-            return ValidationResult(ok=False, messages=messages, children=results)
+            return ValidationError(messages=messages, children=results)
 
     def subschema_validators(self):
         yield from self._validators.values()
@@ -90,9 +90,9 @@ class _Required(KeywordGroup):
             )
 
         if not messages:
-            return ValidationResult(ok=True)
+            return True
         else:
-            return ValidationResult(ok=False, messages=messages)
+            return ValidationError(messages=messages)
 
 
 class _PropertyNames(KeywordGroup):
@@ -108,13 +108,13 @@ class _PropertyNames(KeywordGroup):
         for propertyName in instance:
             res = self._validator.validate(propertyName)
 
-            if not res.ok:
+            if not res:
                 children.append(res)
 
         if not children:
-            return ValidationResult(ok=True)
+            return True
         else:
-            return ValidationResult(ok=False, children=children)
+            return ValidationError(children=children)
 
     def subschema_validators(self):
         yield self._validator
@@ -147,8 +147,8 @@ class _DependentRequired(KeywordGroup):
         for prop, dependentProperties in self.dependentRequired.items():
             if prop in instance:
                 if not (set(dependentProperties) < set(instance.keys())):
-                    return ValidationResult(ok=False)
-        return ValidationResult(ok=True)
+                    return ValidationError()
+        return True
 
 
 class Object(Type):
@@ -164,13 +164,13 @@ class Object(Type):
 
     def validate(self, instance):
         res = super().validate(instance=instance)
-        if res.ok:
+        if res:
             keyTypes = set(type(key) for key in instance)
             if keyTypes:
                 # TODO(ope) this seems wrong to me
                 if len(keyTypes) != 1 or not (str in keyTypes):
-                    res.messages.append("all the keys of the object need to be strings")
-                    return ValidationResult(ok=False, messages=res.messages)
+                    messages = "all the keys of the object need to be strings"
+                    return ValidationError(messages=messages)
             return res
         else:
             return res

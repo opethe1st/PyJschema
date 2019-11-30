@@ -4,7 +4,7 @@ from jschema.common import (
     Primitive,
     KeywordGroup,
     Type,
-    ValidationResult,
+    ValidationError,
 )
 from jschema.common.annotate import deannotate
 
@@ -15,12 +15,12 @@ class Boolean(Type):
     def validate(self, instance):
         # is this faster than an isinstance check?
         res = super().validate(instance=instance)
-        if res.ok:
+        if res:
             if (instance is True) or (instance is False):
-                return ValidationResult(ok=True)
+                return True
             else:
-                return ValidationResult(
-                    ok=False, messages=["instance is not a valid boolean"]
+                return ValidationError(
+                    messages=["instance is not a valid boolean"]
                 )
         else:
             return res
@@ -37,7 +37,7 @@ class Const(KeywordGroup):
 
     def validate(self, instance):
         ok = equals(self.value, instance)
-        return ValidationResult(ok=ok)
+        return True if ok else ValidationError()
 
 
 class Enum(KeywordGroup):
@@ -48,8 +48,8 @@ class Enum(KeywordGroup):
     def validate(self, instance):
         for value in self._values:
             if equals(value, instance):
-                return ValidationResult(ok=True)
-        return ValidationResult(ok=False)
+                return True
+        return ValidationError()
 
 
 def equals(a, b):
@@ -74,7 +74,7 @@ class AcceptAll(AValidator):
         self.location = schema.location.rstrip("#")
 
     def validate(self, instance):
-        return ValidationResult(ok=True)
+        return True
 
 
 class RejectAll(AValidator):
@@ -82,4 +82,4 @@ class RejectAll(AValidator):
         self.location = schema.location.rstrip("#")
 
     def validate(self, instance):
-        return ValidationResult(ok=False, messages=["This fails for every value"])
+        return ValidationError(messages=["This fails for every value"])

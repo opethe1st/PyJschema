@@ -17,4 +17,4 @@ class TestRejectAll(unittest.TestCase):
         ]
     )
     def test_true(self, name, schema, instance):
-        self.assertFalse(validate_once(schema=schema, instance=instance).ok)
+        self.assertFalse(validate_once(schema=schema, instance=instance))

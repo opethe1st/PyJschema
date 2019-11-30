@@ -2,7 +2,7 @@ import json
 import os
 import typing as t
 
-from jschema.common import Primitive, Dict, ValidationResult
+from jschema.common import Primitive, Dict, ValidationError
 from jschema.common.annotate import annotate
 
 from .referencing import (
@@ -19,7 +19,7 @@ __all__ = ["validate_once", "build_validator", "Validator"]
 def construct_validator(schema):
     schema_validator = meta_schema_validator()
 
-    if schema_validator.validate(instance=schema).ok:
+    if schema_validator.validate(instance=schema):
         validator, _ = build_validator_and_attach_context(schema=schema)
         return validator
     else:
@@ -35,7 +35,7 @@ def meta_schema_validator():
     return validator
 
 
-def validate_once(schema: t.Union[dict, bool], instance: dict) -> ValidationResult:
+def validate_once(schema: t.Union[dict, bool], instance: dict) -> ValidationError:
     validator, _ = build_validator_and_attach_context(schema=schema)
     return validator.validate(instance=instance)
 
