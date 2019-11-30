@@ -7,17 +7,6 @@ from .type_base import Type
 class Boolean(Type):
     type_ = bool
 
-    def validate(self, instance):
-        # is this faster than an isinstance check?
-        res = super().validate(instance=instance)
-        if res:
-            if (instance is True) or (instance is False):
-                return True
-            else:
-                return ValidationError(messages=["instance is not a valid boolean"])
-        else:
-            return res
-
 
 class Null(Type):
     type_ = type(None)

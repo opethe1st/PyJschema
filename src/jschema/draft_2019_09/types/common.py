@@ -3,15 +3,15 @@ import typing
 from jschema.common import AValidator, ValidationError
 
 
-def validate_min(value, instance):
+def validate_min(value, instance, message=""):
     if len(instance) < value:
-        return ValidationError(messages=[])
+        return ValidationError(messages=[message])
     return True
 
 
-def validate_max(value, instance):
+def validate_max(value, instance, message=""):
     if value < len(instance):
-        return ValidationError(messages=[])
+        return ValidationError(messages=[message])
     return True
 
 

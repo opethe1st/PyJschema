@@ -38,7 +38,7 @@ class _Items(KeywordGroup):
         return True
 
     def _validate_items(self, instance):
-
+        # TODO: shouldnt call this errors, more like results
         errors = filter(
             lambda res: not res,
             (self._items_validator.validate(value) for value in instance),
@@ -50,34 +50,13 @@ class _Items(KeywordGroup):
             return ValidationError(children=itertools.chain([first_error], errors))
 
     def _validate_items_list(self, instance):
-        children = []
+        results = _validate_item_list(items_validators=self._items_validators, additional_items_validator=self._additional_items_validator, instance=instance)
+        first_res = next(results, True)
 
-        i = 0
-        while i < len(self._items_validators):
-            if i >= len(instance):
-                break
-
-            res = self._items_validators[i].validate(instance[i])
-
-            if not res:
-                children.append(res)
-
-            i += 1
-
-        # additionalItem for the rest of the items in the instance
-        if self._additional_items_validator:
-            while i < len(instance):
-                res = self._additional_items_validator.validate(instance[i])
-
-                if not res:
-                    children.append(res)
-
-                i += 1
-
-        if children:
-            return ValidationError(children=children)
-        else:
+        if first_res:
             return True
+        else:
+            return ValidationError(children=itertools.chain([first_res], results))
 
     def subschema_validators(self):
         if self._items_validator:
@@ -86,6 +65,30 @@ class _Items(KeywordGroup):
             yield validator
         if self._additional_items_validator:
             yield self._additional_items_validator
+
+
+def _validate_item_list(items_validators, additional_items_validator, instance):
+    i = 0
+    while i < len(items_validators):
+        if i >= len(instance):
+            break
+
+        res = items_validators[i].validate(instance[i])
+
+        if not res:
+            yield res
+
+        i += 1
+
+    # additionalItem for the rest of the items in the instance
+    if additional_items_validator:
+        while i < len(instance):
+            res = additional_items_validator.validate(instance[i])
+
+            if not res:
+                yield res
+
+            i += 1
 
 
 class _Contains(KeywordGroup):

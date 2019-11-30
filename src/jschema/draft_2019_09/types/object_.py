@@ -114,7 +114,7 @@ class _PropertyNames(KeywordGroup):
         self._validator = build_validator(schema=propertyNames)
 
     def validate(self, instance):
-        errors = yield_property_name_errors(
+        errors = validate_property_names(
             validator=self._validator, instance=instance
         )
         first_error = next(errors, True)
@@ -127,7 +127,7 @@ class _PropertyNames(KeywordGroup):
         yield self._validator
 
 
-def yield_property_name_errors(validator, instance):
+def validate_property_names(validator, instance):
     for propertyName in instance:
         res = validator.validate(propertyName)
 
@@ -184,7 +184,7 @@ class Object(Type):
             if keyTypes:
                 # TODO(ope) this seems wrong to me
                 if len(keyTypes) != 1 or not (str in keyTypes):
-                    messages = "all the keys of the object need to be strings"
+                    messages = ["all the keys of the object need to be strings"]
                     return ValidationError(messages=messages)
             return res
         else:

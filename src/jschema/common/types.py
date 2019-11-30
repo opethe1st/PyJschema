@@ -6,6 +6,7 @@ from collections.abc import Mapping, Sequence
 from jschema.common import ValidationError
 
 JsonType = t.Union[str, numbers.Number, bool, None, Mapping, Sequence]
+# TODO: rename this file to abstract validator or something
 
 
 class AValidator(abc.ABC):

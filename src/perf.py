@@ -4,12 +4,10 @@ from textwrap import dedent
 # apt-get install jsonschema json-spec validictory
 import fastjsonschema
 import jsonschema
-from jsonspec.validators import load
 
 import jschema
 import jschema.draft_2019_09 as draft_1909
 from jschema.draft_2019_09.validator_construction import construct_validator
-from temp.performance import validate
 
 NUMBER = 1000
 
@@ -80,19 +78,14 @@ fast_compiled = lambda value, _: fastjsonschema_validate(value)
 fast_not_compiled = lambda value, json_schema: fastjsonschema.compile(json_schema)(value)
 
 my_jsonschema = lambda value, json_schema: draft_1909.validate_once(schema=json_schema, instance=value)
+
+jsonchema_validator = jsonschema.Draft4Validator(JSON_SCHEMA)
+jsonschema_compiled = lambda value, json_schema: jsonchema_validator.validate(value)
+
 validator = construct_validator(schema=JSON_SCHEMA)
 # my_jsonschema_compiled = lambda value, _: validator.validate(instance=value)
 def my_jsonschema_compiled(value, _):
-    try:
-        validator.validate(instance=value)
-    except Exception:
-        return False
-
-with open('temp/performance.py', 'w') as f:
-    f.write(fastjsonschema.compile_to_code(JSON_SCHEMA))
-fast_file = lambda value, _: validate(value)
-
-jsonspec = load(JSON_SCHEMA)
+    return validator.validate(instance=value)
 
 
 def t(func, valid_values=True):
@@ -104,9 +97,8 @@ def t(func, valid_values=True):
         VALUES_BAD,
         jschema,
         jsonschema,
-        jsonspec,
         fast_compiled,
-        fast_file,
+        jsonschema_compiled,
         fast_not_compiled,
         my_jsonschema,
         my_jsonschema_compiled,
@@ -133,20 +125,21 @@ def t(func, valid_values=True):
 
 print('Number: {}'.format(NUMBER))
 
-t('fast_compiled')
-t('fast_compiled', valid_values=False)
-
-t('fast_file')
-t('fast_file', valid_values=False)
-
 t('fast_not_compiled')
 t('fast_not_compiled', valid_values=False)
 
 t('jsonschema.validate')
 t('jsonschema.validate', valid_values=False)
 
-
 t('my_jsonschema')
 t('my_jsonschema', valid_values=False)
+
+
+t('fast_compiled')
+t('fast_compiled', valid_values=False)
+
+t('jsonschema_compiled')
+t('jsonschema_compiled', valid_values=False)
+
 t('my_jsonschema_compiled')
 t('my_jsonschema_compiled', valid_values=False)

@@ -39,15 +39,13 @@ class Type(AValidator):
         first_error = next(error_generator, True)
 
         # needs to be not - because bool(first_error) evaluates to True
-        if not first_error:
+        if first_error and not messages:
+            return True
+        else:
             return ValidationError(
                 messages=messages,
                 children=itertools.chain([first_error], error_generator),
             )
-        elif messages:
-            return ValidationError(messages=messages)
-        else:
-            return True
 
     def subschema_validators(self):
         yield from self._validators
