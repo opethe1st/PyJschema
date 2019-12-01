@@ -46,7 +46,7 @@ Pyjschema is pretty fast
 
 Compared to the python jsonschema library it is some multiplies faster (at least 8). Compared to fastjsonschema it is faster when not compiled. And for the compiled case, it is like 75 percent slower.
 
-Keep in mind that fastjsonschema makes use of Exception to indicate validation errors and this is the reason it is faster
+Keep in mind that fastjsonschema makes use of Exceptions to indicate validation errors and this is the reason it is faster
 (I created a [branch](https://github.com/opethe1st/PyJschema/tree/raise-exceptions-instead-of-returns) to test this assumption. You can run perf.py in that branch. The only change from my original code was that I raised Exceptions instead of trying to return ValidationErrors. This made my code even faster than fastjsonschema).
 You can't generate a list of all the validation errors when you use exceptions that way. That's an important feature so I accept the speed penalty for supporting listing all the errors that occur :D
 
