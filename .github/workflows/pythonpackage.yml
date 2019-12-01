@@ -37,7 +37,3 @@ jobs:
         cd src/
         pytest --cov=.
         cd ..
-
-    - name: Benchmarks
-      run: |
-        pytest src/benchmarks/test_benchmark.py --benchmark-min-time=0.1
