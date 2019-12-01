@@ -10,7 +10,7 @@ from jschema.draft_2019_09 import construct_validator
 
 if __name__ == "__main__":
     schema = {
-        "$schema": "http://json-schema.org/draft-07/schema#",
+        "$schema": "http://json-schema.org/draft-04/schema#",
         "type": "array",
         "items": [
             {"type": "number", "maximum": 10, "exclusiveMaximum": True},
