@@ -39,9 +39,10 @@ This is similar to compiling regex and you can get significant speed improvement
 ## Benchmarks
 Pyjschema is pretty fast
 
-[compile+run](/compile-run-benchmark.png)
+![compile+run](/compile-run-benchmark.png)
 
-[run](/run-benchmark.png)
+
+![run](/run-benchmark.png)
 
 Compared to the python jsonschema library it is some multiplies faster (at least 8). Compared to fastjsonschema it is faster when not compiled. And for the compiled case, it is like 75 percent slower.
 
