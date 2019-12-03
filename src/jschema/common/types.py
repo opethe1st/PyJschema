@@ -3,7 +3,9 @@ import numbers
 import typing as t
 from collections.abc import Mapping, Sequence
 
-from jschema.common import ValidationError, Dict
+from .validation_result import ValidationError
+from .instance import Dict
+
 
 JsonType = t.Union[str, numbers.Number, bool, None, Mapping, Sequence]
 # TODO: rename this file to abstract validator or something
