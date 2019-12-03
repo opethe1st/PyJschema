@@ -21,7 +21,7 @@ class Type(AValidator):
             if any(schema.get(keyword) is not None for keyword in keywords):
                 self._validators.append(
                     self.KEYWORDS_TO_VALIDATOR[keywords](
-                        **{keyword: schema.get(keyword) for keyword in keywords}
+                        schema=schema
                     )
                 )
 

@@ -3,7 +3,7 @@ import numbers
 import typing as t
 from collections.abc import Mapping, Sequence
 
-from jschema.common import ValidationError
+from jschema.common import ValidationError, Dict
 
 JsonType = t.Union[str, numbers.Number, bool, None, Mapping, Sequence]
 # TODO: rename this file to abstract validator or something
@@ -15,7 +15,7 @@ class AValidator(abc.ABC):
     anchor = None
     location: t.Optional[str] = None
 
-    def __init__(self, **kwargs):
+    def __init__(self, schema: Dict):
         pass
 
     @abc.abstractmethod

@@ -1,15 +1,15 @@
 import typing as t
 import itertools
-from jschema.common import Dict, KeywordGroup, List, Primitive, ValidationError
+from jschema.common import Dict, KeywordGroup, List, ValidationError
 
 from .common import validate_max, validate_min
 from .type_base import Type
 
 
 class _Items(KeywordGroup):
-    def __init__(
-        self, items: t.Union[Primitive, List], additionalItems: t.Optional[Dict] = None
-    ):
+    def __init__(self, schema: Dict):
+        items = schema.get("items")
+        additionalItems = schema.get("additionalItems")
         from jschema.draft_2019_09 import build_validator
         from jschema.draft_2019_09.validator_construction import (
             BuildValidatorResultType,
@@ -96,13 +96,12 @@ def _validate_item_list(items_validators, additional_items_validator, instance):
 
 
 class _Contains(KeywordGroup):
-    def __init__(
-        self,
-        contains: t.Union[Primitive, Dict],
-        maxContains: Primitive,
-        minContains: Primitive,
-    ):
+    def __init__(self, schema: Dict):
         from jschema.draft_2019_09 import build_validator
+
+        contains = schema.get("contains")
+        maxContains = schema.get("maxContains")
+        minContains = schema.get("minContains")
 
         self._validator = build_validator(schema=contains) if contains else None
         self.maxContainsValue = maxContains.value if maxContains else float("inf")
@@ -143,24 +142,24 @@ class _Contains(KeywordGroup):
 
 
 class _MinItems(KeywordGroup):
-    def __init__(self, minItems: Primitive):
-        self.value = minItems.value
+    def __init__(self, schema: Dict):
+        self.value = schema["minItems"].value
 
     def validate(self, instance):
         return validate_min(value=self.value, instance=instance)
 
 
 class _MaxItems(KeywordGroup):
-    def __init__(self, maxItems: Primitive):
-        self.value = maxItems.value
+    def __init__(self, schema: Dict):
+        self.value = schema["maxItems"].value
 
     def validate(self, instance):
         return validate_max(value=self.value, instance=instance)
 
 
 class _UniqueItems(KeywordGroup):
-    def __init__(self, uniqueItems: Primitive):
-        self.value = uniqueItems.value
+    def __init__(self, schema: Dict):
+        self.value = schema["uniqueItems"].value
 
     def validate(self, instance):
         if self.value:

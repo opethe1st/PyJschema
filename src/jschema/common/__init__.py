@@ -3,6 +3,7 @@ from .validation_result import ValidationError  # isort:skip
 
 from .types import AValidator, KeywordGroup
 from .instance import Primitive, Dict, List
+from .annotate import annotate, deannotate
 
 __all__ = [
     "AValidator",
@@ -12,4 +13,6 @@ __all__ = [
     "Dict",
     "List",
     "KeywordGroup",
+    "annotate",
+    "deannotate",
 ]

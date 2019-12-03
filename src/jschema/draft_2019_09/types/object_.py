@@ -1,8 +1,7 @@
 import itertools
 import re
-import typing as t
 
-from jschema.common import Dict, KeywordGroup, List, Primitive, ValidationError
+from jschema.common import Dict, KeywordGroup, ValidationError
 
 from .common import validate_max, validate_min
 from .type_base import Type
@@ -11,12 +10,13 @@ from .type_base import Type
 class _Property(KeywordGroup):
     def __init__(
         self,
-        properties: t.Optional[Dict] = None,
-        additionalProperties: t.Optional[Dict] = None,
-        patternProperties: t.Optional[Dict] = None,
+        schema: Dict,
     ):
         from jschema.draft_2019_09 import build_validator
 
+        properties = schema.get("properties")
+        additionalProperties = schema.get("additionalProperties")
+        patternProperties = schema.get("patternProperties")
         self._validators = (
             {key: build_validator(prop) for key, prop in properties.items()}
             if properties
@@ -89,7 +89,8 @@ def _validate(property_validators, additional_validator, pattern_validators, ins
 
 
 class _Required(KeywordGroup):
-    def __init__(self, required: List):
+    def __init__(self, schema: Dict):
+        required = schema["required"]
         self.value = [item.value for item in required]
 
     def validate(self, instance):
@@ -106,11 +107,12 @@ class _Required(KeywordGroup):
 
 
 class _PropertyNames(KeywordGroup):
-    def __init__(self, propertyNames: Dict):
+    def __init__(self, schema: Dict):
         # add this to make sure that the type is string - I have seen it missing from
         # examples in the documentation so can only assume it's allowed
         from jschema.draft_2019_09 import build_validator
 
+        propertyNames = schema["propertyNames"]
         self._validator = build_validator(schema=propertyNames)
 
     def validate(self, instance):
@@ -134,23 +136,24 @@ def validate_property_names(validator, instance):
 
 
 class _MinProperties(KeywordGroup):
-    def __init__(self, minProperties: Primitive):
-        self.value = minProperties.value
+    def __init__(self, schema: Dict):
+        self.value = schema["minProperties"].value
 
     def validate(self, instance):
         return validate_min(instance=instance, value=self.value)
 
 
 class _MaxProperties(KeywordGroup):
-    def __init__(self, maxProperties: Primitive):
-        self.value = maxProperties.value
+    def __init__(self, schema: Dict):
+        self.value = schema["maxProperties"].value
 
     def validate(self, instance):
         return validate_max(instance=instance, value=self.value)
 
 
 class _DependentRequired(KeywordGroup):
-    def __init__(self, dependentRequired: Dict):
+    def __init__(self, schema: Dict):
+        dependentRequired = schema["dependentRequired"]
         self.dependentRequired = {
             key: [val.value for val in value]
             for key, value in dependentRequired.items()
