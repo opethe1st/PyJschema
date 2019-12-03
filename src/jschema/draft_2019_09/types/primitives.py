@@ -1,7 +1,7 @@
 from jschema.common import AValidator, Dict, KeywordGroup, Primitive, ValidationError
 from jschema.common.annotate import deannotate
 
-from .type_base import Type
+from .type_ import Type
 
 
 class Boolean(Type):

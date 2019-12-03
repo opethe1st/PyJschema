@@ -3,8 +3,8 @@ import numbers
 import typing as t
 from collections.abc import Mapping, Sequence
 
-from .validation_result import ValidationError
-from .instance import Dict
+from .validation_error import ValidationError
+from .primitive_types_wrappers import Dict
 
 
 JsonType = t.Union[str, numbers.Number, bool, None, Mapping, Sequence]

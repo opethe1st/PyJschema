@@ -2,8 +2,6 @@ import typing as t
 
 import dataclasses
 
-# TODO rename this file to validation_error
-
 
 @dataclasses.dataclass
 class ValidationError:

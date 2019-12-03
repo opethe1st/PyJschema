@@ -1,7 +1,7 @@
 from jschema.common import Dict, KeywordGroup, ValidationError
 
 from .common import validate_max, validate_min
-from .type_base import Type
+from .type_ import Type
 
 
 class _MaxLength(KeywordGroup):

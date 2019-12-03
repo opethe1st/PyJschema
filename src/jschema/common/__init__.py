@@ -1,8 +1,8 @@
 # validation_result has to be imported before reference_resolver, because reference_resolver depends on it
-from .validation_result import ValidationError  # isort:skip
-from .instance import Primitive, Dict, List  # isort:skip
+from .validation_error import ValidationError  # isort:skip
+from .primitive_types_wrappers import Primitive, Dict, List  # isort:skip
 
-from .types import AValidator, KeywordGroup
+from .abstract_classes import AValidator, KeywordGroup
 from .annotate import annotate, deannotate
 
 __all__ = [

@@ -5,7 +5,7 @@ import parameterized  # type: ignore
 from jschema.common.annotate import annotate
 from jschema.draft_2019_09 import build_validator
 
-from .functions import attach_base_URIs, generate_context, get_base_URI_from_URI_part
+from .referencing import attach_base_URIs, generate_context, get_base_URI_from_URI_part
 
 
 class TestGetBaseURIfromURIpart(unittest.TestCase):

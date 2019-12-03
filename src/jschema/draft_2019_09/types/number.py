@@ -4,7 +4,7 @@ import numbers
 from jschema.common import KeywordGroup, ValidationError, Dict
 
 from .common import validate_instance_against_all_validators
-from .type_base import Type
+from .type_ import Type
 
 
 class _MultipleOf(KeywordGroup):

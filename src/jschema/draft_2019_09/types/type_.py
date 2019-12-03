@@ -38,7 +38,6 @@ class Type(AValidator):
         # default to True if exhausted since that means that there were no errors
         first_result = next(errors, True)
 
-        # needs to be not - because bool(first_result) evaluates to True
         if first_result and not messages:
             return True
         else:
