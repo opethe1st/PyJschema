@@ -72,12 +72,13 @@ class _NumberOrInteger(Type):
 
     def validate(self, instance):
         messages = []
-        if self.type_ is not None and not isinstance(instance, self.type_):
-            messages.append(f"instance: {instance} is not a {self.type_}")
+        if self.type_ is not None:
+            if isinstance(instance, bool):
+                messages.append(f"instance: {instance} is not a {self.type_}")
+            else:
+                if not isinstance(instance, self.type_):
+                    messages.append(f"instance: {instance} is not a {self.type_}")
 
-        # TODO: this looks weird to me. Needs a closer look
-        if isinstance(instance, bool):
-            messages.append(f"instance: {instance} is not a {self.type_}")
         if messages:
             return ValidationError(messages=messages)
         errors = validate_instance_against_all_validators(
