@@ -26,7 +26,7 @@ class If(KeywordGroup):
                 return self._else_validator.validate(instance=instance)
         return True
 
-    def subschema_validators(self):
+    def sub_validators(self):
         yield self._if_validator
         if self._then_validator:
             yield self._then_validator
@@ -49,7 +49,7 @@ class AllOf(KeywordGroup):
     # WOAH: Not defining this resulted in an almost impossible to debug bug. SIGH!
     # How do I prevent that in future
     # this is required if a keyword
-    def subschema_validators(self):
+    def sub_validators(self):
         yield from self._validators
 
 
@@ -73,7 +73,7 @@ class OneOf(KeywordGroup):
 
     # WOAH: Not defining this resulted in an almost impossible to debug bug. SIGH!
     # How do I prevent that in future
-    def subschema_validators(self):
+    def sub_validators(self):
         yield from self._validators
 
 
@@ -91,7 +91,7 @@ class AnyOf(KeywordGroup):
 
     # WOAH: Not defining this resulted in an almost impossible to debug bug. SIGH!
     # How do I prevent that in future
-    def subschema_validators(self):
+    def sub_validators(self):
         yield from self._validators
 
 
@@ -107,6 +107,6 @@ class Not(KeywordGroup):
 
     # WOAH: Not defining this resulted in an almost impossible to debug bug. SIGH!
     # How do I prevent that in future
-    def subschema_validators(self):
+    def sub_validators(self):
         if self._validator:
             yield self._validator

@@ -50,7 +50,7 @@ class _Property(KeywordGroup):
         else:
             return ValidationError(children=itertools.chain([first_result], errors))
 
-    def subschema_validators(self):
+    def sub_validators(self):
         yield from self._validators.values()
         if self._additional_validator:
             yield self._additional_validator
@@ -123,7 +123,7 @@ class _PropertyNames(KeywordGroup):
         else:
             return ValidationError(children=itertools.chain([first_result], errors))
 
-    def subschema_validators(self):
+    def sub_validators(self):
         yield self._validator
 
 

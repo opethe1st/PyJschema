@@ -24,7 +24,7 @@ class AValidator(abc.ABC):
     def validate(self, instance: JsonType) -> ValidationError:
         raise NotImplementedError
 
-    def subschema_validators(self) -> t.Iterable["AValidator"]:
+    def sub_validators(self) -> t.Iterable["AValidator"]:
         yield from []
 
 

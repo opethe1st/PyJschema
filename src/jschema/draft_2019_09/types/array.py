@@ -62,7 +62,7 @@ class _Items(KeywordGroup):
         else:
             return ValidationError(children=itertools.chain([first_res], results))
 
-    def subschema_validators(self):
+    def sub_validators(self):
         if self._items_validator:
             yield self._items_validator
         for validator in self._items_validators:
@@ -136,7 +136,7 @@ class _Contains(KeywordGroup):
         else:
             return True
 
-    def subschema_validators(self):
+    def sub_validators(self):
         if self._validator:
             yield self._validator
 

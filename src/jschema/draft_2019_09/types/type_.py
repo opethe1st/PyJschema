@@ -45,5 +45,5 @@ class Type(AValidator):
                 messages=messages, children=itertools.chain([first_result], errors)
             )
 
-    def subschema_validators(self):
+    def sub_validators(self):
         yield from self._validators

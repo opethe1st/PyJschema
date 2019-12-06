@@ -17,5 +17,5 @@ class Defs(KeywordGroup):
     def validate(self, instance):
         return True
 
-    def subschema_validators(self):
+    def sub_validators(self):
         yield from self._validators.values()

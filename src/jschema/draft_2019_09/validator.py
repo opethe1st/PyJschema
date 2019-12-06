@@ -66,5 +66,5 @@ class Validator(AValidator):
             )
 
     # TODO(ope): hm.. this is the same as the method in Type.
-    def subschema_validators(self):
+    def sub_validators(self):
         yield from self._validators

@@ -30,7 +30,7 @@ def attach_base_URIs(validator: AValidator, parent_URI):
         validator.base_uri = uri  # this should probably be in the constructor
         validator.id = uri
 
-    for sub_validator in validator.subschema_validators():
+    for sub_validator in validator.sub_validators():
         attach_base_URIs(validator=sub_validator, parent_URI=validator.id)
 
 
@@ -58,7 +58,7 @@ def generate_context(validator: AValidator, root_base_uri) -> t.Tuple[Context, t
         if validator.location is not None:
             uri_to_validator[validator.location] = validator
 
-    for sub_validator in validator.subschema_validators():
+    for sub_validator in validator.sub_validators():
         sub_uri_to_validator, sub_base_uri_to_location = generate_context(
             validator=sub_validator, root_base_uri=root_base_uri
         )
@@ -75,7 +75,7 @@ def add_context_to_ref_validators(
         validator.set_context(context)
         validator.set_base_uri_to_abs_location(base_uri_to_abs_location)
 
-    for sub_validators in validator.subschema_validators():
+    for sub_validators in validator.sub_validators():
         add_context_to_ref_validators(
             validator=sub_validators,
             context=context,

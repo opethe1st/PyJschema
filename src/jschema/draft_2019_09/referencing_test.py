@@ -74,7 +74,7 @@ class TestAttachBaseURI(unittest.TestCase):
 
 def get_base_uris(validator):
     uris = {validator.id}
-    for subvalidator in validator.subschema_validators():
+    for subvalidator in validator.sub_validators():
         uris |= get_base_uris(subvalidator)
     return uris
 
