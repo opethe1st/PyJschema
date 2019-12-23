@@ -1,7 +1,6 @@
 import typing as t
 
-from .instance import Dict, Primitive, List
-from .utils import append
+from .primitive_types_wrappers import Dict, Primitive, List
 
 
 def annotate(obj, location="#") -> t.Union[Primitive, Dict, List]:
@@ -33,3 +32,8 @@ def deannotate(instance: Primitive):
         return {key: deannotate(instance=value) for key, value in instance.items()}
     else:
         return instance.value
+
+
+# TODO(ope): support escaping
+def append(location, value):
+    return "{location}/{value}".format(location=location, value=value)

@@ -1,19 +1,20 @@
 import typing as t
 import itertools
-from jschema.common import Dict, KeywordGroup, List, Primitive, ValidationError
+from pyjschema.common import Dict, KeywordGroup, List, ValidationError
 
 from .common import validate_max, validate_min
-from .type_base import Type
+from .type_ import Type
 
 
 class _Items(KeywordGroup):
-    def __init__(
-        self, items: t.Union[Primitive, List], additionalItems: t.Optional[Dict] = None
-    ):
-        from jschema.draft_2019_09 import build_validator
-        from jschema.draft_2019_09.validator_construction import (
+    def __init__(self, schema: Dict):
+        from pyjschema.draft_2019_09 import build_validator
+        from pyjschema.draft_2019_09.validator_construction import (
             BuildValidatorResultType,
         )
+
+        items = schema.get("items")
+        additionalItems = schema.get("additionalItems")
 
         self._items_validator: t.Optional[BuildValidatorResultType] = None
         self._items_validators: t.List[BuildValidatorResultType] = []
@@ -27,7 +28,7 @@ class _Items(KeywordGroup):
                     self._additional_items_validator = build_validator(
                         schema=additionalItems
                     )
-            else:  # add to add this condition
+            else:
                 self._items_validator = build_validator(schema=items)
 
     def validate(self, instance):
@@ -62,7 +63,7 @@ class _Items(KeywordGroup):
         else:
             return ValidationError(children=itertools.chain([first_res], results))
 
-    def subschema_validators(self):
+    def sub_validators(self):
         if self._items_validator:
             yield self._items_validator
         for validator in self._items_validators:
@@ -96,13 +97,12 @@ def _validate_item_list(items_validators, additional_items_validator, instance):
 
 
 class _Contains(KeywordGroup):
-    def __init__(
-        self,
-        contains: t.Union[Primitive, Dict],
-        maxContains: Primitive,
-        minContains: Primitive,
-    ):
-        from jschema.draft_2019_09 import build_validator
+    def __init__(self, schema: Dict):
+        from pyjschema.draft_2019_09 import build_validator
+
+        contains = schema.get("contains")
+        maxContains = schema.get("maxContains")
+        minContains = schema.get("minContains")
 
         self._validator = build_validator(schema=contains) if contains else None
         self.maxContainsValue = maxContains.value if maxContains else float("inf")
@@ -137,30 +137,30 @@ class _Contains(KeywordGroup):
         else:
             return True
 
-    def subschema_validators(self):
+    def sub_validators(self):
         if self._validator:
             yield self._validator
 
 
 class _MinItems(KeywordGroup):
-    def __init__(self, minItems: Primitive):
-        self.value = minItems.value
+    def __init__(self, schema: Dict):
+        self.value = schema["minItems"].value
 
     def validate(self, instance):
         return validate_min(value=self.value, instance=instance)
 
 
 class _MaxItems(KeywordGroup):
-    def __init__(self, maxItems: Primitive):
-        self.value = maxItems.value
+    def __init__(self, schema: Dict):
+        self.value = schema["maxItems"].value
 
     def validate(self, instance):
         return validate_max(value=self.value, instance=instance)
 
 
 class _UniqueItems(KeywordGroup):
-    def __init__(self, uniqueItems: Primitive):
-        self.value = uniqueItems.value
+    def __init__(self, schema: Dict):
+        self.value = schema["uniqueItems"].value
 
     def validate(self, instance):
         if self.value:

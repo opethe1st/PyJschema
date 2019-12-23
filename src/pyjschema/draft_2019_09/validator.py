@@ -1,8 +1,8 @@
 import itertools
 import typing as t
 
-from jschema.common import AValidator, List, ValidationError
-from jschema.draft_2019_09.referencing import Ref
+from pyjschema.common import AValidator, List, ValidationError
+from pyjschema.draft_2019_09.referencing import Ref
 
 from .constants import KEYWORDS_TO_VALIDATOR, TYPE_TO_TYPE_VALIDATORS
 from .defs import Defs
@@ -66,5 +66,5 @@ class Validator(AValidator):
             )
 
     # TODO(ope): hm.. this is the same as the method in Type.
-    def subschema_validators(self):
+    def sub_validators(self):
         yield from self._validators

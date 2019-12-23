@@ -1,7 +1,7 @@
 import itertools
 import typing as t
 
-from jschema.common import AValidator, Dict, ValidationError
+from pyjschema.common import AValidator, Dict, ValidationError
 
 from .constants import TYPE_TO_TYPE_VALIDATORS
 from .types.common import validate_instance_against_any_validator
@@ -35,5 +35,5 @@ class Types(AValidator):
             )
 
     # Forgot this too - enforce with abc abstract?
-    def subschema_validators(self):
+    def sub_validators(self):
         yield from self._validators

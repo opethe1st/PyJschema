@@ -2,7 +2,7 @@ import fastjsonschema
 import jsonschema
 from memory_profiler import profile
 
-from jschema.draft_2019_09 import construct_validator
+from pyjschema.draft_2019_09 import construct_validator
 
 SCHEMA = {
     "$schema": "http://json-schema.org/draft-04/schema#",

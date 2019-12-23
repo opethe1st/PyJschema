@@ -1,7 +1,7 @@
-from jschema.common import AValidator, Dict, KeywordGroup, Primitive, ValidationError
-from jschema.common.annotate import deannotate
+from pyjschema.common import AValidator, Dict, KeywordGroup, Primitive, ValidationError
+from pyjschema.common.annotate import deannotate
 
-from .type_base import Type
+from .type_ import Type
 
 
 class Boolean(Type):
@@ -53,7 +53,7 @@ def equals(a, b):
 
 class AcceptAll(AValidator):
     def __init__(self, schema: Primitive):
-        self.location = schema.location.rstrip("#")
+        self.location = schema.location
 
     def validate(self, instance):
         return True
@@ -61,7 +61,7 @@ class AcceptAll(AValidator):
 
 class RejectAll(AValidator):
     def __init__(self, schema: Primitive):
-        self.location = schema.location.rstrip("#")
+        self.location = schema.location
 
     def validate(self, instance):
         return ValidationError(messages=["This fails for every value"])

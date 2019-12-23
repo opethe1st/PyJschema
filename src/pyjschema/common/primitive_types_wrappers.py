@@ -2,11 +2,6 @@ import dataclasses as d
 import typing as t
 
 
-# wanted to make this similar to List and Dict
-# so instances of this class could be used as drop in
-# replacements for the native types
-# but it seems impossible to do
-# TODO: Refactor - rename this file to builtins_wrapper or something similar
 @d.dataclass
 class Primitive:
     value: t.Any

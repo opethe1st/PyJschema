@@ -2,10 +2,10 @@ import unittest
 
 import parameterized  # type: ignore
 
-from jschema.common.annotate import annotate
-from jschema.draft_2019_09 import build_validator
+from pyjschema.common.annotate import annotate
+from pyjschema.draft_2019_09 import build_validator
 
-from .functions import attach_base_URIs, generate_context, get_base_URI_from_URI_part
+from .referencing import attach_base_URIs, generate_context, get_base_URI_from_URI_part
 
 
 class TestGetBaseURIfromURIpart(unittest.TestCase):
@@ -74,7 +74,7 @@ class TestAttachBaseURI(unittest.TestCase):
 
 def get_base_uris(validator):
     uris = {validator.id}
-    for subvalidator in validator.subschema_validators():
+    for subvalidator in validator.sub_validators():
         uris |= get_base_uris(subvalidator)
     return uris
 

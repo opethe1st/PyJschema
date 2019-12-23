@@ -1,7 +1,7 @@
 import itertools
 import typing as t
 
-from jschema.common import AValidator, KeywordGroup, ValidationError
+from pyjschema.common import AValidator, KeywordGroup, ValidationError
 
 from .common import validate_instance_against_all_validators
 
@@ -21,7 +21,7 @@ class Type(AValidator):
             if any(schema.get(keyword) is not None for keyword in keywords):
                 self._validators.append(
                     self.KEYWORDS_TO_VALIDATOR[keywords](
-                        **{keyword: schema.get(keyword) for keyword in keywords}
+                        schema=schema
                     )
                 )
 
@@ -38,7 +38,6 @@ class Type(AValidator):
         # default to True if exhausted since that means that there were no errors
         first_result = next(errors, True)
 
-        # needs to be not - because bool(first_result) evaluates to True
         if first_result and not messages:
             return True
         else:
@@ -46,5 +45,5 @@ class Type(AValidator):
                 messages=messages, children=itertools.chain([first_result], errors)
             )
 
-    def subschema_validators(self):
+    def sub_validators(self):
         yield from self._validators

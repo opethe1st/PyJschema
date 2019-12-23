@@ -2,8 +2,8 @@ import json
 import os
 import typing as t
 
-from jschema.common import Primitive, Dict, ValidationError
-from jschema.common.annotate import annotate
+from pyjschema.common import Primitive, Dict, ValidationError
+from pyjschema.common.annotate import annotate
 
 from .referencing import (
     add_context_to_ref_validators,

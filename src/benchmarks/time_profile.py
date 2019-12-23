@@ -5,7 +5,7 @@ import timeit
 import fastjsonschema
 import jsonschema
 
-from jschema.draft_2019_09 import construct_validator
+from pyjschema.draft_2019_09 import construct_validator
 
 
 if __name__ == "__main__":

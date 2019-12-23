@@ -1,6 +1,6 @@
 import typing
 
-from jschema.common import AValidator, ValidationError
+from pyjschema.common import AValidator, ValidationError
 
 
 def validate_min(value, instance, message=""):
