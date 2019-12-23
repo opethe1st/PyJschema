@@ -2,8 +2,8 @@ import unittest
 
 import parameterized  # type: ignore
 
-from jschema.common import Primitive, Dict, List
-from jschema.common.annotate import annotate, deannotate
+from pyjschema.common import Primitive, Dict, List
+from pyjschema.common.annotate import annotate, deannotate
 
 
 class TestAnnotate(unittest.TestCase):

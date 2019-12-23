@@ -2,7 +2,7 @@ import re
 import typing as t
 from urllib import parse
 
-from jschema.common import AValidator, KeywordGroup
+from pyjschema.common import AValidator, KeywordGroup
 
 Context = t.Dict[str, AValidator]
 

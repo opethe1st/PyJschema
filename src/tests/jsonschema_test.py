@@ -4,7 +4,7 @@ import unittest
 
 import parameterized
 
-from jschema.draft_2019_09 import validate_once
+from pyjschema.draft_2019_09 import validate_once
 
 KEYWORDS = [
     # string

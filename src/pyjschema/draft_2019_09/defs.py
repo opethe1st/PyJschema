@@ -1,4 +1,4 @@
-from jschema.common import Dict, KeywordGroup
+from pyjschema.common import Dict, KeywordGroup
 
 
 class Defs(KeywordGroup):

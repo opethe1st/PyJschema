@@ -1,8 +1,8 @@
 import itertools
 import typing as t
 
-from jschema.common import AValidator, List, ValidationError
-from jschema.draft_2019_09.referencing import Ref
+from pyjschema.common import AValidator, List, ValidationError
+from pyjschema.draft_2019_09.referencing import Ref
 
 from .constants import KEYWORDS_TO_VALIDATOR, TYPE_TO_TYPE_VALIDATORS
 from .defs import Defs

@@ -1,5 +1,5 @@
-from jschema.common import AValidator, Dict, KeywordGroup, Primitive, ValidationError
-from jschema.common.annotate import deannotate
+from pyjschema.common import AValidator, Dict, KeywordGroup, Primitive, ValidationError
+from pyjschema.common.annotate import deannotate
 
 from .type_ import Type
 

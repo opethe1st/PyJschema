@@ -1,4 +1,4 @@
-from jschema.common import Dict, KeywordGroup, ValidationError
+from pyjschema.common import Dict, KeywordGroup, ValidationError
 
 from .common import validate_max, validate_min
 from .type_ import Type

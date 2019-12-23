@@ -4,7 +4,7 @@ import fastjsonschema
 import jsonschema
 import pytest
 
-from jschema.draft_2019_09 import construct_validator, validate_once
+from pyjschema.draft_2019_09 import construct_validator, validate_once
 
 SCHEMA = {
     "$schema": "http://json-schema.org/draft-04/schema#",

@@ -1,4 +1,4 @@
-from jschema.common import Dict, KeywordGroup, ValidationError
+from pyjschema.common import Dict, KeywordGroup, ValidationError
 
 
 class If(KeywordGroup):

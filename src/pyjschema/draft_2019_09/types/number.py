@@ -1,7 +1,7 @@
 import itertools
 import numbers
 
-from jschema.common import KeywordGroup, ValidationError, Dict
+from pyjschema.common import KeywordGroup, ValidationError, Dict
 
 from .common import validate_instance_against_all_validators
 from .type_ import Type

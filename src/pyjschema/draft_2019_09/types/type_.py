@@ -1,7 +1,7 @@
 import itertools
 import typing as t
 
-from jschema.common import AValidator, KeywordGroup, ValidationError
+from pyjschema.common import AValidator, KeywordGroup, ValidationError
 
 from .common import validate_instance_against_all_validators
 

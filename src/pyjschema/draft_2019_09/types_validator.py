@@ -1,7 +1,7 @@
 import itertools
 import typing as t
 
-from jschema.common import AValidator, Dict, ValidationError
+from pyjschema.common import AValidator, Dict, ValidationError
 
 from .constants import TYPE_TO_TYPE_VALIDATORS
 from .types.common import validate_instance_against_any_validator

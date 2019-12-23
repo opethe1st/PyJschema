@@ -1,5 +1,5 @@
 from .string import String
-from jschema.common import annotate
+from pyjschema.common import annotate
 
 
 class TestString:

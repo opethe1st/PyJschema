@@ -1,6 +1,6 @@
 import typing as t
 
-from jschema.common import AValidator
+from pyjschema.common import AValidator
 
 from .boolean_applicators import AllOf, AnyOf, If, Not, OneOf
 from .types import Array, Boolean, Const, Enum, Integer, Null, Number, Object, String

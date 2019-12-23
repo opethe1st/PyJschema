@@ -1,4 +1,4 @@
-from jschema.common import annotate
+from pyjschema.common import annotate
 
 from .number import Integer, Number
 

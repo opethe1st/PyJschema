@@ -1,7 +1,7 @@
 import itertools
 import re
 
-from jschema.common import Dict, KeywordGroup, ValidationError
+from pyjschema.common import Dict, KeywordGroup, ValidationError
 
 from .common import validate_max, validate_min
 from .type_ import Type
@@ -12,7 +12,7 @@ class _Property(KeywordGroup):
         self,
         schema: Dict,
     ):
-        from jschema.draft_2019_09 import build_validator
+        from pyjschema.draft_2019_09 import build_validator
 
         properties = schema.get("properties")
         additionalProperties = schema.get("additionalProperties")
@@ -110,7 +110,7 @@ class _PropertyNames(KeywordGroup):
     def __init__(self, schema: Dict):
         # add this to make sure that the type is string - I have seen it missing from
         # examples in the documentation so can only assume it's allowed
-        from jschema.draft_2019_09 import build_validator
+        from pyjschema.draft_2019_09 import build_validator
 
         propertyNames = schema["propertyNames"]
         self._validator = build_validator(schema=propertyNames)

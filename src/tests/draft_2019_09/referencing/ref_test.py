@@ -2,7 +2,7 @@ import unittest
 
 import parameterized  # type: ignore
 
-from jschema.draft_2019_09 import validate_once
+from pyjschema.draft_2019_09 import validate_once
 
 
 class TestRefValidate(unittest.TestCase):

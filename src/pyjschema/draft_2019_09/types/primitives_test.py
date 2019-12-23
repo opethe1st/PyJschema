@@ -1,4 +1,4 @@
-from jschema.common import annotate
+from pyjschema.common import annotate
 
 from .primitives import AcceptAll, RejectAll, Boolean, Null, Const, Enum
 

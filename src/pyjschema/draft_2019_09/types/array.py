@@ -1,6 +1,6 @@
 import typing as t
 import itertools
-from jschema.common import Dict, KeywordGroup, List, ValidationError
+from pyjschema.common import Dict, KeywordGroup, List, ValidationError
 
 from .common import validate_max, validate_min
 from .type_ import Type
@@ -10,8 +10,8 @@ class _Items(KeywordGroup):
     def __init__(self, schema: Dict):
         items = schema.get("items")
         additionalItems = schema.get("additionalItems")
-        from jschema.draft_2019_09 import build_validator
-        from jschema.draft_2019_09.validator_construction import (
+        from pyjschema.draft_2019_09 import build_validator
+        from pyjschema.draft_2019_09.validator_construction import (
             BuildValidatorResultType,
         )
 
@@ -97,7 +97,7 @@ def _validate_item_list(items_validators, additional_items_validator, instance):
 
 class _Contains(KeywordGroup):
     def __init__(self, schema: Dict):
-        from jschema.draft_2019_09 import build_validator
+        from pyjschema.draft_2019_09 import build_validator
 
         contains = schema.get("contains")
         maxContains = schema.get("maxContains")

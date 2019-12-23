@@ -1,7 +1,7 @@
 import re
 import typing as t
 
-from jschema.common import AValidator
+from pyjschema.common import AValidator
 
 from .ref import Context, Ref
 
