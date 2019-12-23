@@ -8,12 +8,13 @@ from .type_ import Type
 
 class _Items(KeywordGroup):
     def __init__(self, schema: Dict):
-        items = schema.get("items")
-        additionalItems = schema.get("additionalItems")
         from pyjschema.draft_2019_09 import build_validator
         from pyjschema.draft_2019_09.validator_construction import (
             BuildValidatorResultType,
         )
+
+        items = schema.get("items")
+        additionalItems = schema.get("additionalItems")
 
         self._items_validator: t.Optional[BuildValidatorResultType] = None
         self._items_validators: t.List[BuildValidatorResultType] = []
@@ -27,7 +28,7 @@ class _Items(KeywordGroup):
                     self._additional_items_validator = build_validator(
                         schema=additionalItems
                     )
-            else:  # add to add this condition
+            else:
                 self._items_validator = build_validator(schema=items)
 
     def validate(self, instance):
