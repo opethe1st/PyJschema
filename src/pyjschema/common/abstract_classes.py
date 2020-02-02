@@ -8,17 +8,18 @@ from .primitive_types_wrappers import Dict
 
 
 JsonType = t.Union[str, numbers.Number, bool, None, Mapping, Sequence]
-# TODO: rename this file to abstract validator or something
 
 
 class AValidator(abc.ABC):
-    id = None
-    base_uri = None  # if $id was set in the schema this Validator was created from
+    id = None  # and remove this line
+    base_uri = None
     anchor = None
-    location: t.Optional[str] = None
 
     def __init__(self, schema: Dict):
-        pass
+        # TODO(Ope): call super in all the subclasses
+        self.id = self.base_uri = schema.get("$id")
+        self.location = schema.location
+        self.anchor = schema.get("$anchor")
 
     @abc.abstractmethod
     def validate(self, instance: JsonType) -> ValidationError:
@@ -31,7 +32,7 @@ class AValidator(abc.ABC):
 class KeywordGroup(AValidator):
     """
     Validator for a group of keywords that are dependent on each other.
-    This also included the case where there is one validator
+    This also includes the case where there is one keyword
     """
 
     pass
