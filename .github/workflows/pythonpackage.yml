@@ -36,10 +36,10 @@ jobs:
       run: |
         cd src/
         coverage run -m unittest discover -qp "*_test.py"
-    - name: coverage report
-      run: |
         coverage report
+        cd ..
     - name: benchmarks
       run: |
+        cd src/
         pytest benchmarks
         cd ..
