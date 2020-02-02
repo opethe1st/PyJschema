@@ -32,10 +32,18 @@ jobs:
       run: |
         mypy src/pyjschema --config-file src/setup.cfg
         mypy src/tests --config-file src/setup.cfg
-    - name: Test with pytest
+    - name: Test
+      run: |
+        cd src/
+        coverage run -m unittest tests/**.py
+        cd ..
+    - name: coverage report
+      run: |
+        cd src/
+        coverage report
+        cd ..
+    - name: benchmarks
       run: |
         cd src/
         pytest benchmarks
-        coverage run -m unittest tests/**.py
-        coverage report
         cd ..
