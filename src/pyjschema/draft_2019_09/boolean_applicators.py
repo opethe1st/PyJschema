@@ -7,6 +7,7 @@ class If(KeywordGroup):
     # but that wont work since they are reserved keywords. Maybe the decision to pass in individual keywords was
     # misguided but I also wanted to document that a particular keyword group deals with these keywords
     def __init__(self, schema: Dict):
+        super().__init__(schema=schema)
         from .validator_construction import build_validator
 
         self._if_validator = build_validator(schema=schema["if"])
@@ -36,6 +37,7 @@ class If(KeywordGroup):
 
 class AllOf(KeywordGroup):
     def __init__(self, schema: Dict):
+        super().__init__(schema=schema)
         from .validator_construction import build_validator
 
         self._validators = [build_validator(schema=item) for item in schema["allOf"]]
@@ -55,6 +57,7 @@ class AllOf(KeywordGroup):
 
 class OneOf(KeywordGroup):
     def __init__(self, schema: Dict):
+        super().__init__(schema=schema)
         from .validator_construction import build_validator
 
         self._validators = [build_validator(schema=item) for item in schema["oneOf"]]
@@ -79,6 +82,7 @@ class OneOf(KeywordGroup):
 
 class AnyOf(KeywordGroup):
     def __init__(self, schema: Dict):
+        super().__init__(schema=schema)
         from .validator_construction import build_validator
 
         self._validators = [build_validator(schema=item) for item in schema["anyOf"]]
@@ -97,6 +101,7 @@ class AnyOf(KeywordGroup):
 
 class Not(KeywordGroup):
     def __init__(self, schema: Dict):
+        super().__init__(schema=schema)
         from .validator_construction import build_validator
 
         self._validator = build_validator(schema=schema["not"])

@@ -90,6 +90,7 @@ def _validate(property_validators, additional_validator, pattern_validators, ins
 
 class _Required(KeywordGroup):
     def __init__(self, schema: Dict):
+        super().__init__(schema=schema)
         required = schema["required"]
         self.value = [item.value for item in required]
 
@@ -108,6 +109,7 @@ class _Required(KeywordGroup):
 
 class _PropertyNames(KeywordGroup):
     def __init__(self, schema: Dict):
+        super().__init__(schema=schema)
         # add this to make sure that the type is string - I have seen it missing from
         # examples in the documentation so can only assume it's allowed
         from pyjschema.draft_2019_09 import build_validator
@@ -137,6 +139,7 @@ def validate_property_names(validator, instance):
 
 class _MinProperties(KeywordGroup):
     def __init__(self, schema: Dict):
+        super().__init__(schema=schema)
         self.value = schema["minProperties"].value
 
     def validate(self, instance):
@@ -145,6 +148,7 @@ class _MinProperties(KeywordGroup):
 
 class _MaxProperties(KeywordGroup):
     def __init__(self, schema: Dict):
+        super().__init__(schema=schema)
         self.value = schema["maxProperties"].value
 
     def validate(self, instance):
@@ -153,6 +157,7 @@ class _MaxProperties(KeywordGroup):
 
 class _DependentRequired(KeywordGroup):
     def __init__(self, schema: Dict):
+        super().__init__(schema=schema)
         dependentRequired = schema["dependentRequired"]
         self.dependentRequired = {
             key: [val.value for val in value]

@@ -8,6 +8,7 @@ from .type_ import Type
 
 class _Items(KeywordGroup):
     def __init__(self, schema: Dict):
+        super().__init__(schema=schema)
         from pyjschema.draft_2019_09 import build_validator
         from pyjschema.draft_2019_09.validator_construction import (
             BuildValidatorResultType,
@@ -98,8 +99,8 @@ def _validate_item_list(items_validators, additional_items_validator, instance):
 
 class _Contains(KeywordGroup):
     def __init__(self, schema: Dict):
+        super().__init__(schema=schema)
         from pyjschema.draft_2019_09 import build_validator
-
         contains = schema.get("contains")
         maxContains = schema.get("maxContains")
         minContains = schema.get("minContains")
@@ -144,6 +145,7 @@ class _Contains(KeywordGroup):
 
 class _MinItems(KeywordGroup):
     def __init__(self, schema: Dict):
+        super().__init__(schema=schema)
         self.value = schema["minItems"].value
 
     def validate(self, instance):
@@ -152,6 +154,7 @@ class _MinItems(KeywordGroup):
 
 class _MaxItems(KeywordGroup):
     def __init__(self, schema: Dict):
+        super().__init__(schema=schema)
         self.value = schema["maxItems"].value
 
     def validate(self, instance):
@@ -160,6 +163,7 @@ class _MaxItems(KeywordGroup):
 
 class _UniqueItems(KeywordGroup):
     def __init__(self, schema: Dict):
+        super().__init__(schema=schema)
         self.value = schema["uniqueItems"].value
 
     def validate(self, instance):
