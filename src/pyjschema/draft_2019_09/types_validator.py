@@ -9,7 +9,6 @@ from .types.common import validate_instance_against_any_validator
 
 class Types(AValidator):
     def __init__(self, schema: Dict):
-        super().__init__(schema=schema)
         self._validators: t.List[AValidator] = []
         if "type" in schema:
             types: t.Iterable[str] = [item.value for item in schema["type"]]

@@ -12,7 +12,6 @@ class _Property(KeywordGroup):
         self,
         schema: Dict,
     ):
-        super().__init__(schema=schema)
         from pyjschema.draft_2019_09 import build_validator
 
         properties = schema.get("properties")

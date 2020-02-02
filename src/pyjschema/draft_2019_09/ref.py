@@ -46,7 +46,6 @@ class Ref(KeywordGroup):
         base_uri = self.base_uri.rstrip() if self.base_uri else ""
         fragment = uridecode(value.fragment.replace("~1", "/").replace("~0", "~")) if value.fragment else ""
 
-        # print(value, has_authority, has_path, has_fragment)
         if not has_authority and not has_path and has_fragment:
             if is_plain_name(value.fragment):
                 return urijoin(base_uri + "#", value.fragment)
@@ -54,8 +53,10 @@ class Ref(KeywordGroup):
                 # should make sure this is a valid json pointer
                 # and also unquote
                 return urijoin(base_uri, fragment)
+        elif not has_authority and has_path and not has_fragment:
+            return urijoin(base_uri, value.path)
         elif not has_authority and has_path and has_fragment:
-            # print("herere")
+
             return urijoin(urijoin(base_uri, value.path), "#" + fragment)
         elif has_authority:
             if not has_path and not has_fragment:
@@ -75,15 +76,14 @@ class Ref(KeywordGroup):
         raise SchemaError(f"Unable to resolve this uri: {self.value}")
 
     def _get_validator(self, uri_to_validator):
-        # print(self.rel_uri)
-        # from pprint import pprint; pprint(uri_to_validator)
         validator = uri_to_validator.get(self.rel_uri)
         if validator:
             return validator
         else:
             raise SchemaError(
                 f"Unable to locate the validator at this location "
-                f"while trying to resolve this reference: {self.value} at {self.location}"
+                f"while trying to resolve this reference: {self.value} at {self.location} "
+                f"{list(uri_to_validator.keys())}"
             )
 
     def __eq__(self, other) -> bool:

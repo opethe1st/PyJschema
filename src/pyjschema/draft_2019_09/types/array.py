@@ -74,27 +74,31 @@ class _Items(KeywordGroup):
 
 
 def _validate_item_list(items_validators, additional_items_validator, instance):
-    i = 0
-    while i < len(items_validators):
-        if i >= len(instance):
-            break
+    if isinstance(instance, list):
 
-        res = items_validators[i].validate(instance[i])
+        i = 0
+        while i < len(items_validators):
+            if i >= len(instance):
+                break
 
-        if not res:
-            yield res
-
-        i += 1
-
-    # additionalItem for the rest of the items in the instance
-    if additional_items_validator:
-        while i < len(instance):
-            res = additional_items_validator.validate(instance[i])
+            res = items_validators[i].validate(instance[i])
 
             if not res:
                 yield res
 
             i += 1
+
+        # additionalItem for the rest of the items in the instance
+        if additional_items_validator:
+            while i < len(instance):
+                res = additional_items_validator.validate(instance[i])
+
+                if not res:
+                    yield res
+
+                i += 1
+    else:
+        yield ValidationError()
 
 
 class _Contains(KeywordGroup):

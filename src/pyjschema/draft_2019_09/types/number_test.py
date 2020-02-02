@@ -1,9 +1,11 @@
+import unittest
+
 from pyjschema.common import annotate
 
 from .number import Integer, Number
 
 
-class TestNumber:
+class TestNumber(unittest.TestCase):
 
     def test(self):
         validator = Number(schema=annotate({'minimum': 0, 'maximum': 10}))
@@ -14,7 +16,7 @@ class TestNumber:
         assert not validator.validate(instance=False)
 
 
-class TestInteger:
+class TestInteger(unittest.TestCase):
     def test(self):
         validator = Integer(schema=annotate({'minimum': 0, 'maximum': 10}))
         assert validator.validate(instance=2)
