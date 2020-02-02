@@ -9,23 +9,23 @@ from pyjschema.common.annotate import annotate, deannotate
 class TestAnnotate(unittest.TestCase):
     @parameterized.parameterized.expand(
         [
-            ("empty string", "", Primitive("", "#")),
-            ("string", "str", Primitive("str", "#")),
-            ("array with one item", ["item"], List([Primitive("item", "#/0")], "#")),
+            ("empty string", "", Primitive("", "")),
+            ("string", "str", Primitive("str", "")),
+            ("array with one item", ["item"], List([Primitive("item", "/0")], "")),
             (
                 "dictionary with one item",
                 {"key": "value"},
-                Dict({"key": Primitive("value", "#/key")}, location="#"),
+                Dict({"key": Primitive("value", "/key")}, location=""),
             ),
             (
                 "dictionary with more than one item",
                 {"key": "value", "key2": 2},
                 Dict(
                     {
-                        "key": Primitive("value", "#/key"),
-                        "key2": Primitive(2, "#/key2"),
+                        "key": Primitive("value", "/key"),
+                        "key2": Primitive(2, "/key2"),
                     },
-                    location="#",
+                    location="",
                 ),
             ),
             (
@@ -33,13 +33,13 @@ class TestAnnotate(unittest.TestCase):
                 ["item", ["item1", "item2"]],
                 List(
                     [
-                        Primitive("item", "#/0"),
+                        Primitive("item", "/0"),
                         List(
-                            [Primitive("item1", "#/1/0"), Primitive("item2", "#/1/1")],
-                            "#/1",
+                            [Primitive("item1", "/1/0"), Primitive("item2", "/1/1")],
+                            "/1",
                         ),
                     ],
-                    "#",
+                    "",
                 ),
             ),
         ]

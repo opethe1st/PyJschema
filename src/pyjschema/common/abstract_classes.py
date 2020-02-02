@@ -3,9 +3,9 @@ import numbers
 import typing as t
 from collections.abc import Mapping, Sequence
 
-from .validation_error import ValidationError
+from .annotate import deannotate
 from .primitive_types_wrappers import Dict
-
+from .validation_error import ValidationError
 
 JsonType = t.Union[str, numbers.Number, bool, None, Mapping, Sequence]
 
@@ -16,10 +16,9 @@ class AValidator(abc.ABC):
     anchor = None
 
     def __init__(self, schema: Dict):
-        # TODO(Ope): call super in all the subclasses
-        self.id = self.base_uri = schema.get("$id")
+        self.id = self.base_uri = deannotate(schema["$id"]) if schema.get("$id") else ""
         self.location = schema.location
-        self.anchor = schema.get("$anchor")
+        self.anchor = deannotate(schema["$anchor"]) if schema.get("$anchor") else ""
 
     @abc.abstractmethod
     def validate(self, instance: JsonType) -> ValidationError:

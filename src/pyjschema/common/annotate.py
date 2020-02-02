@@ -3,7 +3,7 @@ import typing as t
 from .primitive_types_wrappers import Dict, Primitive, List
 
 
-def annotate(obj, location="#") -> t.Union[Primitive, Dict, List]:
+def annotate(obj, location="") -> t.Union[Primitive, Dict, List]:
     if isinstance(obj, list):
         return List(
             [

@@ -16,6 +16,7 @@ class Validator(AValidator):
     """
 
     def __init__(self, schema):
+        super().__init__(schema=schema)
         self.location = schema.location
         self._validators: t.List[AValidator] = []
 

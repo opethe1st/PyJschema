@@ -1,8 +1,8 @@
 from functools import wraps
 
-from uritools import SplitResult, urijoin, urisplit
+from uritools import SplitResult, urijoin, urisplit, uridecode
 
-from pyjschema.common import KeywordGroup
+from pyjschema.common import KeywordGroup, deannotate
 
 from .exceptions import SchemaError
 
@@ -22,13 +22,13 @@ def raise_if_not_ready(func):
 class Ref(KeywordGroup):
     def __init__(self, schema):
         super().__init__(schema=schema)
-        self.value = schema["$ref"]
+        self.value = deannotate(schema["$ref"])
         self._validator = None
         self.rel_uri = None
 
     @property
     def is_ready(self):
-        return all(self.rel_uri is not None, self._validator is not None)
+        return all([self.rel_uri is not None, self._validator is not None])
 
     @raise_if_not_ready
     def validate(self, instance):
@@ -41,19 +41,22 @@ class Ref(KeywordGroup):
     def _to_rel_uri(self, uri_to_root_location):
         value: SplitResult = urisplit(self.value)
         has_authority = bool(value.scheme and value.authority)
-        has_path = bool(value.path)
-        has_fragment = bool(value.fragment)
-        base_uri = self.base_uri.rstrip()
+        has_path = bool(value.path is not None)
+        has_fragment = bool(value.fragment is not None)
+        base_uri = self.base_uri.rstrip() if self.base_uri else ""
+        fragment = uridecode(value.fragment.replace("~1", "/").replace("~0", "~")) if value.fragment else ""
 
+        # print(value, has_authority, has_path, has_fragment)
         if not has_authority and not has_path and has_fragment:
             if is_plain_name(value.fragment):
                 return urijoin(base_uri + "#", value.fragment)
             elif is_json_pointer(value.fragment):
                 # should make sure this is a valid json pointer
                 # and also unquote
-                return urijoin(base_uri, value.fragment)
-        elif not has_authority and has_path and not has_fragment:
-            return urijoin(base_uri.rstrip(), value.path)
+                return urijoin(base_uri, fragment)
+        elif not has_authority and has_path and has_fragment:
+            # print("herere")
+            return urijoin(urijoin(base_uri, value.path), "#" + fragment)
         elif has_authority:
             if not has_path and not has_fragment:
                 return self.value
@@ -61,22 +64,26 @@ class Ref(KeywordGroup):
                 # this should throw better than the index error
                 root_location = urijoin(uri_to_root_location[""], uri_to_root_location[self.value])
                 return urijoin(root_location, value.path)
-            elif not has_path and has_fragment and is_json_pointer(value.fragment):
+            elif not has_path and has_fragment and is_json_pointer(fragment):
                 if base_uri == uri_to_root_location[""]:
                     return urijoin(base_uri, value.fragment)
                 else:
-                    return urijoin(uri_to_root_location[self.value], value.fragment)
+                    return urijoin(uri_to_root_location[self.value] + "#" + fragment)
+            elif has_path and has_fragment:
+                return self.value
 
-        raise SchemaError("Unable to resolve this uri")
+        raise SchemaError(f"Unable to resolve this uri: {self.value}")
 
     def _get_validator(self, uri_to_validator):
+        # print(self.rel_uri)
+        # from pprint import pprint; pprint(uri_to_validator)
         validator = uri_to_validator.get(self.rel_uri)
         if validator:
             return validator
         else:
             raise SchemaError(
-                f"Unable to locate the validator at this canonical URI: {self.canonical_uri}"
-                "while trying to resolve this reference: {self.value} at {self.location}"
+                f"Unable to locate the validator at this location "
+                f"while trying to resolve this reference: {self.value} at {self.location}"
             )
 
     def __eq__(self, other) -> bool:
@@ -86,8 +93,8 @@ class Ref(KeywordGroup):
 
 
 def is_plain_name(val):
-    return False
+    return val and val[0] != "/"
 
 
 def is_json_pointer(val):
-    return False
+    return val and val[0] == '/'

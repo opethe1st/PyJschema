@@ -12,9 +12,9 @@ class TestAttachBaseURI(unittest.TestCase):
     @parameterized.parameterized.expand(
         [
             (
-                "make sure that the expected base_URI are set",
+                "make sure that the expected base_URI are set 1",
                 {"$id": "http://localhost:1234/root#"},
-                {"http://localhost:1234/root"},
+                {"http://localhost:1234/root", "http://localhost:1234/root#"},
             ),
             (
                 "make sure that the expected base_URI are set",
@@ -26,7 +26,7 @@ class TestAttachBaseURI(unittest.TestCase):
                 {"http://localhost:1234/root", "items"},
             ),
             (
-                "make sure that the expected base_URI are set",
+                "make sure that the expected base_URI are set 2",
                 {
                     "$id": "http://localhost:1234/root.json#",
                     "type": "array",
@@ -34,6 +34,7 @@ class TestAttachBaseURI(unittest.TestCase):
                 },
                 {
                     "http://localhost:1234/root.json",
+                    "http://localhost:1234/root.json#",
                     "/items/abc.json",
                 },
             ),
