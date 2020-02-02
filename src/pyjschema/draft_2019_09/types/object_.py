@@ -8,10 +8,7 @@ from .type_ import Type
 
 
 class _Property(KeywordGroup):
-    def __init__(
-        self,
-        schema: Dict,
-    ):
+    def __init__(self, schema: Dict):
         from pyjschema.draft_2019_09 import build_validator
 
         properties = schema.get("properties")

@@ -20,9 +20,7 @@ class Type(AValidator):
 
             if any(schema.get(keyword) is not None for keyword in keywords):
                 self._validators.append(
-                    self.KEYWORDS_TO_VALIDATOR[keywords](
-                        schema=schema
-                    )
+                    self.KEYWORDS_TO_VALIDATOR[keywords](schema=schema)
                 )
 
     def validate(self, instance):

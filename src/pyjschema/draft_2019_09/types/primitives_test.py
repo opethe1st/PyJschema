@@ -6,7 +6,6 @@ from .primitives import AcceptAll, Boolean, Const, Enum, Null, RejectAll
 
 
 class TestAcceptAll(unittest.TestCase):
-
     def test(self):
         validator = AcceptAll(schema=annotate({}))
         assert validator.validate(instance=5)

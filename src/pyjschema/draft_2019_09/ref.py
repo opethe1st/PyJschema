@@ -44,7 +44,11 @@ class Ref(KeywordGroup):
         has_path = bool(value.path is not None)
         has_fragment = bool(value.fragment is not None)
         base_uri = self.base_uri.rstrip() if self.base_uri else ""
-        fragment = uridecode(value.fragment.replace("~1", "/").replace("~0", "~")) if value.fragment else ""
+        fragment = (
+            uridecode(value.fragment.replace("~1", "/").replace("~0", "~"))
+            if value.fragment
+            else ""
+        )
 
         if not has_authority and not has_path and has_fragment:
             if is_plain_name(value.fragment):
@@ -63,7 +67,9 @@ class Ref(KeywordGroup):
                 return self.value
             elif has_path and not has_fragment:
                 # this should throw better than the index error
-                root_location = urijoin(uri_to_root_location[""], uri_to_root_location[self.value])
+                root_location = urijoin(
+                    uri_to_root_location[""], uri_to_root_location[self.value]
+                )
                 return urijoin(root_location, value.path)
             elif not has_path and has_fragment and is_json_pointer(fragment):
                 if base_uri == uri_to_root_location[""]:
@@ -97,4 +103,4 @@ def is_plain_name(val):
 
 
 def is_json_pointer(val):
-    return val and val[0] == '/'
+    return val and val[0] == "/"

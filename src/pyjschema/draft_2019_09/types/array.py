@@ -105,6 +105,7 @@ class _Contains(KeywordGroup):
     def __init__(self, schema: Dict):
         super().__init__(schema=schema)
         from pyjschema.draft_2019_09 import build_validator
+
         contains = schema.get("contains")
         maxContains = schema.get("maxContains")
         minContains = schema.get("minContains")

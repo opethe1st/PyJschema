@@ -15,8 +15,18 @@ def _attach_base_URIs(validator: AValidator, parent_URI):
         split = urisplit(validator.id)
         if split.scheme is None and split.authority is None:
             parent_uri_split = urisplit(parent_URI)
-            path = split.path if split.path and split.path[0] == '/' else "/"+split.path
-            validator.id = uriunsplit([parent_uri_split.scheme, parent_uri_split.authority, path, split.query, split.fragment])
+            path = (
+                split.path if split.path and split.path[0] == "/" else "/" + split.path
+            )
+            validator.id = uriunsplit(
+                [
+                    parent_uri_split.scheme,
+                    parent_uri_split.authority,
+                    path,
+                    split.query,
+                    split.fragment,
+                ]
+            )
             validator.base_uri = validator.id
 
     for sub_validator in validator.sub_validators():
@@ -24,7 +34,10 @@ def _attach_base_URIs(validator: AValidator, parent_URI):
 
 
 def _generate_context(
-    validator: AValidator, root_base_uri, uri_to_validator: Dict, uri_to_root_location: Dict
+    validator: AValidator,
+    root_base_uri,
+    uri_to_validator: Dict,
+    uri_to_root_location: Dict,
 ):
     """
     This needs to be run after _attach_base_URIs because _attach_base_URIs propagates
@@ -44,7 +57,9 @@ def _generate_context(
         uri_to_root_location[validator_id] = validator.location
 
     if validator.anchor:
-        uri_to_validator[(urijoin(validator.base_uri or "", validator.anchor))] = validator
+        uri_to_validator[
+            (urijoin(validator.base_uri or "", validator.anchor))
+        ] = validator
 
     for sub_validator in validator.sub_validators():
         _generate_context(
@@ -55,7 +70,9 @@ def _generate_context(
         )
 
 
-def _resolve_references(validator: AValidator, uri_to_validator: Dict, uri_to_root_location: Dict):
+def _resolve_references(
+    validator: AValidator, uri_to_validator: Dict, uri_to_root_location: Dict
+):
     if isinstance(validator, Ref):
         validator.resolve(
             uri_to_validator=uri_to_validator, uri_to_root_location=uri_to_root_location

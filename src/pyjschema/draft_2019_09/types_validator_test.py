@@ -6,7 +6,6 @@ from .types_validator import Types
 
 
 class TestTypes(unittest.TestCase):
-
     def test_types_true(self):
         validator = Types(schema=annotate({"maxLength": 10, "maximum": 4}))
 

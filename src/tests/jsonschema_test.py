@@ -7,12 +7,12 @@ import parameterized
 from pyjschema.draft_2019_09 import validate_once
 
 KEYWORDS = [
-# string
+    # string
     "minLength",
     "maxLength",
     "pattern",
     "type",
-# object
+    # object
     "uniqueItems",
     "maxProperties",
     "minProperties",
@@ -23,13 +23,13 @@ KEYWORDS = [
     "uniqueItems",
     "anchor",  # need to support non-canonical URIs - support relate pointers in $id
     # "defs", # needs "https://json-schema.org/draft/2019-09/schema" in the ref
-# array
+    # array
     "items",
     "minItems",
     "maxItems",
     "additionalItems",
     "contains",
-# numbers
+    # numbers
     "maximum",
     "exclusiveMaximum",
     "minimum",

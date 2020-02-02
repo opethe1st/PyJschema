@@ -1,5 +1,3 @@
-
-
 class SchemaError(Exception):
     pass
 

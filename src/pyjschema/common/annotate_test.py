@@ -21,10 +21,7 @@ class TestAnnotate(unittest.TestCase):
                 "dictionary with more than one item",
                 {"key": "value", "key2": 2},
                 Dict(
-                    {
-                        "key": Primitive("value", "/key"),
-                        "key2": Primitive(2, "/key2"),
-                    },
+                    {"key": Primitive("value", "/key"), "key2": Primitive(2, "/key2")},
                     location="",
                 ),
             ),

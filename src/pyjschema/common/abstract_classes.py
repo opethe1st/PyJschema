@@ -16,7 +16,9 @@ class AValidator(abc.ABC):
     anchor = None
 
     def __init__(self, schema: Dict):
-        self.id = self.base_uri = deannotate(schema["$id"]) if schema.get("$id") else None  # TODO if this id is not a absuri, do what?
+        self.id = self.base_uri = (
+            deannotate(schema["$id"]) if schema.get("$id") else None
+        )
         self.location = schema.location
         self.anchor = deannotate(schema["$anchor"]) if schema.get("$anchor") else None
 
