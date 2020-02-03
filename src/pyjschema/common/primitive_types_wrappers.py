@@ -14,11 +14,12 @@ class List(list):
         super().__init__(value)
 
     def __eq__(self, other):
-        if isinstance(other, dict):
+        if isinstance(other, list):
             return super().__eq__(other)
-        if not isinstance(other, List):
+        elif not isinstance(other, List):
             return False
-        return super().__eq__(other) and self.location == other.location
+        else:
+            return super().__eq__(other) and self.location == other.location
 
     def __str__(self):
         return f"{self.__class__.__name__}({self!r}, location={self.location})"
@@ -32,9 +33,10 @@ class Dict(dict):
     def __eq__(self, other):
         if isinstance(other, dict):
             return super().__eq__(other)
-        if not isinstance(other, Dict):
+        elif not isinstance(other, Dict):
             return False
-        return super().__eq__(other) and self.location == other.location
+        else:
+            return super().__eq__(other) and self.location == other.location
 
     def __str__(self):
         return f"{self.__class__.__name__}({self!r}, location={self.location})"

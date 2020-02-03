@@ -193,7 +193,7 @@ class DummyRef(Ref):
     def __init__(self):
         self.resolved = False
 
-    def resolve(self, uri_to_validator, uri_to_root_location):
+    def resolve(self, uri_to_validator):
         self.resolved = True
 
 
@@ -212,7 +212,7 @@ class Test_ResolveReferences(unittest.TestCase):
         self.assertFalse(sub_validator1.resolved)
         self.assertFalse(sub_validator2.resolved)
 
-        _resolve_references(validator=validator, uri_to_validator={}, uri_to_root_location={})
+        _resolve_references(validator=validator, uri_to_validator={})
 
         self.assertTrue(sub_validator1.resolved)
         self.assertTrue(sub_validator2.resolved)

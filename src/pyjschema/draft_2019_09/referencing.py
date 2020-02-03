@@ -1,10 +1,11 @@
 from typing import Dict
 
-from uritools import urijoin, uriunsplit, urisplit
+from uritools import urijoin
 
 from pyjschema.common import AValidator
 
 from .ref import Ref
+from .utils import to_canonical_uri
 from .validator import Validator
 
 
@@ -12,23 +13,7 @@ def _attach_base_URIs(validator: AValidator, parent_URI):
     if not validator.base_uri:
         validator.base_uri = parent_URI
     elif validator.id is not None:
-        split = urisplit(validator.id)
-        if split.scheme is None and split.authority is None:
-            parent_uri_split = urisplit(parent_URI)
-            path = (
-                split.path if split.path and split.path[0] == "/" else "/" + split.path
-            )
-            path = parent_uri_split.path if path in ["/", ""] else path
-            validator.id = uriunsplit(
-                [
-                    parent_uri_split.scheme,
-                    parent_uri_split.authority,
-                    path,
-                    split.query,
-                    split.fragment,
-                ]
-            )
-            validator.base_uri = validator.id
+        validator.id = validator.base_uri = to_canonical_uri(current_base_uri=parent_URI, uri=validator.base_uri)
 
     for sub_validator in validator.sub_validators():
         _attach_base_URIs(validator=sub_validator, parent_URI=validator.base_uri)
@@ -72,23 +57,22 @@ def _generate_context(
 
 
 def _resolve_references(
-    validator: AValidator, uri_to_validator: Dict, uri_to_root_location: Dict
+    validator: AValidator, uri_to_validator: Dict
 ):
     if isinstance(validator, Ref):
         validator.resolve(
-            uri_to_validator=uri_to_validator, uri_to_root_location=uri_to_root_location
+            uri_to_validator=uri_to_validator
         )
 
     for sub_validator in validator.sub_validators():
         _resolve_references(
             validator=sub_validator,
             uri_to_validator=uri_to_validator,
-            uri_to_root_location=uri_to_root_location,
         )
 
 
 def resolve_references(root_validator):
-    _attach_base_URIs(validator=root_validator, parent_URI="")
+    _attach_base_URIs(validator=root_validator, parent_URI=root_validator.base_uri or "")
     uri_to_root_location = {"": root_validator.base_uri, "#": root_validator.base_uri}
     uri_to_validator = {"": root_validator, "#": root_validator}
     _generate_context(
@@ -100,5 +84,4 @@ def resolve_references(root_validator):
     _resolve_references(
         validator=root_validator,
         uri_to_validator=uri_to_validator,
-        uri_to_root_location=uri_to_root_location,
     )
