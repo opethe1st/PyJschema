@@ -18,6 +18,7 @@ def _attach_base_URIs(validator: AValidator, parent_URI):
             path = (
                 split.path if split.path and split.path[0] == "/" else "/" + split.path
             )
+            path = parent_uri_split.path if path in ["/", ""] else path
             validator.id = uriunsplit(
                 [
                     parent_uri_split.scheme,

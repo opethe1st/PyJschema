@@ -24,7 +24,6 @@ def annotate(obj, location="") -> t.Union[Primitive, Dict, List]:
         return Primitive(value=obj, location=location)
 
 
-# TODO(ope): use deannotate wherever it is useful, + Add tests
 def deannotate(instance: Primitive):
     if isinstance(instance, List):
         return [deannotate(instance=value) for value in instance]
