@@ -4,44 +4,9 @@ import fastjsonschema
 import jsonschema
 import pytest
 
+from benchmarks.large_schema import SCHEMA
 from pyjschema.draft_2019_09 import construct_validator, validate_once
 
-SCHEMA = {
-    "$schema": "http://json-schema.org/draft-04/schema#",
-    "type": "array",
-    "items": [
-        {"type": "number", "maximum": 10, "exclusiveMaximum": True},
-        {"type": "string", "enum": ["hello", "world"]},
-        {
-            "type": "array",
-            "minItems": 1,
-            "maxItems": 3,
-            "items": [
-                {"type": "number"},
-                {"type": "string", "maxLength": 1000, "pattern": "[a-z]*"},
-                {"type": "boolean"},
-            ],
-        },
-        {
-            "type": "object",
-            "required": ["a", "b"],
-            "minProperties": 3,
-            "properties": {
-                "a": {"type": ["null", "string"]},
-                "b": {"type": ["null", "string"]},
-                "c": {"type": ["null", "string"], "default": "abc"},
-            },
-            "additionalProperties": {"type": "string"},
-        },
-        {"not": {"type": ["null"]}},
-        {
-            "oneOf": [
-                {"type": "number", "multipleOf": 3},
-                {"type": "number", "multipleOf": 5},
-            ]
-        },
-    ],
-}
 INSTANCE = [9, "hello", [1, "a", True], {"a": "a", "b": "b", "d": "d"}, 42, 3]
 
 
