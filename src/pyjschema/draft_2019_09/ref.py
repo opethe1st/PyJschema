@@ -1,87 +1,57 @@
-import re
-import typing as t
-from urllib import parse
+from functools import wraps
 
-from pyjschema.common import AValidator, KeywordGroup
+from uritools import uridecode
 
-Context = t.Dict[str, AValidator]
+from pyjschema.common import KeywordGroup, deannotate
+
+from .exceptions import SchemaError
+from .utils import to_canonical_uri
 
 
-FRAGMENT_REGEX = re.compile(pattern=r"#.*")
-BASE_URI_REGEX = re.compile(pattern=r"http.*")
+def raise_if_not_ready(func):
+    @wraps(func)
+    def wrapper(self, *arg, **kwargs):
+        if not self.is_resolved:
+            raise Exception(
+                "You are trying to call a method on a reference that is not resolved. Call the resolve method"
+            )
+        return func(self, *arg, **kwargs)
+
+    return wrapper
 
 
 class Ref(KeywordGroup):
     def __init__(self, schema):
-        ref = schema["$ref"]
-        value = ref.value.replace("~1", "/")
-        value = value.replace("~0", "~")
-        self.value = parse.unquote(value)
-        self.context: t.Optional[Context] = None
+        super().__init__(schema=schema)
+        self.value = uridecode(deannotate(schema["$ref"]).replace("~1", "/").replace("~0", "~"))
+        self._validator = None
+        self.abs_uri = None
 
+    @property
+    def is_resolved(self):
+        return all([self.abs_uri is not None, self._validator is not None])
+
+    @raise_if_not_ready
     def validate(self, instance):
-        if self.context is None:
-            # Maybe have another state for not validated?
-            return True
+        return self._validator.validate(instance)
 
-        # looks like this needs a resolver function here
-        value = self.value
-        if FRAGMENT_REGEX.match(value):
-            value = self.id + value
+    def resolve(self, uri_to_validator):
+        self.abs_uri = self._get_abs_uri()
+        self._validator = self._get_validator(uri_to_validator=uri_to_validator)
 
-        if not BASE_URI_REGEX.match(value):
-            parts = self.id.split("/")
-            parts[-1] = value
-            value = "/".join(parts)
+    def _get_abs_uri(self):
+        # needs to be called after self.base)uri has been set to cancnical form
+        return to_canonical_uri(uri=self.value, current_base_uri=self.base_uri or '')
 
-        validator = self._resolve_uri(uri=value)
-
+    def _get_validator(self, uri_to_validator):
+        # test this?
+        validator = uri_to_validator.get(self.abs_uri)
         if validator:
-            return validator.validate(instance)
+            return validator
         else:
-            # this is temporary, probably need to do something else
-            raise Exception(
-                f"unable to find this reference '{value}' in valid_references: {self.context.keys()}"
+            # TODO(ope): better error message
+            raise SchemaError(
+                f"Unable to locate the validator at this location "
+                f"while trying to resolve this reference: {self.value} at {self.location} "
+                f"{list(uri_to_validator.keys())}"
             )
-
-    def set_context(self, context):
-        self.context = context
-
-    def set_base_uri_to_abs_location(self, base_uri_to_abs_location):
-        self.base_uri_to_abs_location = base_uri_to_abs_location
-
-    def _resolve_uri(self, uri):
-        return resolve_uri(
-            uri=uri,
-            context=self.context,
-            base_uri_to_abs_location=self.base_uri_to_abs_location,
-        )
-
-    def __eq__(self, other) -> bool:
-        if not isinstance(other, Ref):
-            return NotImplemented
-        return self.value == other.value
-
-
-# TODO(ope): need to fix this
-BASE_URI_AND_ANCHOR_REGEX = re.compile(pattern=r"http.*#[a-zA-Z].*")
-
-
-# TODO(ope): this needs to be refactored a lot!!
-def resolve_uri(context, uri, base_uri_to_abs_location):
-    if uri in context:
-        return context[uri]
-    if BASE_URI_AND_ANCHOR_REGEX.match(uri):
-        return context[uri]
-    base_uri, fragment = uri.split("#") if ("#" in uri and uri != "#") else [uri, ""]
-    if (base_uri and not fragment) or (not base_uri and fragment):
-        if base_uri:
-            return context[base_uri]
-        else:
-            return context["#" + fragment]
-    else:
-        if base_uri in base_uri_to_abs_location:
-            uri_location = base_uri_to_abs_location[base_uri]
-            return context[f"{uri_location}{fragment}"]
-        else:
-            return context[f"#{fragment}"]

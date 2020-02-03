@@ -1,65 +1,25 @@
 import unittest
 
-import parameterized  # type: ignore
-
-from .ref import resolve_uri
+from .ref import Ref
 
 
-class TestResolveURI(unittest.TestCase):
-    @parameterized.parameterized.expand(
-        [
-            (
-                "resolve uri of embedded base_uri + fragment",
-                {
-                    "https://example.com/root.json": True,
-                    "https://example.com/other.json": False,
-                    "#/$defs/other/defs/string": None,
-                },
-                {"https://example.com/other.json": "#/$defs/other"},
-                "https://example.com/other.json#/defs/string",
-                None,
-            ),
-            (
-                "resolve uri of root base uri",
-                {
-                    "https://example.com/root.json": True,
-                    "https://example.com/other.json": False,
-                    "#/$defs/other/defs/string": None,
-                },
-                {"https://example.com/other.json": "#/$defs/other"},
-                "https://example.com/root.json",
-                True,
-            ),
-            (
-                "resolve uri of root base uri + fragment",
-                {
-                    "https://example.com/root.json": True,
-                    "https://example.com/other.json": False,
-                    "#/$defs/other": False,
-                },
-                {"https://example.com/other.json": "#/$defs/other"},
-                "https://example.com/root.json#/$defs/other",
-                False,
-            ),
-            (
-                "resolve uri of embedded base uri",
-                {
-                    "https://example.com/root.json": True,
-                    "https://example.com/other.json": False,
-                    "#/$defs/other/defs/string": None,
-                },
-                {"https://example.com/other.json": "#/$defs/other"},
-                "https://example.com/other.json",
-                False,
-            ),
-        ]
-    )
-    def test(self, description, context, base_uri_to_abs_location, input_, output):
-        self.assertEqual(
-            resolve_uri(
-                context=context,
-                base_uri_to_abs_location=base_uri_to_abs_location,
-                uri=input_,
-            ),
-            output,
-        )
+class DummyRef(Ref):
+    def __init__(self):
+        self.value = None
+
+
+class DummyValidator:
+    pass
+
+
+class TestRefResolve(unittest.TestCase):
+
+    def test(self):
+        ref = DummyRef()
+        ref.base_uri = "https://localhost:5000/root.json"
+        ref.value = "other.json"
+        validator = DummyValidator()
+
+        ref.resolve(uri_to_validator={"https://localhost:5000/other.json": validator})
+
+        self.assertEqual(ref._validator, validator)

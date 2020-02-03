@@ -7,6 +7,7 @@ class Defs(KeywordGroup):
     """
 
     def __init__(self, schema: Dict):
+        super().__init__(schema=schema)
         defs = schema["$defs"]
         from .validator_construction import build_validator
 

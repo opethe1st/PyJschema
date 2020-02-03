@@ -1,4 +1,5 @@
 import json
+import os
 import typing as t
 import unittest
 
@@ -6,13 +7,15 @@ import parameterized
 
 from pyjschema.draft_2019_09 import validate_once
 
-KEYWORDS = [
-    # string
+STRING_KEYWORDS = [
     "minLength",
     "maxLength",
     "pattern",
     "type",
-    # object
+    "format",  # not implemented anything here but it passes the tests
+]
+
+OBJECT_KEYWORDS = [
     "uniqueItems",
     "maxProperties",
     "minProperties",
@@ -21,41 +24,50 @@ KEYWORDS = [
     "patternProperties",
     "additionalProperties",
     "uniqueItems",
-    "anchor",  # need to support non-canonical URIs - support relate pointers in $id
-    # "defs", # needs "https://json-schema.org/draft/2019-09/schema" in the ref
-    # array
+    "required",
+]
+
+ARRAY_KEYWORDS = [
     "items",
     "minItems",
     "maxItems",
     "additionalItems",
     "contains",
-    # numbers
+]
+
+NUMBER_KEYWORDS = [
     "maximum",
     "exclusiveMaximum",
     "minimum",
     "exclusiveMinimum",
     "multipleOf",
-    "const",
-    "enum",
-    "if-then-else",
-    "boolean_schema",
-    "required",
-    "anyOf",
-    "oneOf",
-    "allOf",
-    "default",
-    "format",  # not implemented anything here but it passes the tests
-    "not",
-    "ref",  # need root ref - #, also escaped json-pointers,
-    # $ref not a reference, references that are not json pointer but relative
-    # to current base URI
-    # "refRemote",
 ]
 
+BOOLEAN_KEYWORDS = ["if-then-else", "anyOf", "oneOf", "allOf", "not"]
+KEYWORDS = (
+    STRING_KEYWORDS
+    + NUMBER_KEYWORDS
+    + BOOLEAN_KEYWORDS
+    + ARRAY_KEYWORDS
+    + OBJECT_KEYWORDS
+    + [
+        "anchor",  # need to support non-canonical URIs - support relate pointers in $id
+        # "defs", # needs "https://json-schema.org/draft/2019-09/schema" in the ref
+        "const",
+        "enum",
+        "boolean_schema",
+        "default",
+        "ref",  # need root ref - #, also escaped json-pointers,
+        # "refRemote",
+    ]
+)
+
+
+CWD = os.path.dirname(__file__)
 
 KEYWORD_TESTS: t.List = []
 for keyword in KEYWORDS:
-    with open(f"tests/json-schema-tests/tests/draft2019-09/{keyword}.json") as file:
+    with open(os.path.join(CWD, f"json-schema-tests/tests/draft2019-09/{keyword}.json")) as file:
         keyword_testcases = json.load(file)
         for testcase in keyword_testcases:
             testcase["keyword"] = keyword

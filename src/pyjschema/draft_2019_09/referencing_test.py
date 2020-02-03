@@ -1,136 +1,218 @@
 import unittest
 
-import parameterized  # type: ignore
+from .ref import Ref
+from .referencing import (
+    _attach_base_URIs,
+    _generate_context,
+    _resolve_references
+)
+from .validator import Validator
 
-from pyjschema.common.annotate import annotate
-from pyjschema.draft_2019_09 import build_validator
 
-from .referencing import attach_base_URIs, generate_context, get_base_URI_from_URI_part
+class DummyValidator(Validator):
+    def __init__(self, id=None, base_uri=None, validators=None, anchor=None, location=None):
+        self.id = id
+        self.base_uri = base_uri if base_uri else id
+        self._validators = validators if validators else[]
+        self.anchor = anchor
+        self.location = location
+        self._resolve = False
+
+    def sub_validators(self):
+        return self._validators
 
 
-class TestGetBaseURIfromURIpart(unittest.TestCase):
-    @parameterized.parameterized.expand(
-        [
-            ("https://localhost:1234/root", "other", "https://localhost:1234/other"),
-            (
-                "https://localhost:1234/root.json",
-                "other.json",
-                "https://localhost:1234/other.json",
-            ),
-            (
-                "https://localhost:1234/root.json",
-                "t/other.json",
-                "https://localhost:1234/t/other.json",
-            ),
-            (
-                "https://localhost:1234/root.json",
-                "abcdef/other.json",
-                "https://localhost:1234/abcdef/other.json",
-            ),
-        ]
-    )
-    def test(self, parent_URI, base_URI, result):
-        self.assertEqual(
-            get_base_URI_from_URI_part(parent_URI=parent_URI, base_URI=base_URI), result
+class Test_AttachBaseURIs(unittest.TestCase):
+    # test that given a validator with just one base_uri, every validator within it has the same base_uri
+    def test_one_base_uri(self):
+        sub_validator1 = DummyValidator()
+        sub_validator2 = DummyValidator(
+            validators=[sub_validator1]
+        )
+        sub_validator3 = DummyValidator()
+
+        validator_id = "http://localhost:5000/schema.json"
+        validator = DummyValidator(
+            id=validator_id,
+            validators=[
+                sub_validator3,
+                sub_validator2,
+            ]
+        )
+        _attach_base_URIs(validator=validator, parent_URI="")
+        self.assertEqual(sub_validator1.base_uri, validator_id)
+        self.assertEqual(sub_validator2.base_uri, validator_id)
+        self.assertEqual(sub_validator3.base_uri, validator_id)
+        self.assertEqual(validator.base_uri, validator_id)
+
+    # test that given a validator with two nested base_uri this works
+    def test_two_base_uri(self):
+        sub_validator1 = DummyValidator()
+        sub_validator_id = "http://localhost:5000/another.json"
+        sub_validator2 = DummyValidator(
+            id=sub_validator_id,
+            validators=[sub_validator1]
+        )
+        sub_validator3 = DummyValidator()
+
+        validator_id = "http://localhost:5000/schema.json"
+        validator = DummyValidator(
+            id=validator_id,
+            validators=[
+                sub_validator3,
+                sub_validator2,
+            ]
+        )
+        _attach_base_URIs(validator=validator, parent_URI="")
+        self.assertEqual(sub_validator1.base_uri, sub_validator_id)
+        self.assertEqual(sub_validator2.base_uri, sub_validator_id)
+        self.assertEqual(sub_validator3.base_uri, validator_id)
+        self.assertEqual(validator.base_uri, validator_id)
+
+    # random test case
+    def test_three_base_uri(self):
+        sub_validator1 = DummyValidator()
+        sub_validator2_id = "http://localhost:5000/another.json"
+        sub_validator2 = DummyValidator(
+            id=sub_validator2_id,
+            validators=[sub_validator1]
+        )
+        sub_validator4 = DummyValidator()
+        sub_validator3_id = "http://localhost:5000/schema124.json"
+        sub_validator3 = DummyValidator(
+            id=sub_validator3_id,
+            validators=[sub_validator4]
+        )
+
+        validator_id = "http://localhost:5000/schema.json"
+        validator = DummyValidator(
+            id=validator_id,
+            validators=[
+                sub_validator2,
+                sub_validator3,
+            ]
+        )
+        _attach_base_URIs(validator=validator, parent_URI="")
+        self.assertEqual(sub_validator1.base_uri, sub_validator2_id)
+        self.assertEqual(sub_validator2.base_uri, sub_validator2_id)
+        self.assertEqual(sub_validator3.base_uri, sub_validator3_id)
+        self.assertEqual(sub_validator4.base_uri, sub_validator3_id)
+        self.assertEqual(validator.base_uri, validator_id)
+
+    # resolve relative id
+    def test_resolve_relative_id(self):
+        sub_validator1 = DummyValidator()
+        sub_validator2_id = "http://localhost:5000/schema.json#anchor"
+        sub_validator2 = DummyValidator(
+            id="#anchor",
+            validators=[sub_validator1]
+        )
+        sub_validator4_id = "http://localhost:5000/schema124.json#/relative/fragment"
+        sub_validator4 = DummyValidator(
+            id="#/relative/fragment"
+        )
+        sub_validator3_id = "http://localhost:5000/schema124.json"
+        sub_validator3 = DummyValidator(
+            id="schema124.json",
+            validators=[sub_validator4]
+        )
+
+        validator_id = "http://localhost:5000/schema.json"
+        validator = DummyValidator(
+            id=validator_id,
+            validators=[
+                sub_validator2,
+                sub_validator3,
+            ]
+        )
+        _attach_base_URIs(validator=validator, parent_URI="")
+        self.assertEqual(sub_validator1.base_uri, sub_validator2_id)
+        self.assertEqual(sub_validator2.base_uri, sub_validator2_id)
+        self.assertEqual(sub_validator3.base_uri, sub_validator3_id)
+        self.assertEqual(sub_validator4.base_uri, sub_validator4_id)
+        self.assertEqual(validator.base_uri, validator_id)
+
+
+class Test_GenerateContext(unittest.TestCase):
+    # make sure generated context is what we expect
+    def test_generate_context(self):
+        sub_validator1 = DummyValidator(location="schema456/schema789")
+        sub_validator2_id = "http://localhost:5000/another.json"
+        sub_validator2 = DummyValidator(
+            id=sub_validator2_id,
+            validators=[sub_validator1],
+            location="schema456"
+        )
+        sub_validator4 = DummyValidator(
+            location="schema123/schema678"
+        )
+        sub_validator3_id = "http://localhost:5000/schema123.json"
+        sub_validator3 = DummyValidator(
+            id=sub_validator3_id,
+            validators=[sub_validator4],
+            location="schema123"
+        )
+
+        validator_id = "http://localhost:5000/schema.json"
+        validator = DummyValidator(
+            id=validator_id,
+            validators=[
+                sub_validator2,
+                sub_validator3,
+            ],
+            location=""
+        )
+        uri_to_validator = {}
+        uri_to_root_location = {}
+
+        _generate_context(validator=validator, root_base_uri=validator.base_uri, uri_to_validator=uri_to_validator, uri_to_root_location=uri_to_root_location)
+
+        self.assertDictEqual(
+            uri_to_validator,
+            {
+                "http://localhost:5000/schema.json": validator,
+                "http://localhost:5000/another.json": sub_validator2,
+                "http://localhost:5000/schema123.json": sub_validator3,
+                "http://localhost:5000/schema.json#schema123": sub_validator3,
+                "http://localhost:5000/schema.json#schema456": sub_validator2,
+                "http://localhost:5000/schema.json#schema123/schema678": sub_validator4,
+                "http://localhost:5000/schema.json#schema456/schema789": sub_validator1,
+            }
+        )
+        self.assertDictEqual(
+            uri_to_root_location,
+            {
+                'http://localhost:5000/another.json': 'schema456',
+                'http://localhost:5000/schema.json': '',
+                'http://localhost:5000/schema123.json': 'schema123',
+            }
         )
 
 
-class TestAttachBaseURI(unittest.TestCase):
-    @parameterized.parameterized.expand(
-        [
-            (
-                "make sure that the expected base_URI are set",
-                {"$id": "http://localhost:1234/root#"},
-                {"http://localhost:1234/root"},
-            ),
-            (
-                "make sure that the expected base_URI are set",
-                {
-                    "$id": "http://localhost:1234/root",
-                    "type": "array",
-                    "items": {"$id": "items"},
-                },
-                {"http://localhost:1234/root", "http://localhost:1234/items"},
-            ),
-            (
-                "make sure that the expected base_URI are set",
-                {
-                    "$id": "http://localhost:1234/root.json#",
-                    "type": "array",
-                    "items": {"$id": "/items/abc.json"},
-                },
-                {
-                    "http://localhost:1234/root.json",
-                    "http://localhost:1234/items/abc.json",
-                },
-            ),
-        ]
-    )
-    def test(self, description, schema, base_uris):
-        validator = build_validator(schema=annotate(obj=schema))
-        attach_base_URIs(validator=validator, parent_URI=schema["$id"].rstrip("#"))
-        self.assertEqual(get_base_uris(validator=validator), base_uris)
+class DummyRef(Ref):
+    def __init__(self):
+        self.resolved = False
+
+    def resolve(self, uri_to_validator):
+        self.resolved = True
 
 
-def get_base_uris(validator):
-    uris = {validator.id}
-    for subvalidator in validator.sub_validators():
-        uris |= get_base_uris(subvalidator)
-    return uris
+class Test_ResolveReferences(unittest.TestCase):
 
+    def test(self):
+        sub_validator1 = DummyRef()
+        sub_validator2 = DummyRef()
+        validator = DummyValidator(
+            validators=[
+                sub_validator1,
+                sub_validator2,
+            ]
+        )
 
-class TestGenerateContext(unittest.TestCase):
-    @parameterized.parameterized.expand(
-        [
-            (
-                "make sure context is generated properly",
-                {"$anchor": "blah", "type": "string", "$id": "https://example.com/ope"},
-                {"https://example.com/ope", "https://example.com/ope#blah", "#"},
-                [("https://example.com/ope", "#")],
-            ),
-            (
-                "make sure context is generated properly with nested anchors",
-                {
-                    "$id": "https://example.com/ope",
-                    "$anchor": "anarray",
-                    "type": "array",
-                    "items": [
-                        {"$anchor": "astring", "type": "string"},
-                        {"$anchor": "anumber", "type": "number"},
-                        {
-                            "$id": "anobject",
-                            "type": "object",
-                            "properties": {"abc": True},
-                        },
-                    ],
-                },
-                {
-                    "https://example.com/anobject",
-                    "https://example.com/ope",
-                    "#",
-                    "#/items/0",
-                    "#/items/1",
-                    "#/items/2",
-                    "#/items/2/properties/abc",
-                    "https://example.com/ope#anarray",
-                    "https://example.com/ope#astring",
-                    "https://example.com/ope#anumber",
-                },
-                [
-                    ("#/items/0", "https://example.com/ope#astring"),
-                    ("#/items/1", "https://example.com/ope#anumber"),
-                    ("#/items/2", "https://example.com/anobject"),
-                    ("https://example.com/ope", "#"),
-                ],
-            ),
-        ]
-    )
-    def test(self, name, schema, keys, same_keys):
-        validator = build_validator(schema=annotate(obj=schema))
-        attach_base_URIs(validator=validator, parent_URI=schema["$id"])
-        context, _ = generate_context(validator, root_base_uri=schema["$id"])
+        self.assertFalse(sub_validator1.resolved)
+        self.assertFalse(sub_validator2.resolved)
 
-        self.assertSetEqual(set(context.keys()), keys)
+        _resolve_references(validator=validator, uri_to_validator={})
 
-        for ref1, ref2 in same_keys:
-            self.assertEqual(context[ref1], context[ref2])
+        self.assertTrue(sub_validator1.resolved)
+        self.assertTrue(sub_validator2.resolved)

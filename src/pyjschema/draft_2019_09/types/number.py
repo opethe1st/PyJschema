@@ -9,6 +9,7 @@ from .type_ import Type
 
 class _MultipleOf(KeywordGroup):
     def __init__(self, schema: Dict):
+        super().__init__(schema=schema)
         self.value = schema["multipleOf"].value
 
     def validate(self, instance):
@@ -23,6 +24,7 @@ class _MultipleOf(KeywordGroup):
 
 class _Minimum(KeywordGroup):
     def __init__(self, schema: Dict):
+        super().__init__(schema=schema)
         self.value = schema["minimum"].value
 
     def validate(self, instance):
@@ -33,6 +35,7 @@ class _Minimum(KeywordGroup):
 
 class _Maximum(KeywordGroup):
     def __init__(self, schema: Dict):
+        super().__init__(schema=schema)
         self.value = schema["maximum"].value
 
     def validate(self, instance):
@@ -43,6 +46,7 @@ class _Maximum(KeywordGroup):
 
 class _ExclusiveMinimum(KeywordGroup):
     def __init__(self, schema: Dict):
+        super().__init__(schema=schema)
         self.value = schema["exclusiveMinimum"].value
 
     def validate(self, instance):
@@ -53,6 +57,7 @@ class _ExclusiveMinimum(KeywordGroup):
 
 class _ExclusiveMaximum(KeywordGroup):
     def __init__(self, schema: Dict):
+        super().__init__(schema=schema)
         self.value = schema["exclusiveMaximum"].value
 
     def validate(self, instance):

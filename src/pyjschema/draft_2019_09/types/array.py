@@ -8,6 +8,7 @@ from .type_ import Type
 
 class _Items(KeywordGroup):
     def __init__(self, schema: Dict):
+        super().__init__(schema=schema)
         from pyjschema.draft_2019_09 import build_validator
         from pyjschema.draft_2019_09.validator_construction import (
             BuildValidatorResultType,
@@ -73,31 +74,36 @@ class _Items(KeywordGroup):
 
 
 def _validate_item_list(items_validators, additional_items_validator, instance):
-    i = 0
-    while i < len(items_validators):
-        if i >= len(instance):
-            break
+    if isinstance(instance, list):
 
-        res = items_validators[i].validate(instance[i])
+        i = 0
+        while i < len(items_validators):
+            if i >= len(instance):
+                break
 
-        if not res:
-            yield res
-
-        i += 1
-
-    # additionalItem for the rest of the items in the instance
-    if additional_items_validator:
-        while i < len(instance):
-            res = additional_items_validator.validate(instance[i])
+            res = items_validators[i].validate(instance[i])
 
             if not res:
                 yield res
 
             i += 1
 
+        # additionalItem for the rest of the items in the instance
+        if additional_items_validator:
+            while i < len(instance):
+                res = additional_items_validator.validate(instance[i])
+
+                if not res:
+                    yield res
+
+                i += 1
+    else:
+        yield ValidationError()
+
 
 class _Contains(KeywordGroup):
     def __init__(self, schema: Dict):
+        super().__init__(schema=schema)
         from pyjschema.draft_2019_09 import build_validator
 
         contains = schema.get("contains")
@@ -144,6 +150,7 @@ class _Contains(KeywordGroup):
 
 class _MinItems(KeywordGroup):
     def __init__(self, schema: Dict):
+        super().__init__(schema=schema)
         self.value = schema["minItems"].value
 
     def validate(self, instance):
@@ -152,6 +159,7 @@ class _MinItems(KeywordGroup):
 
 class _MaxItems(KeywordGroup):
     def __init__(self, schema: Dict):
+        super().__init__(schema=schema)
         self.value = schema["maxItems"].value
 
     def validate(self, instance):
@@ -160,6 +168,7 @@ class _MaxItems(KeywordGroup):
 
 class _UniqueItems(KeywordGroup):
     def __init__(self, schema: Dict):
+        super().__init__(schema=schema)
         self.value = schema["uniqueItems"].value
 
     def validate(self, instance):

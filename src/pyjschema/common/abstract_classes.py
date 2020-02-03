@@ -3,22 +3,24 @@ import numbers
 import typing as t
 from collections.abc import Mapping, Sequence
 
-from .validation_error import ValidationError
+from .annotate import deannotate
 from .primitive_types_wrappers import Dict
-
+from .validation_error import ValidationError
 
 JsonType = t.Union[str, numbers.Number, bool, None, Mapping, Sequence]
-# TODO: rename this file to abstract validator or something
 
 
 class AValidator(abc.ABC):
-    id = None
-    base_uri = None  # if $id was set in the schema this Validator was created from
+    id = None  # and remove this line
+    base_uri = None
     anchor = None
-    location: t.Optional[str] = None
 
     def __init__(self, schema: Dict):
-        pass
+        self.id = self.base_uri = (
+            deannotate(schema["$id"]) if schema.get("$id") else None
+        )
+        self.location = schema.location
+        self.anchor = deannotate(schema["$anchor"]) if schema.get("$anchor") else None
 
     @abc.abstractmethod
     def validate(self, instance: JsonType) -> ValidationError:
@@ -31,7 +33,7 @@ class AValidator(abc.ABC):
 class KeywordGroup(AValidator):
     """
     Validator for a group of keywords that are dependent on each other.
-    This also included the case where there is one validator
+    This also includes the case where there is one keyword
     """
 
     pass

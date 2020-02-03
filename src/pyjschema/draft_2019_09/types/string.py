@@ -6,6 +6,7 @@ from .type_ import Type
 
 class _MaxLength(KeywordGroup):
     def __init__(self, schema: Dict):
+        super().__init__(schema=schema)
         self.value = schema["maxLength"].value
 
     def validate(self, instance):
@@ -19,6 +20,7 @@ class _MaxLength(KeywordGroup):
 
 class _MinLength(KeywordGroup):
     def __init__(self, schema: Dict):
+        super().__init__(schema=schema)
         self.value = schema["minLength"].value
 
     def validate(self, instance):
@@ -32,6 +34,7 @@ class _MinLength(KeywordGroup):
 
 class _Pattern(KeywordGroup):
     def __init__(self, schema: Dict):
+        super().__init__(schema=schema)
         import re
 
         self.value = schema["pattern"].value

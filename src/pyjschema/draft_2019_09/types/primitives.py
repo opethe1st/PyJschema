@@ -14,6 +14,7 @@ class Null(Type):
 
 class Const(KeywordGroup):
     def __init__(self, schema: Dict):
+        super().__init__(schema=schema)
         const = schema["const"]
         self.value = deannotate(const)
 
@@ -24,6 +25,7 @@ class Const(KeywordGroup):
 
 class Enum(KeywordGroup):
     def __init__(self, schema: Dict):
+        super().__init__(schema=schema)
         enum = schema["enum"]
         self._values = [deannotate(instance=instance) for instance in enum]
 
