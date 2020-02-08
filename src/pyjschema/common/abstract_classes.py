@@ -3,7 +3,6 @@ import numbers
 import typing as t
 from collections.abc import Mapping, Sequence
 
-from .annotate import deannotate
 from .primitive_types_wrappers import Dict
 from .validation_error import ValidationError
 
@@ -15,12 +14,13 @@ class AValidator(abc.ABC):
     base_uri = None
     anchor = None
 
-    def __init__(self, schema: Dict):
+    def __init__(self, schema: Dict, location=None):
+        schema = {} if isinstance(schema, bool) else schema
         self.id = self.base_uri = (
-            deannotate(schema["$id"]) if schema.get("$id") else None
+            schema["$id"] if schema.get("$id") else None
         )
-        self.location = schema.location
-        self.anchor = deannotate(schema["$anchor"]) if schema.get("$anchor") else None
+        self.location = location
+        self.anchor = schema["$anchor"] if schema.get("$anchor") else None
 
     @abc.abstractmethod
     def validate(self, instance: JsonType) -> ValidationError:

@@ -111,8 +111,8 @@ class _Contains(KeywordGroup):
         minContains = schema.get("minContains")
 
         self._validator = build_validator(schema=contains) if contains else None
-        self.maxContainsValue = maxContains.value if maxContains else float("inf")
-        self.minContainsValue = minContains.value if minContains else -float("inf")
+        self.maxContainsValue = maxContains if maxContains else float("inf")
+        self.minContainsValue = minContains if minContains else -float("inf")
 
     def validate(self, instance):
 
@@ -151,7 +151,7 @@ class _Contains(KeywordGroup):
 class _MinItems(KeywordGroup):
     def __init__(self, schema: Dict):
         super().__init__(schema=schema)
-        self.value = schema["minItems"].value
+        self.value = schema["minItems"]
 
     def validate(self, instance):
         return validate_min(value=self.value, instance=instance)
@@ -160,7 +160,7 @@ class _MinItems(KeywordGroup):
 class _MaxItems(KeywordGroup):
     def __init__(self, schema: Dict):
         super().__init__(schema=schema)
-        self.value = schema["maxItems"].value
+        self.value = schema["maxItems"]
 
     def validate(self, instance):
         return validate_max(value=self.value, instance=instance)
@@ -169,7 +169,7 @@ class _MaxItems(KeywordGroup):
 class _UniqueItems(KeywordGroup):
     def __init__(self, schema: Dict):
         super().__init__(schema=schema)
-        self.value = schema["uniqueItems"].value
+        self.value = schema["uniqueItems"]
 
     def validate(self, instance):
         if self.value:

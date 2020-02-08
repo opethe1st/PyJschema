@@ -35,4 +35,4 @@ def deannotate(instance: Primitive):
 
 # TODO(ope): support escaping
 def append(location, value):
-    return "{location}/{value}".format(location=location, value=value)
+    return f"{location}/{value}"

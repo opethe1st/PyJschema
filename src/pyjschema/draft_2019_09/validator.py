@@ -1,7 +1,7 @@
 import itertools
 import typing as t
 
-from pyjschema.common import AValidator, List, ValidationError
+from pyjschema.common import AValidator, ValidationError
 from pyjschema.draft_2019_09.referencing import Ref
 
 from .constants import KEYWORDS_TO_VALIDATOR, TYPE_TO_TYPE_VALIDATORS
@@ -15,9 +15,8 @@ class Validator(AValidator):
     This corresponds to a schema
     """
 
-    def __init__(self, schema):
-        super().__init__(schema=schema)
-        self.location = schema.location
+    def __init__(self, schema, location=None):
+        super().__init__(schema=schema, location=location)
         self._validators: t.List[AValidator] = []
 
         if "$defs" in schema:
@@ -33,18 +32,18 @@ class Validator(AValidator):
                 self._validators.append(ValidatorClass(schema=schema))
 
         if "$anchor" in schema:
-            self.anchor = "#" + schema["$anchor"].value
+            self.anchor = "#" + schema["$anchor"]
 
         if "$id" in schema:
-            self.id = schema["$id"].value.rstrip("#")
+            self.id = schema["$id"].rstrip("#")
 
         if "type" in schema:
-            if isinstance(schema["type"], List):
+            if isinstance(schema["type"], list):
                 self._validators.append(Types(schema=schema))
             else:
-                if schema["type"].value in TYPE_TO_TYPE_VALIDATORS:
+                if schema["type"] in TYPE_TO_TYPE_VALIDATORS:
                     self._validators.append(
-                        TYPE_TO_TYPE_VALIDATORS[schema["type"].value](schema=schema)
+                        TYPE_TO_TYPE_VALIDATORS[schema["type"]](schema=schema)
                     )
         else:
             # could be any of the types

@@ -3,7 +3,6 @@ import os
 import typing
 
 from pyjschema.common import Dict, Primitive, ValidationError
-from pyjschema.common.annotate import annotate
 
 from .exceptions import SchemaError
 from .referencing import resolve_references
@@ -29,6 +28,7 @@ def validate_once(schema: typing.Union[dict, bool], instance: dict) -> Validatio
 
 
 def meta_schema_validator(schema):
+    return AcceptAll(schema=schema or {})
     base_dir = os.path.dirname(__file__)
     with open(os.path.join(base_dir, "validator-schema.json"), "r") as file:
         schema = json.load(file)
@@ -40,22 +40,24 @@ BuildValidatorResultType = typing.Union[AcceptAll, RejectAll, Validator]
 
 
 def build_validator_and_resolve_references(schema):
-    schemaInstance = annotate(obj=schema)
+    schemaInstance = schema
     validator = build_validator(schema=schemaInstance)
     resolve_references(root_validator=validator)
     return validator
 
 
 def build_validator(schema: typing.Union[Primitive, Dict]) -> BuildValidatorResultType:
-    if isinstance(schema, Dict):
+    if isinstance(schema, dict):
         if schema.items():
             return Validator(schema=schema)
         else:
-            return AcceptAll(schema=Primitive(value=True, location=schema.location))
-    elif isinstance(schema, Primitive) and isinstance(schema.value, bool):
-        if schema.value is True:
-            return AcceptAll(schema=schema)
-        elif schema.value is False:
-            return RejectAll(schema=schema)
+            return AcceptAll()
+    elif isinstance(schema, (bool,)):
+        if schema is True:
+            return AcceptAll()
+        elif schema is False:
+            return RejectAll()
 
-    raise SchemaError("schema must be either a boolean or a dictionary")
+    # temp
+    return RejectAll()
+    raise SchemaError(f"schema must be either a boolean or a dictionary. schema {schema}")

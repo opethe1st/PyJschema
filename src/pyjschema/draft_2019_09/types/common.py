@@ -32,7 +32,7 @@ def validate_instance_against_any_validator(
     for validator in validators:
         res = validator.validate(instance=instance)
         if res:
-            return
+            return True
         else:
             errors.append(res)
 

@@ -11,11 +11,12 @@ class Types(AValidator):
     def __init__(self, schema: Dict):
         self._validators: t.List[AValidator] = []
         if "type" in schema:
-            types: t.Iterable[str] = [item.value for item in schema["type"]]
+            types: t.Iterable[str] = schema["type"]
         else:
             # if there is no type, then try all the types
             # TODO(ope): optimize this later
             types = TYPE_TO_TYPE_VALIDATORS.keys()
+            types = []
 
         for type_ in types:
             if type_ in TYPE_TO_TYPE_VALIDATORS:

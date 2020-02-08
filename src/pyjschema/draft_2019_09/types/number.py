@@ -10,7 +10,7 @@ from .type_ import Type
 class _MultipleOf(KeywordGroup):
     def __init__(self, schema: Dict):
         super().__init__(schema=schema)
-        self.value = schema["multipleOf"].value
+        self.value = schema["multipleOf"]
 
     def validate(self, instance):
         # using this multipier here so that the precision is better
@@ -25,7 +25,7 @@ class _MultipleOf(KeywordGroup):
 class _Minimum(KeywordGroup):
     def __init__(self, schema: Dict):
         super().__init__(schema=schema)
-        self.value = schema["minimum"].value
+        self.value = schema["minimum"]
 
     def validate(self, instance):
         if instance < self.value:
@@ -36,7 +36,7 @@ class _Minimum(KeywordGroup):
 class _Maximum(KeywordGroup):
     def __init__(self, schema: Dict):
         super().__init__(schema=schema)
-        self.value = schema["maximum"].value
+        self.value = schema["maximum"]
 
     def validate(self, instance):
         if self.value < instance:
@@ -47,7 +47,7 @@ class _Maximum(KeywordGroup):
 class _ExclusiveMinimum(KeywordGroup):
     def __init__(self, schema: Dict):
         super().__init__(schema=schema)
-        self.value = schema["exclusiveMinimum"].value
+        self.value = schema["exclusiveMinimum"]
 
     def validate(self, instance):
         if instance <= self.value:
@@ -58,7 +58,7 @@ class _ExclusiveMinimum(KeywordGroup):
 class _ExclusiveMaximum(KeywordGroup):
     def __init__(self, schema: Dict):
         super().__init__(schema=schema)
-        self.value = schema["exclusiveMaximum"].value
+        self.value = schema["exclusiveMaximum"]
 
     def validate(self, instance):
         if self.value <= instance:

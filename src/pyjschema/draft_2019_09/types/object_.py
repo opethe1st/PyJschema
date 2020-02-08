@@ -89,7 +89,7 @@ class _Required(KeywordGroup):
     def __init__(self, schema: Dict):
         super().__init__(schema=schema)
         required = schema["required"]
-        self.value = [item.value for item in required]
+        self.value = required
 
     def validate(self, instance):
         messages = []
@@ -137,7 +137,7 @@ def validate_property_names(validator, instance):
 class _MinProperties(KeywordGroup):
     def __init__(self, schema: Dict):
         super().__init__(schema=schema)
-        self.value = schema["minProperties"].value
+        self.value = schema["minProperties"]
 
     def validate(self, instance):
         return validate_min(instance=instance, value=self.value)
@@ -146,7 +146,7 @@ class _MinProperties(KeywordGroup):
 class _MaxProperties(KeywordGroup):
     def __init__(self, schema: Dict):
         super().__init__(schema=schema)
-        self.value = schema["maxProperties"].value
+        self.value = schema["maxProperties"]
 
     def validate(self, instance):
         return validate_max(instance=instance, value=self.value)
@@ -157,7 +157,7 @@ class _DependentRequired(KeywordGroup):
         super().__init__(schema=schema)
         dependentRequired = schema["dependentRequired"]
         self.dependentRequired = {
-            key: [val.value for val in value]
+            key: value
             for key, value in dependentRequired.items()
         }
 
