@@ -11,7 +11,7 @@ htmlcov
 
 # environment
 .venv
-.virtualenv
+.virtualenv/
 .tox
 
 # editor

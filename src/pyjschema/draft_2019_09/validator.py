@@ -4,10 +4,53 @@ import typing as t
 from pyjschema.common import AValidator, ValidationError
 from pyjschema.draft_2019_09.referencing import Ref
 
-from .constants import KEYWORDS_TO_VALIDATOR, TYPE_TO_TYPE_VALIDATORS
+from .constants import KEYWORDS_TO_VALIDATOR
 from .defs import Defs
 from .types.common import validate_instance_against_all_validators
-from .types_validator import Types
+from .types.string import _MaxLength, _MinLength, _Pattern
+from .types.number import _MultipleOf, _Minimum, _Maximum, _ExclusiveMinimum, _ExclusiveMaximum
+from .types.object_ import _Property, _Required, _PropertyNames, _MinProperties, _MaxProperties, _DependentRequired
+from .types.array import _Items, _Contains, _MinItems, _MaxItems, _UniqueItems
+from .types.type_ import Type
+
+
+# this should probably be in the files for each type
+TYPE_TO_KEYWORD_VALIDATORS = {
+    "string": {
+        ("minLength",): _MinLength,
+        ("maxLength",): _MaxLength,
+        ("pattern",): _Pattern,
+    },
+    "integer": {
+        ("multipleOf",): _MultipleOf,
+        ("minimum",): _Minimum,
+        ("maximum",): _Maximum,
+        ("exclusiveMinimum",): _ExclusiveMinimum,
+        ("exclusiveMaximum",): _ExclusiveMaximum,
+    },
+    "number": {
+        ("multipleOf",): _MultipleOf,
+        ("minimum",): _Minimum,
+        ("maximum",): _Maximum,
+        ("exclusiveMinimum",): _ExclusiveMinimum,
+        ("exclusiveMaximum",): _ExclusiveMaximum,
+    },
+    "object": {
+        ("required",): _Required,
+        ("propertyNames",): _PropertyNames,
+        ("minProperties",): _MinProperties,
+        ("maxProperties",): _MaxProperties,
+        ("dependentRequired",): _DependentRequired,
+        ("properties", "patternProperties", "additionalProperties"): _Property,
+    },
+    "array": {
+        ("minItems",): _MinItems,
+        ("maxItems",): _MaxItems,
+        ("uniqueItems",): _UniqueItems,
+        ("contains", "maxContains", "minContains"): _Contains,
+        ("items", "additionalItems"): _Items,
+    },
+}
 
 
 class Validator(AValidator):
@@ -37,22 +80,20 @@ class Validator(AValidator):
         if "$id" in schema:
             self.id = schema["$id"].rstrip("#")
 
-        if "type" in schema:
-            if isinstance(schema["type"], list):
-                self._validators.append(Types(schema=schema))
-            else:
-                if schema["type"] in TYPE_TO_TYPE_VALIDATORS:
-                    self._validators.append(
-                        TYPE_TO_TYPE_VALIDATORS[schema["type"]](schema=schema)
-                    )
-        else:
-            # could be any of the types
-            self._validators.append(Types(schema=schema))
+        types = schema.get("type")
+        if isinstance(types, str):
+            types = [types]
+        if types:
+            self._validators.append(Type(schema=schema))
 
-    # hm.. this is the same as the method in Type.
+        for type_, keyword_to_keyword_validators in TYPE_TO_KEYWORD_VALIDATORS.items():
+            if not types or type_ in types:
+                for keywords, keyword_validator in keyword_to_keyword_validators.items():
+                    if any(keyword in schema for keyword in keywords):
+                        self._validators.append(keyword_validator(schema=schema))
+
     def validate(self, instance):
-        # can move this to a function that take in a list of validators and an instance
-        # then yield the errors as they occur
+        # import pdb; pdb.set_trace()
         errors = validate_instance_against_all_validators(
             validators=self._validators, instance=instance
         )
@@ -65,6 +106,5 @@ class Validator(AValidator):
                 children=itertools.chain([first_result], errors),
             )
 
-    # TODO(ope): hm.. this is the same as the method in Type.
     def sub_validators(self):
         yield from self._validators

@@ -1,7 +1,6 @@
 from pyjschema.common import Dict, KeywordGroup, ValidationError
 
-from .common import validate_max, validate_min
-from .type_ import Type
+from .common import validate_max, validate_min, correct_type
 
 
 class _MaxLength(KeywordGroup):
@@ -9,6 +8,7 @@ class _MaxLength(KeywordGroup):
         super().__init__(schema=schema)
         self.value = schema["maxLength"]
 
+    @correct_type(type_=str)
     def validate(self, instance):
         return validate_max(
             value=self.value, instance=instance, message=f"{instance} failed {self}"
@@ -23,6 +23,7 @@ class _MinLength(KeywordGroup):
         super().__init__(schema=schema)
         self.value = schema["minLength"]
 
+    @correct_type(type_=str)
     def validate(self, instance):
         return validate_min(
             value=self.value, instance=instance, message=f"{instance} failed {self}"
@@ -40,6 +41,7 @@ class _Pattern(KeywordGroup):
         self.value = schema["pattern"]
         self.regex = re.compile(pattern=self.value)
 
+    @correct_type(type_=str)
     def validate(self, instance):
         if not self.regex.search(instance):
             return ValidationError(messages=[f"{instance} failed {self}"])
@@ -47,12 +49,3 @@ class _Pattern(KeywordGroup):
 
     def __repr__(self):
         return f"Pattern(value={self.value})"
-
-
-class String(Type):
-    KEYWORDS_TO_VALIDATOR = {
-        ("minLength",): _MinLength,
-        ("maxLength",): _MaxLength,
-        ("pattern",): _Pattern,
-    }
-    type_ = str

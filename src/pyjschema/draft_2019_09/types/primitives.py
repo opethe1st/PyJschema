@@ -1,15 +1,5 @@
 from pyjschema.common import AValidator, Dict, KeywordGroup, ValidationError
 
-from .type_ import Type
-
-
-class Boolean(Type):
-    type_ = bool
-
-
-class Null(Type):
-    type_ = type(None)
-
 
 class Const(KeywordGroup):
     def __init__(self, schema: Dict):
@@ -53,12 +43,16 @@ def equals(a, b):
 
 
 class AcceptAll(AValidator):
+    def __init__(self, schema=None):
+        pass
 
     def validate(self, instance):
         return True
 
 
 class RejectAll(AValidator):
+    def __init__(self, schema=None):
+        pass
 
     def validate(self, instance):
         return ValidationError(messages=["This fails for every value"])

@@ -3,9 +3,6 @@ from pyjschema.common import Dict, KeywordGroup, ValidationError
 
 class If(KeywordGroup):
 
-    # TODO(ope): this accepts a schema, probably should accept if, then, else
-    # but that wont work since they are reserved keywords. Maybe the decision to pass in individual keywords was
-    # misguided but I also wanted to document that a particular keyword group deals with these keywords
     def __init__(self, schema: Dict):
         super().__init__(schema=schema)
         from .validator_construction import build_validator
@@ -19,6 +16,7 @@ class If(KeywordGroup):
         )
 
     def validate(self, instance):
+        # import pdb; pdb.set_trace()
         if self._if_validator.validate(instance=instance):
             if self._then_validator:
                 return self._then_validator.validate(instance=instance)

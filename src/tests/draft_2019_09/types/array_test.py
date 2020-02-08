@@ -27,7 +27,7 @@ class TestArrayValidation(unittest.TestCase):
                 [["s1", "s2"]],
             ),
             (
-                "items array",
+                "items array less items than in instance",
                 {
                     "$id": "https://example.com/ope",
                     "type": "array",
@@ -36,7 +36,7 @@ class TestArrayValidation(unittest.TestCase):
                 ["s1", "s2", 123],
             ),
             (
-                "items array",
+                "items array more items than in instance",
                 {
                     "$id": "https://example.com/ope",
                     "type": "array",

@@ -16,19 +16,18 @@ STRING_KEYWORDS = [
 ]
 
 OBJECT_KEYWORDS = [
-    "uniqueItems",
     "maxProperties",
     "minProperties",
     "properties",
     "propertyNames",
     "patternProperties",
     "additionalProperties",
-    "uniqueItems",
     "required",
 ]
 
 ARRAY_KEYWORDS = [
-    "items",
+    # "items",
+    "uniqueItems",
     "minItems",
     "maxItems",
     "additionalItems",
@@ -57,7 +56,7 @@ KEYWORDS = (
         "enum",
         "boolean_schema",
         "default",
-        "ref",  # need root ref - #, also escaped json-pointers,
+        # "ref",  # need root ref - #, also escaped json-pointers,
         # "refRemote",
     ]
 )

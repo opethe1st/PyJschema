@@ -3,8 +3,7 @@ import re
 
 from pyjschema.common import Dict, KeywordGroup, ValidationError
 
-from .common import validate_max, validate_min
-from .type_ import Type
+from .common import validate_max, validate_min, correct_type
 
 
 class _Property(KeywordGroup):
@@ -33,6 +32,7 @@ class _Property(KeywordGroup):
             else {}
         )
 
+    @correct_type(type_=dict)
     def validate(self, instance):
 
         errors = _validate(
@@ -55,6 +55,7 @@ class _Property(KeywordGroup):
 
 
 def _validate(property_validators, additional_validator, pattern_validators, instance):
+
     for key in property_validators:
         if key in instance:
             result = property_validators[key].validate(instance[key])
@@ -91,6 +92,7 @@ class _Required(KeywordGroup):
         required = schema["required"]
         self.value = required
 
+    @correct_type(type_=dict)
     def validate(self, instance):
         messages = []
         if set(self.value) - set(instance.keys()):
@@ -114,6 +116,7 @@ class _PropertyNames(KeywordGroup):
         propertyNames = schema["propertyNames"]
         self._validator = build_validator(schema=propertyNames)
 
+    @correct_type(type_=dict)
     def validate(self, instance):
         errors = validate_property_names(validator=self._validator, instance=instance)
         first_result = next(errors, True)
@@ -139,6 +142,7 @@ class _MinProperties(KeywordGroup):
         super().__init__(schema=schema)
         self.value = schema["minProperties"]
 
+    @correct_type(type_=dict)
     def validate(self, instance):
         return validate_min(instance=instance, value=self.value)
 
@@ -148,6 +152,7 @@ class _MaxProperties(KeywordGroup):
         super().__init__(schema=schema)
         self.value = schema["maxProperties"]
 
+    @correct_type(type_=dict)
     def validate(self, instance):
         return validate_max(instance=instance, value=self.value)
 
@@ -161,34 +166,10 @@ class _DependentRequired(KeywordGroup):
             for key, value in dependentRequired.items()
         }
 
+    @correct_type(type_=dict)
     def validate(self, instance):
         for prop, dependentProperties in self.dependentRequired.items():
             if prop in instance:
                 if not (set(dependentProperties) < set(instance.keys())):
                     return ValidationError()
         return True
-
-
-class Object(Type):
-    KEYWORDS_TO_VALIDATOR = {
-        ("required",): _Required,
-        ("propertyNames",): _PropertyNames,
-        ("minProperties",): _MinProperties,
-        ("maxProperties",): _MaxProperties,
-        ("dependentRequired",): _DependentRequired,
-        ("properties", "patternProperties", "additionalProperties"): _Property,
-    }
-    type_ = dict
-
-    def validate(self, instance):
-        res = super().validate(instance=instance)
-        if res:
-            keyTypes = set(type(key) for key in instance)
-            if keyTypes:
-                # TODO(ope) this seems wrong to me
-                if len(keyTypes) != 1 or not (str in keyTypes):
-                    messages = ["all the keys of the object need to be strings"]
-                    return ValidationError(messages=messages)
-            return res
-        else:
-            return res

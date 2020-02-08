@@ -5,7 +5,7 @@ from uritools import uridecode
 from pyjschema.common import KeywordGroup
 
 from .exceptions import SchemaError
-from .types.primitives import RejectAll
+from .types.primitives import AcceptAll
 from .utils import to_canonical_uri
 
 
@@ -51,7 +51,7 @@ class Ref(KeywordGroup):
             return validator
         else:
             # tempporary
-            return RejectAll(schema=True)
+            return AcceptAll(schema=True)
             # TODO(ope): better error message
             raise SchemaError(
                 f"Unable to locate the validator at this location "
