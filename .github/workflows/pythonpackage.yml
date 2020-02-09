@@ -35,10 +35,8 @@ jobs:
         mypy src/tests --config-file src/setup.cfg
     - name: Test
       run: |
-        cd src/
         coverage run -m unittest discover -qp "*_test.py"
         coverage report
-        cd ..
     - name: benchmarks
       run: |
         pytest benchmarks
