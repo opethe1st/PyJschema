@@ -1,12 +1,11 @@
 import abc
 import numbers
-import typing as t
+import typing
 from collections.abc import Mapping, Sequence
 
-from .primitive_types_wrappers import Dict
 from .validation_error import ValidationError
 
-JsonType = t.Union[str, numbers.Number, bool, None, Mapping, Sequence]
+JsonType = typing.Union[str, numbers.Number, bool, None, Mapping, Sequence]
 
 
 class AValidator(abc.ABC):
@@ -14,7 +13,7 @@ class AValidator(abc.ABC):
     base_uri = None
     anchor = None
 
-    def __init__(self, schema: Dict, location=None):
+    def __init__(self, schema: typing.Dict, location=None):
         schema = {} if isinstance(schema, bool) else schema
         self.id = self.base_uri = (
             schema["$id"] if schema.get("$id") else None
@@ -26,7 +25,7 @@ class AValidator(abc.ABC):
     def validate(self, instance: JsonType) -> ValidationError:
         raise NotImplementedError
 
-    def sub_validators(self) -> t.Iterable["AValidator"]:
+    def sub_validators(self) -> typing.Iterable["AValidator"]:
         yield from []
 
 

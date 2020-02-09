@@ -1,12 +1,12 @@
 import typing as t
 import itertools
-from pyjschema.common import Dict, KeywordGroup, ValidationError
+from pyjschema.common import KeywordGroup, ValidationError
 
 from .common import validate_max, validate_min, correct_type
 
 
 class _Items(KeywordGroup):
-    def __init__(self, schema: Dict, location=None):
+    def __init__(self, schema: dict, location=None):
         from pyjschema.draft_2019_09 import build_validator
         from pyjschema.draft_2019_09.validator_construction import (
             BuildValidatorResultType,
@@ -102,7 +102,7 @@ def _validate_item_list(items_validators, additional_items_validator, instance):
 
 
 class _Contains(KeywordGroup):
-    def __init__(self, schema: Dict, location=None):
+    def __init__(self, schema: dict, location=None):
         super().__init__(schema=schema, location=location)
         from pyjschema.draft_2019_09 import build_validator
 
@@ -150,7 +150,7 @@ class _Contains(KeywordGroup):
 
 
 class _MinItems(KeywordGroup):
-    def __init__(self, schema: Dict, location=None):
+    def __init__(self, schema: dict, location=None):
         super().__init__(schema=schema, location=location)
         self.value = schema["minItems"]
 
@@ -160,7 +160,7 @@ class _MinItems(KeywordGroup):
 
 
 class _MaxItems(KeywordGroup):
-    def __init__(self, schema: Dict, location=None):
+    def __init__(self, schema: dict, location=None):
         super().__init__(schema=schema, location=location)
         self.value = schema["maxItems"]
 
@@ -170,7 +170,7 @@ class _MaxItems(KeywordGroup):
 
 
 class _UniqueItems(KeywordGroup):
-    def __init__(self, schema: Dict, location=None):
+    def __init__(self, schema: dict, location=None):
         super().__init__(schema=schema, location=location)
         self.value = schema["uniqueItems"]
 

@@ -1,12 +1,12 @@
 import numbers
 
-from pyjschema.common import Dict, KeywordGroup, ValidationError
+from pyjschema.common import KeywordGroup, ValidationError
 
 from .common import correct_type
 
 
 class _MultipleOf(KeywordGroup):
-    def __init__(self, schema: Dict, location=None):
+    def __init__(self, schema: dict, location=None):
         super().__init__(schema=schema, location=location)
         self.value = schema["multipleOf"]
 
@@ -22,7 +22,7 @@ class _MultipleOf(KeywordGroup):
 
 
 class _Minimum(KeywordGroup):
-    def __init__(self, schema: Dict, location=None):
+    def __init__(self, schema: dict, location=None):
         super().__init__(schema=schema, location=location)
         self.value = schema["minimum"]
 
@@ -34,7 +34,7 @@ class _Minimum(KeywordGroup):
 
 
 class _Maximum(KeywordGroup):
-    def __init__(self, schema: Dict, location=None):
+    def __init__(self, schema: dict, location=None):
         super().__init__(schema=schema, location=location)
         self.value = schema["maximum"]
 
@@ -46,7 +46,7 @@ class _Maximum(KeywordGroup):
 
 
 class _ExclusiveMinimum(KeywordGroup):
-    def __init__(self, schema: Dict, location=None):
+    def __init__(self, schema: dict, location=None):
         super().__init__(schema=schema, location=location)
         self.value = schema["exclusiveMinimum"]
 
@@ -58,7 +58,7 @@ class _ExclusiveMinimum(KeywordGroup):
 
 
 class _ExclusiveMaximum(KeywordGroup):
-    def __init__(self, schema: Dict, location=None):
+    def __init__(self, schema: dict, location=None):
         super().__init__(schema=schema, location=location)
         self.value = schema["exclusiveMaximum"]
 

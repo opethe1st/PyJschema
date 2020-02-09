@@ -1,8 +1,8 @@
-from pyjschema.common import AValidator, Dict, KeywordGroup, ValidationError
+from pyjschema.common import AValidator, KeywordGroup, ValidationError
 
 
 class Const(KeywordGroup):
-    def __init__(self, schema: Dict, location=None):
+    def __init__(self, schema: dict, location=None):
         super().__init__(schema=schema, location=location)
         const = schema["const"]
         self.value = (const)
@@ -13,7 +13,7 @@ class Const(KeywordGroup):
 
 
 class Enum(KeywordGroup):
-    def __init__(self, schema: Dict, location=None):
+    def __init__(self, schema: dict, location=None):
         super().__init__(schema=schema, location=location)
         enum = schema["enum"]
         self._values = enum

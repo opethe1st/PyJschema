@@ -1,9 +1,9 @@
-from pyjschema.common import Dict, KeywordGroup, ValidationError
+from pyjschema.common import KeywordGroup, ValidationError
 
 
 class If(KeywordGroup):
 
-    def __init__(self, schema: Dict, location=None):
+    def __init__(self, schema: dict, location=None):
         super().__init__(schema=schema, location=location)
         from .validator_construction import build_validator
 
@@ -34,7 +34,7 @@ class If(KeywordGroup):
 
 
 class AllOf(KeywordGroup):
-    def __init__(self, schema: Dict, location=None):
+    def __init__(self, schema: dict, location=None):
         super().__init__(schema=schema, location=location)
         from .validator_construction import build_validator
 
@@ -54,7 +54,7 @@ class AllOf(KeywordGroup):
 
 
 class OneOf(KeywordGroup):
-    def __init__(self, schema: Dict, location=None):
+    def __init__(self, schema: dict, location=None):
         super().__init__(schema=schema, location=location)
         from .validator_construction import build_validator
 
@@ -74,7 +74,7 @@ class OneOf(KeywordGroup):
 
 
 class AnyOf(KeywordGroup):
-    def __init__(self, schema: Dict, location=None):
+    def __init__(self, schema: dict, location=None):
         super().__init__(schema=schema, location=location)
         from .validator_construction import build_validator
 
@@ -93,7 +93,7 @@ class AnyOf(KeywordGroup):
 
 
 class Not(KeywordGroup):
-    def __init__(self, schema: Dict, location=None):
+    def __init__(self, schema: dict, location=None):
         super().__init__(schema=schema, location=location)
         from .validator_construction import build_validator
 

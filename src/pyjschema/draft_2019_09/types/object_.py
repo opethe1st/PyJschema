@@ -1,13 +1,13 @@
 import itertools
 import re
 
-from pyjschema.common import Dict, KeywordGroup, ValidationError
+from pyjschema.common import KeywordGroup, ValidationError
 
 from .common import validate_max, validate_min, correct_type
 
 
 class _Property(KeywordGroup):
-    def __init__(self, schema: Dict, location=None):
+    def __init__(self, schema: dict, location=None):
         from pyjschema.draft_2019_09 import build_validator
 
         properties = schema.get("properties")
@@ -87,7 +87,7 @@ def _validate(property_validators, additional_validator, pattern_validators, ins
 
 
 class _Required(KeywordGroup):
-    def __init__(self, schema: Dict, location=None):
+    def __init__(self, schema: dict, location=None):
         super().__init__(schema=schema, location=location)
         required = schema["required"]
         self.value = required
@@ -107,7 +107,7 @@ class _Required(KeywordGroup):
 
 
 class _PropertyNames(KeywordGroup):
-    def __init__(self, schema: Dict, location=None):
+    def __init__(self, schema: dict, location=None):
         super().__init__(schema=schema, location=location)
         # add this to make sure that the type is string - I have seen it missing from
         # examples in the documentation so can only assume it's allowed
@@ -138,7 +138,7 @@ def validate_property_names(validator, instance):
 
 
 class _MinProperties(KeywordGroup):
-    def __init__(self, schema: Dict, location=None):
+    def __init__(self, schema: dict, location=None):
         super().__init__(schema=schema, location=location)
         self.value = schema["minProperties"]
 
@@ -148,7 +148,7 @@ class _MinProperties(KeywordGroup):
 
 
 class _MaxProperties(KeywordGroup):
-    def __init__(self, schema: Dict, location=None):
+    def __init__(self, schema: dict, location=None):
         super().__init__(schema=schema, location=location)
         self.value = schema["maxProperties"]
 
@@ -158,7 +158,7 @@ class _MaxProperties(KeywordGroup):
 
 
 class _DependentRequired(KeywordGroup):
-    def __init__(self, schema: Dict, location=None):
+    def __init__(self, schema: dict, location=None):
         super().__init__(schema=schema, location=location)
         dependentRequired = schema["dependentRequired"]
         self.dependentRequired = {

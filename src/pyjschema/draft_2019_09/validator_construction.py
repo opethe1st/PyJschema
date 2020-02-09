@@ -2,7 +2,7 @@ import json
 import os
 import typing
 
-from pyjschema.common import Dict, Primitive, ValidationError
+from pyjschema.common import ValidationError
 
 from .exceptions import SchemaError
 from .referencing import resolve_references
@@ -46,7 +46,7 @@ def build_validator_and_resolve_references(schema):
     return validator
 
 
-def build_validator(schema: typing.Union[Primitive, Dict], location="") -> BuildValidatorResultType:
+def build_validator(schema: typing.Union[bool, dict], location="") -> BuildValidatorResultType:
     if isinstance(schema, dict):
         if schema.items():
             return Validator(schema=schema, location=location)

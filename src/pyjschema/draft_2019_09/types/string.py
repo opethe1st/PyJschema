@@ -1,10 +1,10 @@
-from pyjschema.common import Dict, KeywordGroup, ValidationError
+from pyjschema.common import KeywordGroup, ValidationError
 
 from .common import validate_max, validate_min, correct_type
 
 
 class _MaxLength(KeywordGroup):
-    def __init__(self, schema: Dict, location=None):
+    def __init__(self, schema: dict, location=None):
         super().__init__(schema=schema, location=location)
         self.value = schema["maxLength"]
 
@@ -19,7 +19,7 @@ class _MaxLength(KeywordGroup):
 
 
 class _MinLength(KeywordGroup):
-    def __init__(self, schema: Dict, location=None):
+    def __init__(self, schema: dict, location=None):
         super().__init__(schema=schema, location=location)
         self.value = schema["minLength"]
 
@@ -34,7 +34,7 @@ class _MinLength(KeywordGroup):
 
 
 class _Pattern(KeywordGroup):
-    def __init__(self, schema: Dict, location=None):
+    def __init__(self, schema: dict, location=None):
         super().__init__(schema=schema, location=location)
         import re
 

@@ -1,4 +1,4 @@
-from pyjschema.common import Dict, KeywordGroup
+from pyjschema.common import KeywordGroup
 
 
 class Defs(KeywordGroup):
@@ -6,7 +6,7 @@ class Defs(KeywordGroup):
     This is corresponds to the $defs keyword
     """
 
-    def __init__(self, schema: Dict, location=None):
+    def __init__(self, schema: dict, location=None):
         super().__init__(schema=schema, location=location)
         defs = schema["$defs"]
         from .validator_construction import build_validator
