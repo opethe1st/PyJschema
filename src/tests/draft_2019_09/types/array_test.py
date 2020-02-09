@@ -133,6 +133,7 @@ class TestArrayValidation(unittest.TestCase):
                 },
                 [123, 124, "aa"],
             ),
+
         ]
     )
     def test_true(self, name, schema, instance):
@@ -220,6 +221,34 @@ class TestArrayValidation(unittest.TestCase):
                     "maxContains": 2,
                 },
                 ["123", "124", "1234"],
+            ),
+            (
+                "test false",
+                {
+                    "$defs": {
+                        "item": {
+                            "type": "array",
+                            "additionalItems": False,
+                            "items": [
+                                {"$ref": "#/$defs/sub-item"},
+                                {"$ref": "#/$defs/sub-item"},
+                            ],
+                        },
+                        "sub-item": {"type": "object", "required": ["foo"]},
+                    },
+                    "type": "array",
+                    "additionalItems": False,
+                    "items": [
+                        {"$ref": "#/$defs/item"},
+                        {"$ref": "#/$defs/item"},
+                        {"$ref": "#/$defs/item"},
+                    ],
+                },
+                [
+                    {"foo": None},
+                    [{"foo": None}, {"foo": None}],
+                    [{"foo": None}, {"foo": None}],
+                ],
             ),
         ]
     )

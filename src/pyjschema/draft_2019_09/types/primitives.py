@@ -44,7 +44,7 @@ def equals(a, b):
 
 class AcceptAll(AValidator):
     def __init__(self, schema=None, location=None):
-        pass
+        self.location = location
 
     def validate(self, instance):
         return True
@@ -52,7 +52,7 @@ class AcceptAll(AValidator):
 
 class RejectAll(AValidator):
     def __init__(self, schema=None, location=None):
-        pass
+        self.location = location
 
     def validate(self, instance):
         return ValidationError(messages=["This fails for every value"])

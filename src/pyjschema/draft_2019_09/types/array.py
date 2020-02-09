@@ -7,7 +7,6 @@ from .common import validate_max, validate_min, correct_type
 
 class _Items(KeywordGroup):
     def __init__(self, schema: Dict, location=None):
-        super().__init__(schema=schema, location=location)
         from pyjschema.draft_2019_09 import build_validator
         from pyjschema.draft_2019_09.validator_construction import (
             BuildValidatorResultType,
