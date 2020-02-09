@@ -4,8 +4,8 @@ from .common import validate_max, validate_min, correct_type
 
 
 class _MaxLength(KeywordGroup):
-    def __init__(self, schema: Dict):
-        super().__init__(schema=schema)
+    def __init__(self, schema: Dict, location=None):
+        super().__init__(schema=schema, location=location)
         self.value = schema["maxLength"]
 
     @correct_type(type_=str)
@@ -15,12 +15,12 @@ class _MaxLength(KeywordGroup):
         )
 
     def __repr__(self):
-        return f"Maximum(value={self.value})"
+        return f"MaxLength(value={self.value})"
 
 
 class _MinLength(KeywordGroup):
-    def __init__(self, schema: Dict):
-        super().__init__(schema=schema)
+    def __init__(self, schema: Dict, location=None):
+        super().__init__(schema=schema, location=location)
         self.value = schema["minLength"]
 
     @correct_type(type_=str)
@@ -34,8 +34,8 @@ class _MinLength(KeywordGroup):
 
 
 class _Pattern(KeywordGroup):
-    def __init__(self, schema: Dict):
-        super().__init__(schema=schema)
+    def __init__(self, schema: Dict, location=None):
+        super().__init__(schema=schema, location=location)
         import re
 
         self.value = schema["pattern"]

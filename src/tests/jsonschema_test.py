@@ -26,7 +26,7 @@ OBJECT_KEYWORDS = [
 ]
 
 ARRAY_KEYWORDS = [
-    # "items",
+    "items",
     "uniqueItems",
     "minItems",
     "maxItems",
@@ -56,7 +56,7 @@ KEYWORDS = (
         "enum",
         "boolean_schema",
         "default",
-        # "ref",  # need root ref - #, also escaped json-pointers,
+        "ref",  # need root ref - #, also escaped json-pointers,
         # "refRemote",
     ]
 )

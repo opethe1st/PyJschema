@@ -6,8 +6,8 @@ from .common import validate_max, validate_min, correct_type
 
 
 class _Items(KeywordGroup):
-    def __init__(self, schema: Dict):
-        super().__init__(schema=schema)
+    def __init__(self, schema: Dict, location=None):
+        super().__init__(schema=schema, location=location)
         from pyjschema.draft_2019_09 import build_validator
         from pyjschema.draft_2019_09.validator_construction import (
             BuildValidatorResultType,
@@ -22,14 +22,15 @@ class _Items(KeywordGroup):
         if items is not None:
             if isinstance(items, list):
                 self._items_validators = [
-                    build_validator(schema=schema) for schema in items
+                    build_validator(schema=schema, location=f"{location}/items/{i}") for i, schema in enumerate(items)
                 ]
                 if items is not None and additionalItems is not None:
                     self._additional_items_validator = build_validator(
-                        schema=additionalItems
+                        schema=additionalItems,
+                        location=f"{location}/additionalItems"
                     )
             else:
-                self._items_validator = build_validator(schema=items)
+                self._items_validator = build_validator(schema=items, location=f"{location}/items")
 
     @correct_type(type_=list)
     def validate(self, instance):
@@ -102,15 +103,15 @@ def _validate_item_list(items_validators, additional_items_validator, instance):
 
 
 class _Contains(KeywordGroup):
-    def __init__(self, schema: Dict):
-        super().__init__(schema=schema)
+    def __init__(self, schema: Dict, location=None):
+        super().__init__(schema=schema, location=location)
         from pyjschema.draft_2019_09 import build_validator
 
         contains = schema.get("contains")
         maxContains = schema.get("maxContains")
         minContains = schema.get("minContains")
 
-        self._validator = build_validator(schema=contains) if contains is not None else None
+        self._validator = build_validator(schema=contains, location=f"{location}/contains") if contains is not None else None
         self.maxContainsValue = maxContains if maxContains else float("inf")
         self.minContainsValue = minContains if minContains else -float("inf")
 
@@ -150,8 +151,8 @@ class _Contains(KeywordGroup):
 
 
 class _MinItems(KeywordGroup):
-    def __init__(self, schema: Dict):
-        super().__init__(schema=schema)
+    def __init__(self, schema: Dict, location=None):
+        super().__init__(schema=schema, location=location)
         self.value = schema["minItems"]
 
     @correct_type(type_=list)
@@ -160,8 +161,8 @@ class _MinItems(KeywordGroup):
 
 
 class _MaxItems(KeywordGroup):
-    def __init__(self, schema: Dict):
-        super().__init__(schema=schema)
+    def __init__(self, schema: Dict, location=None):
+        super().__init__(schema=schema, location=location)
         self.value = schema["maxItems"]
 
     @correct_type(type_=list)
@@ -170,8 +171,8 @@ class _MaxItems(KeywordGroup):
 
 
 class _UniqueItems(KeywordGroup):
-    def __init__(self, schema: Dict):
-        super().__init__(schema=schema)
+    def __init__(self, schema: Dict, location=None):
+        super().__init__(schema=schema, location=location)
         self.value = schema["uniqueItems"]
 
     @correct_type(type_=list)

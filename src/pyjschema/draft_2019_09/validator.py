@@ -62,8 +62,15 @@ class Validator(AValidator):
         super().__init__(schema=schema, location=location)
         self._validators: t.List[AValidator] = []
 
+        if "$anchor" in schema:
+            self.anchor = "#" + schema["$anchor"]
+
+        if "$id" in schema:
+            self.id = schema["$id"].rstrip("#")
+
         if "$defs" in schema:
-            self._validators.append(Defs(schema=schema))
+            self._validators.append(Defs(schema=schema, location=f"{location}/$defs"))
+
         if "$ref" in schema:
             self._validators.append(Ref(schema=schema))
             # return earlier because all other keywords are ignored when there is a $ref
@@ -72,13 +79,7 @@ class Validator(AValidator):
 
         for key, ValidatorClass in KEYWORDS_TO_VALIDATOR.items():
             if key in schema:
-                self._validators.append(ValidatorClass(schema=schema))
-
-        if "$anchor" in schema:
-            self.anchor = "#" + schema["$anchor"]
-
-        if "$id" in schema:
-            self.id = schema["$id"].rstrip("#")
+                self._validators.append(ValidatorClass(schema=schema, location=f"{location}/{key}"))
 
         types = schema.get("type")
         if isinstance(types, str):
@@ -88,9 +89,9 @@ class Validator(AValidator):
 
         for type_, keyword_to_keyword_validators in TYPE_TO_KEYWORD_VALIDATORS.items():
             if not types or type_ in types:
-                for keywords, keyword_validator in keyword_to_keyword_validators.items():
+                for keywords, KeywordValidator in keyword_to_keyword_validators.items():
                     if any(keyword in schema for keyword in keywords):
-                        self._validators.append(keyword_validator(schema=schema))
+                        self._validators.append(KeywordValidator(schema=schema, location=location))
 
     def validate(self, instance):
         # import pdb; pdb.set_trace()

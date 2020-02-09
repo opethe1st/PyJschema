@@ -6,8 +6,8 @@ from .common import correct_type
 
 
 class _MultipleOf(KeywordGroup):
-    def __init__(self, schema: Dict):
-        super().__init__(schema=schema)
+    def __init__(self, schema: Dict, location=None):
+        super().__init__(schema=schema, location=location)
         self.value = schema["multipleOf"]
 
     @correct_type(type_=(int, numbers.Number))
@@ -22,8 +22,8 @@ class _MultipleOf(KeywordGroup):
 
 
 class _Minimum(KeywordGroup):
-    def __init__(self, schema: Dict):
-        super().__init__(schema=schema)
+    def __init__(self, schema: Dict, location=None):
+        super().__init__(schema=schema, location=location)
         self.value = schema["minimum"]
 
     @correct_type(type_=(int, numbers.Number))
@@ -34,8 +34,8 @@ class _Minimum(KeywordGroup):
 
 
 class _Maximum(KeywordGroup):
-    def __init__(self, schema: Dict):
-        super().__init__(schema=schema)
+    def __init__(self, schema: Dict, location=None):
+        super().__init__(schema=schema, location=location)
         self.value = schema["maximum"]
 
     @correct_type(type_=(int, numbers.Number))
@@ -46,8 +46,8 @@ class _Maximum(KeywordGroup):
 
 
 class _ExclusiveMinimum(KeywordGroup):
-    def __init__(self, schema: Dict):
-        super().__init__(schema=schema)
+    def __init__(self, schema: Dict, location=None):
+        super().__init__(schema=schema, location=location)
         self.value = schema["exclusiveMinimum"]
 
     @correct_type(type_=(int, numbers.Number))
@@ -58,8 +58,8 @@ class _ExclusiveMinimum(KeywordGroup):
 
 
 class _ExclusiveMaximum(KeywordGroup):
-    def __init__(self, schema: Dict):
-        super().__init__(schema=schema)
+    def __init__(self, schema: Dict, location=None):
+        super().__init__(schema=schema, location=location)
         self.value = schema["exclusiveMaximum"]
 
     @correct_type(type_=(int, numbers.Number))

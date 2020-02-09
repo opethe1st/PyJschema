@@ -2,6 +2,7 @@
 *egg-info*
 **/*.pyc
 **/__pycache__
+.benchmarks
 
 # code quality
 .pytest*

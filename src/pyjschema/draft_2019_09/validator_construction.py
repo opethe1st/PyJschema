@@ -46,10 +46,10 @@ def build_validator_and_resolve_references(schema):
     return validator
 
 
-def build_validator(schema: typing.Union[Primitive, Dict]) -> BuildValidatorResultType:
+def build_validator(schema: typing.Union[Primitive, Dict], location="") -> BuildValidatorResultType:
     if isinstance(schema, dict):
         if schema.items():
-            return Validator(schema=schema)
+            return Validator(schema=schema, location=location)
         else:
             return AcceptAll()
     elif isinstance(schema, (bool,)):
