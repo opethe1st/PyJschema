@@ -40,6 +40,5 @@ jobs:
         cd ..
     - name: benchmarks
       run: |
-        cd src/
         pytest benchmarks
-        cd ..
+
