@@ -4,7 +4,6 @@ from pyjschema.common import AValidator, ValidationError
 
 NAME_TO_TYPE = {
     "string": str,
-    # boolean needs to be before integer and number
     "boolean": bool,
     "integer": int,
     "number": numbers.Number,
