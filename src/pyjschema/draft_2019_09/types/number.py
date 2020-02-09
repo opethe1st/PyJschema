@@ -1,17 +1,16 @@
-import itertools
 import numbers
 
-from pyjschema.common import KeywordGroup, ValidationError, Dict
+from pyjschema.common import KeywordGroup, ValidationError
 
-from .common import validate_instance_against_all_validators
-from .type_ import Type
+from .common import correct_type
 
 
 class _MultipleOf(KeywordGroup):
-    def __init__(self, schema: Dict):
-        super().__init__(schema=schema)
-        self.value = schema["multipleOf"].value
+    def __init__(self, schema: dict, location=None):
+        super().__init__(schema=schema, location=location)
+        self.value = schema["multipleOf"]
 
+    @correct_type(type_=(int, numbers.Number))
     def validate(self, instance):
         # using this multipier here so that the precision is better
         multiplier = 100000
@@ -23,10 +22,11 @@ class _MultipleOf(KeywordGroup):
 
 
 class _Minimum(KeywordGroup):
-    def __init__(self, schema: Dict):
-        super().__init__(schema=schema)
-        self.value = schema["minimum"].value
+    def __init__(self, schema: dict, location=None):
+        super().__init__(schema=schema, location=location)
+        self.value = schema["minimum"]
 
+    @correct_type(type_=(int, numbers.Number))
     def validate(self, instance):
         if instance < self.value:
             return ValidationError()
@@ -34,10 +34,11 @@ class _Minimum(KeywordGroup):
 
 
 class _Maximum(KeywordGroup):
-    def __init__(self, schema: Dict):
-        super().__init__(schema=schema)
-        self.value = schema["maximum"].value
+    def __init__(self, schema: dict, location=None):
+        super().__init__(schema=schema, location=location)
+        self.value = schema["maximum"]
 
+    @correct_type(type_=(int, numbers.Number))
     def validate(self, instance):
         if self.value < instance:
             return ValidationError()
@@ -45,10 +46,11 @@ class _Maximum(KeywordGroup):
 
 
 class _ExclusiveMinimum(KeywordGroup):
-    def __init__(self, schema: Dict):
-        super().__init__(schema=schema)
-        self.value = schema["exclusiveMinimum"].value
+    def __init__(self, schema: dict, location=None):
+        super().__init__(schema=schema, location=location)
+        self.value = schema["exclusiveMinimum"]
 
+    @correct_type(type_=(int, numbers.Number))
     def validate(self, instance):
         if instance <= self.value:
             return ValidationError()
@@ -56,51 +58,12 @@ class _ExclusiveMinimum(KeywordGroup):
 
 
 class _ExclusiveMaximum(KeywordGroup):
-    def __init__(self, schema: Dict):
-        super().__init__(schema=schema)
-        self.value = schema["exclusiveMaximum"].value
+    def __init__(self, schema: dict, location=None):
+        super().__init__(schema=schema, location=location)
+        self.value = schema["exclusiveMaximum"]
 
+    @correct_type(type_=(int, numbers.Number))
     def validate(self, instance):
         if self.value <= instance:
             return ValidationError()
         return True
-
-
-class _NumberOrInteger(Type):
-    KEYWORDS_TO_VALIDATOR = {
-        ("multipleOf",): _MultipleOf,
-        ("minimum",): _Minimum,
-        ("maximum",): _Maximum,
-        ("exclusiveMinimum",): _ExclusiveMinimum,
-        ("exclusiveMaximum",): _ExclusiveMaximum,
-    }
-
-    def validate(self, instance):
-        messages = []
-        if self.type_ is not None:
-            if isinstance(instance, bool):
-                messages.append(f"instance: {instance} is not a {self.type_}")
-            else:
-                if not isinstance(instance, self.type_):
-                    messages.append(f"instance: {instance} is not a {self.type_}")
-
-        if messages:
-            return ValidationError(messages=messages)
-        errors = validate_instance_against_all_validators(
-            validators=self._validators, instance=instance
-        )
-        first_result = next(errors, True)
-        if first_result and not messages:
-            return True
-        else:
-            return ValidationError(
-                messages=messages, children=itertools.chain([first_result], errors)
-            )
-
-
-class Number(_NumberOrInteger):
-    type_ = numbers.Number
-
-
-class Integer(_NumberOrInteger):
-    type_ = int

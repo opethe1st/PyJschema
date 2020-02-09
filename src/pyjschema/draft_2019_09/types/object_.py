@@ -1,38 +1,38 @@
 import itertools
 import re
 
-from pyjschema.common import Dict, KeywordGroup, ValidationError
+from pyjschema.common import KeywordGroup, ValidationError
 
-from .common import validate_max, validate_min
-from .type_ import Type
+from .common import validate_max, validate_min, correct_type
 
 
 class _Property(KeywordGroup):
-    def __init__(self, schema: Dict):
+    def __init__(self, schema: dict, location=None):
         from pyjschema.draft_2019_09 import build_validator
 
         properties = schema.get("properties")
         additionalProperties = schema.get("additionalProperties")
         patternProperties = schema.get("patternProperties")
         self._validators = (
-            {key: build_validator(prop) for key, prop in properties.items()}
+            {key: build_validator(schema=prop, location=f"{location}/properties/{key}") for key, prop in properties.items()}
             if properties
             else {}
         )
         self._additional_validator = (
-            build_validator(schema=additionalProperties)
+            build_validator(schema=additionalProperties, location=f"{location}/additionalProperties")
             if additionalProperties is not None
             else None
         )
         self._pattern_validators = (
             {
-                re.compile(key): build_validator(schema=properties)
+                re.compile(key): build_validator(schema=properties, location=f"{location}/patternProperties/{key}")
                 for key, properties in patternProperties.items()
             }
             if patternProperties
             else {}
         )
 
+    @correct_type(type_=dict)
     def validate(self, instance):
 
         errors = _validate(
@@ -55,6 +55,7 @@ class _Property(KeywordGroup):
 
 
 def _validate(property_validators, additional_validator, pattern_validators, instance):
+
     for key in property_validators:
         if key in instance:
             result = property_validators[key].validate(instance[key])
@@ -86,11 +87,12 @@ def _validate(property_validators, additional_validator, pattern_validators, ins
 
 
 class _Required(KeywordGroup):
-    def __init__(self, schema: Dict):
-        super().__init__(schema=schema)
+    def __init__(self, schema: dict, location=None):
+        super().__init__(schema=schema, location=location)
         required = schema["required"]
-        self.value = [item.value for item in required]
+        self.value = required
 
+    @correct_type(type_=dict)
     def validate(self, instance):
         messages = []
         if set(self.value) - set(instance.keys()):
@@ -105,15 +107,16 @@ class _Required(KeywordGroup):
 
 
 class _PropertyNames(KeywordGroup):
-    def __init__(self, schema: Dict):
-        super().__init__(schema=schema)
+    def __init__(self, schema: dict, location=None):
+        super().__init__(schema=schema, location=location)
         # add this to make sure that the type is string - I have seen it missing from
         # examples in the documentation so can only assume it's allowed
         from pyjschema.draft_2019_09 import build_validator
 
         propertyNames = schema["propertyNames"]
-        self._validator = build_validator(schema=propertyNames)
+        self._validator = build_validator(schema=propertyNames, location=f"{location}/propertyNames")
 
+    @correct_type(type_=dict)
     def validate(self, instance):
         errors = validate_property_names(validator=self._validator, instance=instance)
         first_result = next(errors, True)
@@ -135,60 +138,38 @@ def validate_property_names(validator, instance):
 
 
 class _MinProperties(KeywordGroup):
-    def __init__(self, schema: Dict):
-        super().__init__(schema=schema)
-        self.value = schema["minProperties"].value
+    def __init__(self, schema: dict, location=None):
+        super().__init__(schema=schema, location=location)
+        self.value = schema["minProperties"]
 
+    @correct_type(type_=dict)
     def validate(self, instance):
         return validate_min(instance=instance, value=self.value)
 
 
 class _MaxProperties(KeywordGroup):
-    def __init__(self, schema: Dict):
-        super().__init__(schema=schema)
-        self.value = schema["maxProperties"].value
+    def __init__(self, schema: dict, location=None):
+        super().__init__(schema=schema, location=location)
+        self.value = schema["maxProperties"]
 
+    @correct_type(type_=dict)
     def validate(self, instance):
         return validate_max(instance=instance, value=self.value)
 
 
 class _DependentRequired(KeywordGroup):
-    def __init__(self, schema: Dict):
-        super().__init__(schema=schema)
+    def __init__(self, schema: dict, location=None):
+        super().__init__(schema=schema, location=location)
         dependentRequired = schema["dependentRequired"]
         self.dependentRequired = {
-            key: [val.value for val in value]
+            key: value
             for key, value in dependentRequired.items()
         }
 
+    @correct_type(type_=dict)
     def validate(self, instance):
         for prop, dependentProperties in self.dependentRequired.items():
             if prop in instance:
                 if not (set(dependentProperties) < set(instance.keys())):
                     return ValidationError()
         return True
-
-
-class Object(Type):
-    KEYWORDS_TO_VALIDATOR = {
-        ("required",): _Required,
-        ("propertyNames",): _PropertyNames,
-        ("minProperties",): _MinProperties,
-        ("maxProperties",): _MaxProperties,
-        ("dependentRequired",): _DependentRequired,
-        ("properties", "patternProperties", "additionalProperties"): _Property,
-    }
-    type_ = dict
-
-    def validate(self, instance):
-        res = super().validate(instance=instance)
-        if res:
-            keyTypes = set(type(key) for key in instance)
-            if keyTypes:
-                # TODO(ope) this seems wrong to me
-                if len(keyTypes) != 1 or not (str in keyTypes):
-                    messages = ["all the keys of the object need to be strings"]
-                    return ValidationError(messages=messages)
-            return res
-        else:
-            return res

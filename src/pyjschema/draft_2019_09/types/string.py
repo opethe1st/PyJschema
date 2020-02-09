@@ -1,28 +1,29 @@
-from pyjschema.common import Dict, KeywordGroup, ValidationError
+from pyjschema.common import KeywordGroup, ValidationError
 
-from .common import validate_max, validate_min
-from .type_ import Type
+from .common import validate_max, validate_min, correct_type
 
 
 class _MaxLength(KeywordGroup):
-    def __init__(self, schema: Dict):
-        super().__init__(schema=schema)
-        self.value = schema["maxLength"].value
+    def __init__(self, schema: dict, location=None):
+        super().__init__(schema=schema, location=location)
+        self.value = schema["maxLength"]
 
+    @correct_type(type_=str)
     def validate(self, instance):
         return validate_max(
             value=self.value, instance=instance, message=f"{instance} failed {self}"
         )
 
     def __repr__(self):
-        return f"Maximum(value={self.value})"
+        return f"MaxLength(value={self.value})"
 
 
 class _MinLength(KeywordGroup):
-    def __init__(self, schema: Dict):
-        super().__init__(schema=schema)
-        self.value = schema["minLength"].value
+    def __init__(self, schema: dict, location=None):
+        super().__init__(schema=schema, location=location)
+        self.value = schema["minLength"]
 
+    @correct_type(type_=str)
     def validate(self, instance):
         return validate_min(
             value=self.value, instance=instance, message=f"{instance} failed {self}"
@@ -33,13 +34,14 @@ class _MinLength(KeywordGroup):
 
 
 class _Pattern(KeywordGroup):
-    def __init__(self, schema: Dict):
-        super().__init__(schema=schema)
+    def __init__(self, schema: dict, location=None):
+        super().__init__(schema=schema, location=location)
         import re
 
-        self.value = schema["pattern"].value
+        self.value = schema["pattern"]
         self.regex = re.compile(pattern=self.value)
 
+    @correct_type(type_=str)
     def validate(self, instance):
         if not self.regex.search(instance):
             return ValidationError(messages=[f"{instance} failed {self}"])
@@ -47,12 +49,3 @@ class _Pattern(KeywordGroup):
 
     def __repr__(self):
         return f"Pattern(value={self.value})"
-
-
-class String(Type):
-    KEYWORDS_TO_VALIDATOR = {
-        ("minLength",): _MinLength,
-        ("maxLength",): _MaxLength,
-        ("pattern",): _Pattern,
-    }
-    type_ = str

@@ -2,6 +2,7 @@
 *egg-info*
 **/*.pyc
 **/__pycache__
+.benchmarks
 
 # code quality
 .pytest*
@@ -11,6 +12,7 @@ htmlcov
 
 # environment
 .venv
+.virtualenv/
 .tox
 
 # editor

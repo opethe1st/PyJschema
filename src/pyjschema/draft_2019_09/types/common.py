@@ -32,8 +32,19 @@ def validate_instance_against_any_validator(
     for validator in validators:
         res = validator.validate(instance=instance)
         if res:
-            return
+            return True
         else:
             errors.append(res)
 
     yield from errors
+
+
+def correct_type(type_):
+    def wrapper(func):
+        def wrapped_function(self, instance):
+            if isinstance(instance, type_):
+                return func(self=self, instance=instance)
+            else:
+                return True
+        return wrapped_function
+    return wrapper

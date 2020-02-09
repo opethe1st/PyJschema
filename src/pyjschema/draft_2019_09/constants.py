@@ -3,18 +3,7 @@ import typing as t
 from pyjschema.common import AValidator
 
 from .boolean_applicators import AllOf, AnyOf, If, Not, OneOf
-from .types import Array, Boolean, Const, Enum, Integer, Null, Number, Object, String
-
-TYPE_TO_TYPE_VALIDATORS: t.Dict[str, t.Type[AValidator]] = {
-    "string": String,
-    "number": Number,
-    "integer": Integer,
-    "boolean": Boolean,
-    "null": Null,
-    "array": Array,
-    "object": Object,
-}
-
+from .types import Const, Enum
 
 KEYWORDS_TO_VALIDATOR: t.Dict[str, t.Type[AValidator]] = {
     "const": Const,

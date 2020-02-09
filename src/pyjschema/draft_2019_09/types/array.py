@@ -1,14 +1,12 @@
 import typing as t
 import itertools
-from pyjschema.common import Dict, KeywordGroup, List, ValidationError
+from pyjschema.common import KeywordGroup, ValidationError
 
-from .common import validate_max, validate_min
-from .type_ import Type
+from .common import validate_max, validate_min, correct_type
 
 
 class _Items(KeywordGroup):
-    def __init__(self, schema: Dict):
-        super().__init__(schema=schema)
+    def __init__(self, schema: dict, location=None):
         from pyjschema.draft_2019_09 import build_validator
         from pyjschema.draft_2019_09.validator_construction import (
             BuildValidatorResultType,
@@ -20,18 +18,20 @@ class _Items(KeywordGroup):
         self._items_validator: t.Optional[BuildValidatorResultType] = None
         self._items_validators: t.List[BuildValidatorResultType] = []
         self._additional_items_validator: t.Optional[BuildValidatorResultType] = None
-        if items:
-            if isinstance(items, List):
+        if items is not None:
+            if isinstance(items, list):
                 self._items_validators = [
-                    build_validator(schema=schema) for schema in items
+                    build_validator(schema=schema, location=f"{location}/items/{i}") for i, schema in enumerate(items)
                 ]
-                if items and additionalItems:
+                if items is not None and additionalItems is not None:
                     self._additional_items_validator = build_validator(
-                        schema=additionalItems
+                        schema=additionalItems,
+                        location=f"{location}/additionalItems"
                     )
             else:
-                self._items_validator = build_validator(schema=items)
+                self._items_validator = build_validator(schema=items, location=f"{location}/items")
 
+    @correct_type(type_=list)
     def validate(self, instance):
         if self._items_validator:
             return self._validate_items(instance=instance)
@@ -102,18 +102,19 @@ def _validate_item_list(items_validators, additional_items_validator, instance):
 
 
 class _Contains(KeywordGroup):
-    def __init__(self, schema: Dict):
-        super().__init__(schema=schema)
+    def __init__(self, schema: dict, location=None):
+        super().__init__(schema=schema, location=location)
         from pyjschema.draft_2019_09 import build_validator
 
         contains = schema.get("contains")
         maxContains = schema.get("maxContains")
         minContains = schema.get("minContains")
 
-        self._validator = build_validator(schema=contains) if contains else None
-        self.maxContainsValue = maxContains.value if maxContains else float("inf")
-        self.minContainsValue = minContains.value if minContains else -float("inf")
+        self._validator = build_validator(schema=contains, location=f"{location}/contains") if contains is not None else None
+        self.maxContainsValue = maxContains if maxContains else float("inf")
+        self.minContainsValue = minContains if minContains else -float("inf")
 
+    @correct_type(type_=list)
     def validate(self, instance):
 
         if self._validator:
@@ -149,28 +150,31 @@ class _Contains(KeywordGroup):
 
 
 class _MinItems(KeywordGroup):
-    def __init__(self, schema: Dict):
-        super().__init__(schema=schema)
-        self.value = schema["minItems"].value
+    def __init__(self, schema: dict, location=None):
+        super().__init__(schema=schema, location=location)
+        self.value = schema["minItems"]
 
+    @correct_type(type_=list)
     def validate(self, instance):
         return validate_min(value=self.value, instance=instance)
 
 
 class _MaxItems(KeywordGroup):
-    def __init__(self, schema: Dict):
-        super().__init__(schema=schema)
-        self.value = schema["maxItems"].value
+    def __init__(self, schema: dict, location=None):
+        super().__init__(schema=schema, location=location)
+        self.value = schema["maxItems"]
 
+    @correct_type(type_=list)
     def validate(self, instance):
         return validate_max(value=self.value, instance=instance)
 
 
 class _UniqueItems(KeywordGroup):
-    def __init__(self, schema: Dict):
-        super().__init__(schema=schema)
-        self.value = schema["uniqueItems"].value
+    def __init__(self, schema: dict, location=None):
+        super().__init__(schema=schema, location=location)
+        self.value = schema["uniqueItems"]
 
+    @correct_type(type_=list)
     def validate(self, instance):
         if self.value:
             itemsset = set([str(value) for value in instance])
@@ -180,16 +184,3 @@ class _UniqueItems(KeywordGroup):
             # TODO(ope) - actually make sure the values are unique - is this even possible?
 
         return True
-
-
-class Array(Type):
-
-    KEYWORDS_TO_VALIDATOR = {
-        ("minItems",): _MinItems,
-        ("maxItems",): _MaxItems,
-        ("uniqueItems",): _UniqueItems,
-        ("contains", "maxContains", "minContains"): _Contains,
-        ("items", "additionalItems"): _Items,
-    }
-
-    type_ = list

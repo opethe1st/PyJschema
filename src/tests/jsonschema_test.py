@@ -16,19 +16,18 @@ STRING_KEYWORDS = [
 ]
 
 OBJECT_KEYWORDS = [
-    "uniqueItems",
     "maxProperties",
     "minProperties",
     "properties",
     "propertyNames",
     "patternProperties",
     "additionalProperties",
-    "uniqueItems",
     "required",
 ]
 
 ARRAY_KEYWORDS = [
     "items",
+    "uniqueItems",
     "minItems",
     "maxItems",
     "additionalItems",

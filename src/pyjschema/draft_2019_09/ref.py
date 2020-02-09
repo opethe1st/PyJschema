@@ -2,9 +2,10 @@ from functools import wraps
 
 from uritools import uridecode
 
-from pyjschema.common import KeywordGroup, deannotate
+from pyjschema.common import KeywordGroup
 
 from .exceptions import SchemaError
+from .types.primitives import AcceptAll
 from .utils import to_canonical_uri
 
 
@@ -23,7 +24,7 @@ def raise_if_not_ready(func):
 class Ref(KeywordGroup):
     def __init__(self, schema):
         super().__init__(schema=schema)
-        self.value = uridecode(deannotate(schema["$ref"]).replace("~1", "/").replace("~0", "~"))
+        self.value = uridecode(schema["$ref"].replace("~1", "/").replace("~0", "~"))
         self._validator = None
         self.abs_uri = None
 
@@ -40,7 +41,7 @@ class Ref(KeywordGroup):
         self._validator = self._get_validator(uri_to_validator=uri_to_validator)
 
     def _get_abs_uri(self):
-        # needs to be called after self.base)uri has been set to cancnical form
+        # needs to be called after self.base)uri has been set to canonical form
         return to_canonical_uri(uri=self.value, current_base_uri=self.base_uri or '')
 
     def _get_validator(self, uri_to_validator):
@@ -49,6 +50,8 @@ class Ref(KeywordGroup):
         if validator:
             return validator
         else:
+            # tempporary
+            return AcceptAll(schema=True)
             # TODO(ope): better error message
             raise SchemaError(
                 f"Unable to locate the validator at this location "

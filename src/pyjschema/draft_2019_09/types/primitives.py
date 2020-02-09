@@ -1,22 +1,11 @@
-from pyjschema.common import AValidator, Dict, KeywordGroup, Primitive, ValidationError
-from pyjschema.common.annotate import deannotate
-
-from .type_ import Type
-
-
-class Boolean(Type):
-    type_ = bool
-
-
-class Null(Type):
-    type_ = type(None)
+from pyjschema.common import AValidator, KeywordGroup, ValidationError
 
 
 class Const(KeywordGroup):
-    def __init__(self, schema: Dict):
-        super().__init__(schema=schema)
+    def __init__(self, schema: dict, location=None):
+        super().__init__(schema=schema, location=location)
         const = schema["const"]
-        self.value = deannotate(const)
+        self.value = (const)
 
     def validate(self, instance):
         ok = equals(self.value, instance)
@@ -24,10 +13,10 @@ class Const(KeywordGroup):
 
 
 class Enum(KeywordGroup):
-    def __init__(self, schema: Dict):
-        super().__init__(schema=schema)
+    def __init__(self, schema: dict, location=None):
+        super().__init__(schema=schema, location=location)
         enum = schema["enum"]
-        self._values = [deannotate(instance=instance) for instance in enum]
+        self._values = enum
 
     def validate(self, instance):
         for value in self._values:
@@ -54,16 +43,16 @@ def equals(a, b):
 
 
 class AcceptAll(AValidator):
-    def __init__(self, schema: Primitive):
-        self.location = schema.location
+    def __init__(self, schema=None, location=None):
+        self.location = location
 
     def validate(self, instance):
         return True
 
 
 class RejectAll(AValidator):
-    def __init__(self, schema: Primitive):
-        self.location = schema.location
+    def __init__(self, schema=None, location=None):
+        self.location = location
 
     def validate(self, instance):
         return ValidationError(messages=["This fails for every value"])
