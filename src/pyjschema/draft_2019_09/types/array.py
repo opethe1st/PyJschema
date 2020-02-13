@@ -1,8 +1,9 @@
-import typing as t
 import itertools
+import typing
+
 from pyjschema.common import KeywordGroup, ValidationError
 
-from .common import validate_max, validate_min, correct_type
+from .common import correct_type, validate_max, validate_min
 
 
 class _Items(KeywordGroup):
@@ -15,9 +16,9 @@ class _Items(KeywordGroup):
         items = schema.get("items")
         additionalItems = schema.get("additionalItems")
 
-        self._items_validator: t.Optional[BuildValidatorResultType] = None
-        self._items_validators: t.List[BuildValidatorResultType] = []
-        self._additional_items_validator: t.Optional[BuildValidatorResultType] = None
+        self._items_validator: typing.Optional[BuildValidatorResultType] = None
+        self._items_validators: typing.List[BuildValidatorResultType] = []
+        self._additional_items_validator: typing.Optional[BuildValidatorResultType] = None
         if items is not None:
             if isinstance(items, list):
                 self._items_validators = [
@@ -30,6 +31,9 @@ class _Items(KeywordGroup):
                     )
             else:
                 self._items_validator = build_validator(schema=items, location=f"{location}/items")
+
+    def __repr__(self):
+        return f"Items(items_validator={self._items_validator}, items_validators={self._items_validators}, add_item_validator={self._additional_items_validator})"
 
     @correct_type(type_=list)
     def validate(self, instance):

@@ -49,6 +49,9 @@ class AcceptAll(AValidator):
     def validate(self, instance):
         return True
 
+    def __repr__(self):
+        return "AcceptAll()"
+
 
 class RejectAll(AValidator):
     def __init__(self, schema=None, location=None):
@@ -56,3 +59,6 @@ class RejectAll(AValidator):
 
     def validate(self, instance):
         return ValidationError(messages=["This fails for every value"])
+
+    def __repr__(self):
+        return "RejectAll()"

@@ -6,6 +6,7 @@ from .ref import Ref
 class DummyRef(Ref):
     def __init__(self):
         self.value = None
+        self._validator = None
 
 
 class DummyValidator:

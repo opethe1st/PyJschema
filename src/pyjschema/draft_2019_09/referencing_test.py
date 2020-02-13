@@ -192,6 +192,7 @@ class Test_GenerateContext(unittest.TestCase):
 class DummyRef(Ref):
     def __init__(self):
         self.resolved = False
+        self._validator = DummyValidator()
 
     def resolve(self, uri_to_validator):
         self.resolved = True

@@ -40,6 +40,9 @@ class Type(AValidator):
             return ValidationError(messages=messages)
         return True
 
+    def __repr__(self):
+        return f"Type({self._types})"
+
 
 def isinstance_(obj, type_):
     if type_ in (int, numbers.Number) and isinstance(obj, bool):

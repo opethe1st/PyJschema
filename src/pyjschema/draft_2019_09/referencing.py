@@ -85,3 +85,4 @@ def resolve_references(root_validator):
         validator=root_validator,
         uri_to_validator=uri_to_validator,
     )
+    return uri_to_validator

@@ -20,3 +20,6 @@ class Defs(KeywordGroup):
 
     def sub_validators(self):
         yield from self._validators.values()
+
+    def __repr__(self):
+        return f"Defs(keys={list(self._validators.keys())})"

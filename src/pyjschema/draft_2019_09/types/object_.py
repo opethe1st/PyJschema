@@ -47,6 +47,9 @@ class _Property(KeywordGroup):
         else:
             return ValidationError(children=itertools.chain([first_result], errors))
 
+    def __repr__(self):
+        return f"Property(properties={self._validators}, additionalProperties={self._additional_validator}, patternProperties={self._pattern_validators})"
+
     def sub_validators(self):
         yield from self._validators.values()
         if self._additional_validator:
@@ -88,7 +91,7 @@ def _validate(property_validators, additional_validator, pattern_validators, ins
 
 class _Required(KeywordGroup):
     def __init__(self, schema: dict, location=None):
-        super().__init__(schema=schema, location=location)
+        super().__init__(schema=schema, location=f"{location}/required")
         required = schema["required"]
         self.value = required
 
@@ -104,6 +107,9 @@ class _Required(KeywordGroup):
             return True
         else:
             return ValidationError(messages=messages)
+
+    def __repr__(self):
+        return f"Required(value={self.value!r})"
 
 
 class _PropertyNames(KeywordGroup):

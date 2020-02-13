@@ -144,39 +144,6 @@
         ]
     },
     {
-        "description": "ref overrides any sibling keywords",
-        "schema": {
-            "$defs": {
-                "reffed": {
-                    "type": "array"
-                }
-            },
-            "properties": {
-                "foo": {
-                    "$ref": "#/$defs/reffed",
-                    "maxItems": 2
-                }
-            }
-        },
-        "tests": [
-            {
-                "description": "ref valid",
-                "data": { "foo": [] },
-                "valid": true
-            },
-            {
-                "description": "ref valid, maxItems ignored",
-                "data": { "foo": [ 1, 2, 3] },
-                "valid": true
-            },
-            {
-                "description": "ref invalid",
-                "data": { "foo": "string" },
-                "valid": false
-            }
-        ]
-    },
-    {
         "description": "property named $ref that is not a reference",
         "schema": {
             "properties": {

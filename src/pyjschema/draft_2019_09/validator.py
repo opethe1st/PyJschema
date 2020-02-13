@@ -62,6 +62,12 @@ class Validator(AValidator):
         super().__init__(schema=schema, location=location)
         self._validators: t.List[AValidator] = []
 
+        if "$recursiveAnchor" in schema:
+            self.recursiveAnchor = schema.get("$recursiveAnchor", False)
+
+        if "$recursiveRef" in schema:
+            self.recursiveRef = schema.get("$recursiveRef")
+
         if "$anchor" in schema:
             self.anchor = "#" + schema["$anchor"]
 
@@ -75,7 +81,7 @@ class Validator(AValidator):
             self._validators.append(Ref(schema=schema))
             # return earlier because all other keywords are ignored when there is a $ref
             # - kinda think this is actually different in draft_2019_09
-            return
+            # return
 
         for key, ValidatorClass in KEYWORDS_TO_VALIDATOR.items():
             if key in schema:
@@ -94,7 +100,6 @@ class Validator(AValidator):
                         self._validators.append(KeywordValidator(schema=schema, location=location))
 
     def validate(self, instance):
-        # import pdb; pdb.set_trace()
         errors = validate_instance_against_all_validators(
             validators=self._validators, instance=instance
         )
@@ -109,3 +114,6 @@ class Validator(AValidator):
 
     def sub_validators(self):
         yield from self._validators
+
+    def __repr__(self):
+        return f"Validator(validators={self._validators})"

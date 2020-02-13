@@ -5,7 +5,6 @@ from uritools import uridecode
 from pyjschema.common import KeywordGroup
 
 from .exceptions import SchemaError
-from .types.primitives import AcceptAll
 from .utils import to_canonical_uri
 
 
@@ -42,19 +41,23 @@ class Ref(KeywordGroup):
 
     def _get_abs_uri(self):
         # needs to be called after self.base)uri has been set to canonical form
+        if self.value == '#':
+            return self.value
         return to_canonical_uri(uri=self.value, current_base_uri=self.base_uri or '')
 
     def _get_validator(self, uri_to_validator):
         # test this?
         validator = uri_to_validator.get(self.abs_uri)
+
         if validator:
             return validator
         else:
-            # tempporary
-            return AcceptAll(schema=True)
             # TODO(ope): better error message
             raise SchemaError(
-                f"Unable to locate the validator at this location "
-                f"while trying to resolve this reference: {self.value} at {self.location} "
+                f"Unable to locate the validator "
+                f"while trying to resolve this reference: {self.value!r} at {self.location} "
                 f"{list(uri_to_validator.keys())}"
             )
+
+    def __repr__(self):
+        return f"Ref(value={self.abs_uri!r})"
