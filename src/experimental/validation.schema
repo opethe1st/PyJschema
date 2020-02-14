@@ -1,0 +1,62 @@
+
+# Proposed Schema description language
+
+# boolean operations to combine schemas. syntax stolen from F#
+validator =
+    | str
+    | array
+    | object
+
+validator =
+    & str
+    & object  # obviously impossible to satisfy
+
+# list and every item must be a string
+validator = [str]  # type that every item in the list/sequence needs to satisfy. shortcut for
+validator = iterable<str>
+
+# list and every item must be a string or int
+validator = [str | int]  # string or int items
+
+# Nested validators, object + properties named data and children and data is required
+Tree = {data!: any, children: [Tree]} # shortcut for
+Tree = mapping<data!: any, children: iterable<Tree>>
+
+# Nested list
+NestedList = [NestedList | str]
+
+# Constant - when applied, the instance must be 4. "`" is used to denote constants
+validator = `4`
+validator = `"a string"`
+
+
+# User-defined validators are in capitalized, provided types are lowercase
+range06 = min(0) & max(6)
+
+# Parameterization of validators and values
+range<start: int, end: int> = min(start) & max(end)
+range<end: int> = min(0) & max(end)
+Nested<composite, default> = composite(composite | default)
+
+# if else then - make this a case statement!
+case =
+    str: rangeLength<1, 6>
+    default: None
+
+# can be named
+
+StringRangeLength =
+    case =
+        str: rangeLength<1, 6>
+        default: None
+
+
+# What is the basis of all constraint operations? define the smallest subset on top of
+# which everything else could be built
+# Need expressions - so should be able to count stuff and get results and check if two results are equal?
+#
+# things missing so far?
+# patternProps, additionalProps
+# items
+# autocomplete and linting and editor support
+# define how the the other main keywords would work.
