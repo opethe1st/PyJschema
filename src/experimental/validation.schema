@@ -43,12 +43,20 @@ case =
     str: rangeLength<1, 6>
     default: None
 
+rangeLength<start, end> =
+    & minLength(start)
+    & maxLength(end)
+
 # can be named
 
 StringRangeLength =
     case =
         str: rangeLength<1, 6>
         default: None
+
+a =
+    & [str|int]
+
 
 
 # What is the basis of all constraint operations? define the smallest subset on top of

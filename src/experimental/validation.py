@@ -338,10 +338,10 @@ if __name__ == "__main__":
     assert validator.validate(12) is False
     assert validator.validate(5)
 
-    validator = Each(Or(And(Types(str), MaxLength(10)), Equal(None)))
-    assert validator.validate([None])
-    assert validator.validate(["Astring"])
-    assert validator.validate(["this string is too long"]) is False
+    each = Each(Or(And(Types(str), MaxLength(10)), Equal(None)))
+    assert each.validate([None])
+    assert each.validate(["Astring"])
+    assert each.validate(["this string is too long"]) is False
 
 """
 New Idea:
