@@ -3,16 +3,16 @@ from pyjschema.common import KeywordGroup, ValidationError
 
 class If(KeywordGroup):
 
-    def __init__(self, schema: dict, location=None):
-        super().__init__(schema=schema, location=location)
+    def __init__(self, schema: dict, location=None, parent=None):
+        super().__init__(schema=schema, location=location, parent=parent)
         from .validator_construction import build_validator
 
-        self._if_validator = build_validator(schema=schema["if"], location=f"{location}/if")
+        self._if_validator = build_validator(schema=schema["if"], location=f"{location}/if", parent=self)
         self._then_validator = (
-            build_validator(schema=schema["then"], location=f"{location}/then") if schema.get("then") else None
+            build_validator(schema=schema["then"], location=f"{location}/then", parent=self) if schema.get("then") else None
         )
         self._else_validator = (
-            build_validator(schema=schema["else"], location=f"{location}/else") if schema.get("else") else None
+            build_validator(schema=schema["else"], location=f"{location}/else", parent=self) if schema.get("else") else None
         )
 
     def validate(self, instance):
@@ -34,11 +34,11 @@ class If(KeywordGroup):
 
 
 class AllOf(KeywordGroup):
-    def __init__(self, schema: dict, location=None):
-        super().__init__(schema=schema, location=location)
+    def __init__(self, schema: dict, location=None, parent=None):
+        super().__init__(schema=schema, location=location, parent=parent)
         from .validator_construction import build_validator
 
-        self._validators = [build_validator(schema=item, location=f"{location}/allOf") for item in schema["allOf"]]
+        self._validators = [build_validator(schema=item, location=f"{location}/allOf", parent=self) for item in schema["allOf"]]
 
     def validate(self, instance):
         ok = all(
@@ -54,11 +54,11 @@ class AllOf(KeywordGroup):
 
 
 class OneOf(KeywordGroup):
-    def __init__(self, schema: dict, location=None):
-        super().__init__(schema=schema, location=location)
+    def __init__(self, schema: dict, location=None, parent=None):
+        super().__init__(schema=schema, location=location, parent=parent)
         from .validator_construction import build_validator
 
-        self._validators = [build_validator(schema=item, location=f"{location}/oneOf") for item in schema["oneOf"]]
+        self._validators = [build_validator(schema=item, location=f"{location}/oneOf", parent=self) for item in schema["oneOf"]]
 
     def validate(self, instance):
         oks = list(
@@ -74,11 +74,11 @@ class OneOf(KeywordGroup):
 
 
 class AnyOf(KeywordGroup):
-    def __init__(self, schema: dict, location=None):
-        super().__init__(schema=schema, location=location)
+    def __init__(self, schema: dict, location=None, parent=None):
+        super().__init__(schema=schema, location=location, parent=parent)
         from .validator_construction import build_validator
 
-        self._validators = [build_validator(schema=item, location=f"{location}/anyOf") for item in schema["anyOf"]]
+        self._validators = [build_validator(schema=item, location=f"{location}/anyOf", parent=self) for item in schema["anyOf"]]
 
     def validate(self, instance):
         ok = any(
@@ -93,11 +93,11 @@ class AnyOf(KeywordGroup):
 
 
 class Not(KeywordGroup):
-    def __init__(self, schema: dict, location=None):
-        super().__init__(schema=schema, location=location)
+    def __init__(self, schema: dict, location=None, parent=None):
+        super().__init__(schema=schema, location=location, parent=parent)
         from .validator_construction import build_validator
 
-        self._validator = build_validator(schema=schema["not"], location=f"{location}/not")
+        self._validator = build_validator(schema=schema["not"], location=f"{location}/not", parent=self)
 
     def validate(self, instance):
         result = self._validator.validate(instance=instance)

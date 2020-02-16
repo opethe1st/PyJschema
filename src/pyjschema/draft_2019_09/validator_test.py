@@ -43,8 +43,6 @@ class TestValidator(unittest.TestCase):
         )
 
 
-# hm, recursiveRef only works if there is the ability to combine with ref with adjacent keywords.
-# is this too difficult?
 class TestRecursiveRef(unittest.TestCase):
     @parameterized.parameterized.expand(
         [
@@ -57,18 +55,20 @@ class TestRecursiveRef(unittest.TestCase):
             "$schema": "schema",
             "$id": "https://example.com/schema",
             "$ref": "tree",
+            "$recursiveAnchor": True,
             "$defs": {
                 "tree": {
                     "$id": "tree",
+                    "$recursiveAnchor": True,
+
                     "type": "object",
                     "properties": {
                         "data": True,
                         "children": {
                             "type": "array",
-                            "items": {"$ref": "tree"},
+                            "items": {"$recursiveRef": "#"},
                         }
                     },
-                    "required": ["data", "children"]
                 }
             }
         }

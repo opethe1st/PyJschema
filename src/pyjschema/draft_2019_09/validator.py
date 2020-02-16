@@ -58,13 +58,14 @@ class Validator(AValidator):
     This corresponds to a schema
     """
 
-    def __init__(self, schema, location=None):
-        super().__init__(schema=schema, location=location)
+    def __init__(self, schema, location=None, parent=None):
+        super().__init__(schema=schema, location=location, parent=parent)
         self._validators: t.List[AValidator] = []
 
         if "$recursiveAnchor" in schema:
             self.recursiveAnchor = schema.get("$recursiveAnchor", False)
 
+        # need a reference to the parent. for this, then to evaluate
         if "$recursiveRef" in schema:
             self.recursiveRef = schema.get("$recursiveRef")
 
@@ -79,9 +80,6 @@ class Validator(AValidator):
 
         if "$ref" in schema:
             self._validators.append(Ref(schema=schema))
-            # return earlier because all other keywords are ignored when there is a $ref
-            # - kinda think this is actually different in draft_2019_09
-            # return
 
         for key, ValidatorClass in KEYWORDS_TO_VALIDATOR.items():
             if key in schema:

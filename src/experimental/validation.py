@@ -10,7 +10,7 @@ class IValidator(ABC):
         self.context = {}
 
     @abc.abstractmethod
-    def validate(self, instance):
+    def __call__(self, instance):
         pass
 
     def attach_context(self, context):
@@ -23,7 +23,7 @@ class Types(IValidator):
         super().__init__()
         self.types = types
 
-    def validate(self, instance):
+    def __call__(self, instance):
         return isinstance(instance, self.types)
 
     def attach_context(self, context):
@@ -38,7 +38,7 @@ class MinLength(IValidator):
         # if not an int raise an error
         self.value = value
 
-    def validate(self, instance):
+    def __call__(self, instance):
         # need to make sure it is a container first though
         return self.value < len(instance)
 
@@ -48,7 +48,7 @@ class MaxLength(IValidator):
         # if not an int raise an error
         self.value = value
 
-    def validate(self, instance):
+    def __call__(self, instance):
         # need to make sure it is a Sequence first though. as long as it has a __len__ it is good
         return len(instance) < self.value
 
@@ -60,7 +60,7 @@ class Pattern(IValidator):
         self.value = value
         self.regex = re.compile(self.value)
 
-    def validate(self, instance: str):
+    def __call__(self, instance: str):
         # needs to be a string else error
         return bool(self.regex.match(instance))
 
@@ -70,7 +70,7 @@ class Max(IValidator):
     def __init__(self, value):
         self.value = value
 
-    def validate(self, instance):
+    def __call__(self, instance):
         # instance and value just need to be comparable that's all
         # so should be the same type and things like datetimes would also work
         if not isinstance(instance, self.value.__class__):
@@ -85,7 +85,7 @@ class Min(IValidator):
     def __init__(self, value):
         self.value = value
 
-    def validate(self, instance):
+    def __call__(self, instance):
         # instance and value just need to be comparable that's all
         # so should be the same type and things like datetimes would also work
         return self.value < instance
@@ -98,7 +98,7 @@ class InclusiveMin(IValidator):
     def __init__(self, value):
         self.value = value
 
-    def validate(self, instance):
+    def __call__(self, instance):
         return self.value <= instance
 
 
@@ -106,7 +106,7 @@ class InclusiveMax(IValidator):
     def __init__(self, value):
         self.value = value
 
-    def validate(self, instance):
+    def __call__(self, instance):
         return instance <= self.value
 
 
@@ -114,7 +114,7 @@ class MultipleOf(IValidator):
     def __init__(self, value):
         self.value = value
 
-    def validate(self, instance):
+    def __call__(self, instance):
         multiplier = 100000
         instance = instance * multiplier
         value = self.value * multiplier
@@ -130,9 +130,9 @@ class Or(IValidator):
         self.validators = validators
         self.context = {}
 
-    def validate(self, instance):
+    def __call__(self, instance):
         # what about returning meaniful errors?
-        return any(validator.validate(instance) for validator in self.validators)
+        return any(validator(instance) for validator in self.validators)
 
     def attach_context(self, context):
         self.context = context
@@ -146,8 +146,8 @@ class And(IValidator):
         self.context = context if context else {}
         self.validators = validators
 
-    def validate(self, instance):
-        return all(validator.validate(instance) for validator in self.validators)
+    def __call__(self, instance):
+        return all(validator(instance) for validator in self.validators)
 
     def attach_context(self, context):
         self.context = context
@@ -162,11 +162,11 @@ class Zip(IValidator):
     def __init__(self, validators: List):
         self.validators = validators
 
-    def validate(self, instance):
+    def __call__(self, instance):
         # need to make sure instance is a list - (need to a be ordered)
         if not isinstance(instance, list):
             return False
-        return all(validator.validate(value) for value, validator in zip(instance, self.validators))
+        return all(validator(value) for value, validator in zip(instance, self.validators))
 
 
 class Each(IValidator):
@@ -174,13 +174,13 @@ class Each(IValidator):
         self.validator = validator
         self.context = {}
 
-    def validate(self, instance):
+    def __call__(self, instance):
         #  need to be a sequence
         if isinstance(instance, str):
             return False
         if not isinstance(instance, Sequence):
             return False
-        return all(self.validator.validate(value) for value in instance)
+        return all(self.validator(value) for value in instance)
 
     def attach_context(self, context):
         self.context = context
@@ -191,8 +191,8 @@ class PropertyNames(IValidator):
     def __init__(self, validator):
         self.validator = validator
 
-    def validate(self, instance):
-        return all(self.validator.validate(key) for key in instance.keys())
+    def __call__(self, instance):
+        return all(self.validator(key) for key in instance.keys())
 
 
 class PatternProperties(IValidator):
@@ -200,11 +200,11 @@ class PatternProperties(IValidator):
         # all keys need to be valid regexes
         self.pattern_to_validator = pattern_to_validator
 
-    def validate(self, instance):
+    def __call__(self, instance):
         for pattern, validator in self.pattern_to_validator.items():
             for prop, value in instance.items():
                 if pattern.match(prop):
-                    if not validator.validate(value):
+                    if not validator(value):
                         return False
 
 
@@ -212,7 +212,7 @@ class Required(IValidator):
     def __init__(self, required: list):
         self.required = required
 
-    def validate(self, instance):
+    def __call__(self, instance):
         return not bool(set(self.required) - set(instance.keys()))
 
 
@@ -224,7 +224,7 @@ class Equal(IValidator):
     def __init__(self, value):
         self.value = value
 
-    def validate(self, instance):
+    def __call__(self, instance):
         return self.value == instance
 
 
@@ -233,24 +233,24 @@ class Enum(IValidator):
         # needs to be a list of values
         self.values = values
 
-    def validate(self, instance):
+    def __call__(self, instance):
         return any(value == instance for value in self.values)
 
 
 class Unique(IValidator):
 
-    def validate(self, instance):
+    def __call__(self, instance):
         # needs to a sequence
         return len(set(instance)) == len(instance)
 
 
 class Any(IValidator):
-    def validate(self, instance):
+    def __call__(self, instance):
         return True
 
 
 class Nothing(IValidator):
-    def validate(self, instance):
+    def __call__(self, instance):
         return False
 
 
@@ -260,7 +260,7 @@ class If(IValidator):
         self.then = then
         self.else_ = else_
 
-    def validate(self, instance):
+    def __call__(self, instance):
         if self.condition.validate(instance):
             return self.then.validate(instance)
         else:
@@ -271,8 +271,8 @@ class Not(IValidator):
     def __init__(self, validator):
         self.validator = validator
 
-    def validate(self, instance):
-        return not self.validator.validate(instance)
+    def __call__(self, instance):
+        return not self.validator(instance)
 
 
 class OneOf(IValidator):
@@ -287,10 +287,10 @@ class Ref(IValidator):
         self.value = value
         self.context = {}
 
-    def validate(self, instance):
+    def __call__(self, instance):
         validator = self.context.get(self.value)
         if validator:
-            return validator.validate(instance=instance)
+            return validator(instance=instance)
         else:
             return False
 
@@ -327,21 +327,21 @@ if __name__ == "__main__":
         name="nested-list",
     )
     validator.attach_context(context={})
-    assert validator.validate(["string", "string"])
-    assert validator.validate(["string", []])
-    assert validator.validate("string") is False
-    assert validator.validate(["string", [[[[[[]]]]]]])
-    assert validator.validate(4121) is False
+    assert validator(["string", "string"])
+    assert validator(["string", []])
+    assert validator("string") is False
+    assert validator(["string", [[[[[[]]]]]]])
+    assert validator(4121) is False
 
     validator = And(Min(value=0), Max(value=10))
-    assert validator.validate(-12) is False
-    assert validator.validate(12) is False
-    assert validator.validate(5)
+    assert validator(-12) is False
+    assert validator(12) is False
+    assert validator(5)
 
     each = Each(Or(And(Types(str), MaxLength(10)), Equal(None)))
-    assert each.validate([None])
-    assert each.validate(["Astring"])
-    assert each.validate(["this string is too long"]) is False
+    assert each([None])
+    assert each(["Astring"])
+    assert each(["this string is too long"]) is False
 
 """
 New Idea:

@@ -45,10 +45,10 @@ def build_validator_and_resolve_references(schema):
     return validator, uri_to_validator
 
 
-def build_validator(schema: typing.Union[bool, dict], location="") -> BuildValidatorResultType:
+def build_validator(schema: typing.Union[bool, dict], location="", parent=None) -> BuildValidatorResultType:
     if isinstance(schema, dict):
         if schema.items():
-            return Validator(schema=schema, location=location)
+            return Validator(schema=schema, location=location, parent=parent)
         else:
             return AcceptAll(location=location)
     elif isinstance(schema, (bool,)):

@@ -2,8 +2,8 @@ from pyjschema.common import AValidator, KeywordGroup, ValidationError
 
 
 class Const(KeywordGroup):
-    def __init__(self, schema: dict, location=None):
-        super().__init__(schema=schema, location=location)
+    def __init__(self, schema: dict, location=None, parent=None):
+        super().__init__(schema=schema, location=location, parent=parent)
         const = schema["const"]
         self.value = (const)
 
@@ -13,8 +13,8 @@ class Const(KeywordGroup):
 
 
 class Enum(KeywordGroup):
-    def __init__(self, schema: dict, location=None):
-        super().__init__(schema=schema, location=location)
+    def __init__(self, schema: dict, location=None, parent=None):
+        super().__init__(schema=schema, location=location, parent=parent)
         enum = schema["enum"]
         self._values = enum
 
@@ -43,7 +43,7 @@ def equals(a, b):
 
 
 class AcceptAll(AValidator):
-    def __init__(self, schema=None, location=None):
+    def __init__(self, schema=None, location=None, parent=None):
         self.location = location
 
     def validate(self, instance):
@@ -54,7 +54,7 @@ class AcceptAll(AValidator):
 
 
 class RejectAll(AValidator):
-    def __init__(self, schema=None, location=None):
+    def __init__(self, schema=None, location=None, parent=None):
         self.location = location
 
     def validate(self, instance):
