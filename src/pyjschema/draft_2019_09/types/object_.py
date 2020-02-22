@@ -47,7 +47,7 @@ class _Property(KeywordGroup):
         )
 
     @correct_type(type_=dict)
-    def validate(self, instance):
+    def __call__(self, instance):
 
         errors = _validate(
             property_validators=self._validators,
@@ -75,7 +75,7 @@ def _validate(property_validators, additional_validator, pattern_validators, ins
 
     for key in property_validators:
         if key in instance:
-            result = property_validators[key].validate(instance[key])
+            result = property_validators[key](instance[key])
 
             if not result:
                 yield result
@@ -87,7 +87,7 @@ def _validate(property_validators, additional_validator, pattern_validators, ins
         for key in remaining_properties:
             if regex.search(key):
                 properties_validated_by_pattern.add(key)
-                result = pattern_validators[regex].validate(instance[key])
+                result = pattern_validators[regex](instance[key])
                 if not result:
                     yield result
 
@@ -98,7 +98,7 @@ def _validate(property_validators, additional_validator, pattern_validators, ins
 
     if additional_validator:
         for key in additionalProperties:
-            result = additional_validator.validate(instance[key])
+            result = additional_validator(instance[key])
             if not result:
                 yield result
 
@@ -112,7 +112,7 @@ class _Required(Keyword):
         self.value = required
 
     @correct_type(type_=dict)
-    def validate(self, instance):
+    def __call__(self, instance):
         messages = []
         if set(self.value) - set(instance.keys()):
             messages.append(
@@ -137,7 +137,7 @@ class _PropertyNames(Keyword):
         self._validator = build_validator(schema=self.value, location=self.location)
 
     @correct_type(type_=dict)
-    def validate(self, instance):
+    def __call__(self, instance):
         errors = validate_property_names(validator=self._validator, instance=instance)
         first_result = next(errors, True)
         if first_result:
@@ -151,7 +151,7 @@ class _PropertyNames(Keyword):
 
 def validate_property_names(validator, instance):
     for propertyName in instance:
-        res = validator.validate(propertyName)
+        res = validator(propertyName)
 
         if not res:
             yield res
@@ -161,7 +161,7 @@ class _MinProperties(Keyword):
     keyword = "minProperties"
 
     @correct_type(type_=dict)
-    def validate(self, instance):
+    def __call__(self, instance):
         return validate_min(instance=instance, value=self.value)
 
 
@@ -169,7 +169,7 @@ class _MaxProperties(Keyword):
     keyword = "maxProperties"
 
     @correct_type(type_=dict)
-    def validate(self, instance):
+    def __call__(self, instance):
         return validate_max(instance=instance, value=self.value)
 
 
@@ -177,7 +177,7 @@ class _DependentRequired(Keyword):
     keyword = "dependentRequired"
 
     @correct_type(type_=dict)
-    def validate(self, instance):
+    def __call__(self, instance):
         for prop, dependentProperties in self.value.items():
             if prop in instance:
                 if not (set(dependentProperties) < set(instance.keys())):

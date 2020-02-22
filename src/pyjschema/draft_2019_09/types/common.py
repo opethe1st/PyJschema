@@ -19,8 +19,7 @@ def validate_instance_against_all_validators(
     validators: typing.List[AValidator], instance
 ):
     yield from filter(
-        lambda res: not res,
-        (validator.validate(instance=instance) for validator in validators),
+        lambda res: not res, (validator(instance=instance) for validator in validators),
     )
 
 

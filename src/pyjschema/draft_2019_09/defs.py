@@ -16,7 +16,7 @@ class Defs(Keyword):
             for key, value in self.value.items()
         }
 
-    def validate(self, instance):
+    def __call__(self, instance):
         return True
 
     def sub_validators(self):

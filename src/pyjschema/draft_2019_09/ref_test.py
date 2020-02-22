@@ -10,7 +10,7 @@ class DummyValidator(Validator):
         self.parent = parent
         self.recursiveAnchor = recursiveAnchor
 
-    def validate(self, instance):
+    def __call__(self, instance):
         return True
 
 
@@ -30,7 +30,9 @@ class TestRefResolve(unittest.TestCase):
         validator = DummyValidator()
 
         with self.assertRaises(SchemaError):
-            ref.resolve(uri_to_validator={"https://localhost:5000/blah.json": validator})
+            ref.resolve(
+                uri_to_validator={"https://localhost:5000/blah.json": validator}
+            )
 
 
 class TestRecursiveRef(unittest.TestCase):
@@ -68,7 +70,7 @@ class TestRecursiveRef(unittest.TestCase):
         recursiveRef.resolve()
 
         self.assertEqual(recursiveRef._validator, parent)
-        recursiveRef.validate(True)
+        recursiveRef(True)
 
     def test_resolve_before_validator_resolved(self):
         parent = DummyValidator(recursiveAnchor=True)
@@ -76,4 +78,4 @@ class TestRecursiveRef(unittest.TestCase):
         recursiveRef = RecursiveRef(schema={"$recursiveRef": "#"}, parent=validator)
 
         with self.assertRaises(InternalError):
-            recursiveRef.validate(True)
+            recursiveRef(True)

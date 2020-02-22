@@ -21,7 +21,7 @@ class AValidator(abc.ABC):
         self.anchor = schema["$anchor"] if schema.get("$anchor") else None
 
     @abc.abstractmethod
-    def validate(self, instance: JsonType) -> ValidationError:
+    def __call__(self, instance: JsonType) -> ValidationError:
         raise NotImplementedError
 
     def sub_validators(self) -> typing.Iterable["AValidator"]:

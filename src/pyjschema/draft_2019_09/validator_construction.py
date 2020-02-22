@@ -24,7 +24,7 @@ def construct_validator(schema):
 
 def validate_once(schema: typing.Union[dict, bool], instance: dict) -> ValidationError:
     validator, _ = build_validator_and_resolve_references(schema=schema)
-    return validator.validate(instance=instance)
+    return validator(instance=instance)
 
 
 def meta_schema_validator(schema):

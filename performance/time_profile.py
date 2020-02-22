@@ -64,7 +64,7 @@ if __name__ == "__main__":
             "PyJschema",
             "construct_validator(schema)",
             "validate(instance=instance)",
-            construct_validator(schema).validate,
+            construct_validator(schema),
         ),
     ]:
         print(library)

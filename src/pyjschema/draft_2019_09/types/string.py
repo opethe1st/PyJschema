@@ -7,7 +7,7 @@ class _MaxLength(Keyword):
     keyword = "maxLength"
 
     @correct_type(type_=str)
-    def validate(self, instance):
+    def __call__(self, instance):
         return validate_max(
             value=self.value, instance=instance, message=f"{instance} failed {self}"
         )
@@ -17,7 +17,7 @@ class _MinLength(Keyword):
     keyword = "minLength"
 
     @correct_type(type_=str)
-    def validate(self, instance):
+    def __call__(self, instance):
         return validate_min(
             value=self.value, instance=instance, message=f"{instance} failed {self}"
         )
@@ -33,7 +33,7 @@ class _Pattern(Keyword):
         self.regex = re.compile(pattern=self.value)
 
     @correct_type(type_=str)
-    def validate(self, instance):
+    def __call__(self, instance):
         if not self.regex.search(instance):
             return ValidationError(messages=[f"{instance} failed {self}"])
         return True

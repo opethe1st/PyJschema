@@ -66,10 +66,9 @@ TYPE_TO_KEYWORD_VALIDATORS = {
 }
 
 
-KEYWORDS_THAT_REQUIRE_ANNOTATION_COLLECTION = set([
-    "unevaluatedProperties",
-    "unevaluatedItems"
-])
+KEYWORDS_THAT_REQUIRE_ANNOTATION_COLLECTION = set(
+    ["unevaluatedProperties", "unevaluatedItems"]
+)
 
 
 class Validator(AValidator):
@@ -79,7 +78,9 @@ class Validator(AValidator):
 
     def __init__(self, schema, location=None, parent=None):
         super().__init__(schema=schema, location=location, parent=parent)
-        unsupported_keywords = KEYWORDS_THAT_REQUIRE_ANNOTATION_COLLECTION & set(schema.keys())
+        unsupported_keywords = KEYWORDS_THAT_REQUIRE_ANNOTATION_COLLECTION & set(
+            schema.keys()
+        )
         if unsupported_keywords:
             raise SchemaError(
                 "Unable to process this Schema because this library doesn't support annotation collection"
@@ -99,9 +100,7 @@ class Validator(AValidator):
             self.id = schema["$id"].rstrip("#")
 
         if "$defs" in schema:
-            self._validators.append(
-                Defs(schema=schema, location=location, parent=self)
-            )
+            self._validators.append(Defs(schema=schema, location=location, parent=self))
 
         if "$ref" in schema:
             self._validators.append(Ref(schema=schema))
@@ -128,7 +127,7 @@ class Validator(AValidator):
                             )
                         )
 
-    def validate(self, instance):
+    def __call__(self, instance):
         errors = validate_instance_against_all_validators(
             validators=self._validators, instance=instance
         )

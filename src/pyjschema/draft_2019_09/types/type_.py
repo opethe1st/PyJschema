@@ -23,7 +23,7 @@ class Type(AValidator):
             types = [schema["type"]]
         self._types = types
 
-    def validate(self, instance):
+    def __call__(self, instance):
         messages = []
         for type_ in self._types:
 

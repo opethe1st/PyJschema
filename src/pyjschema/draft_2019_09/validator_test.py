@@ -6,6 +6,7 @@ from .validator import Validator
 from .validator_construction import build_validator_and_resolve_references
 from .exceptions import SchemaError
 
+
 class TestValidator(unittest.TestCase):
     @parameterized.parameterized.expand(
         [
@@ -37,13 +38,12 @@ class TestValidator(unittest.TestCase):
         )
 
         self.assertEqual(
-            result, bool(validator.validate(instance=instance)),
+            result, bool(validator(instance=instance)),
         )
 
-    @parameterized.parameterized.expand([
-        "unevaluatedProperties",
-        "unevaluatedItems",
-    ])
+    @parameterized.parameterized.expand(
+        ["unevaluatedProperties", "unevaluatedItems",]
+    )
     def test_unsupported_keywords(self, keyword):
         with self.assertRaises(SchemaError):
             Validator(schema={keyword: True})
@@ -85,5 +85,5 @@ class TestRecursiveRef(unittest.TestCase):
         )
 
         self.assertEqual(
-            result, bool(validator.validate(instance=instance)),
+            result, bool(validator(instance=instance)),
         )

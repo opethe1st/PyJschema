@@ -262,10 +262,10 @@ class If(IValidator):
         self.else_ = else_
 
     def __call__(self, instance):
-        if self.condition.validate(instance):
-            return self.then.validate(instance)
+        if self.condition(instance):
+            return self.then(instance)
         else:
-            return self.else_.validate(instance)
+            return self.else_(instance)
 
 
 class Not(IValidator):
