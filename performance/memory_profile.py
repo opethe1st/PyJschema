@@ -4,7 +4,7 @@ from memory_profiler import profile
 
 from pyjschema.draft_2019_09 import construct_validator
 
-from benchmarks.large_schema import SCHEMA
+from performance.large_schema import SCHEMA
 
 INSTANCE = [9, "hello", [1, "a", True], {"a": "a", "b": "b", "d": "d"}, 42, 3]
 
