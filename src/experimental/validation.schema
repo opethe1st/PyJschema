@@ -1,0 +1,165 @@
+
+# Proposed Schema description language
+
+# boolean operations to combine schemas. syntax stolen from F#
+validator =
+    | str
+    | array
+    | object
+
+validator =
+    & str
+    & object  # obviously impossible to satisfy
+
+# list and every item must be a string
+validator = [str]  # type that every item in the list/sequence needs to satisfy. shortcut for
+validator = iterable<str>
+
+# list and every item must be a string or int
+validator = [str | int]  # string or int items
+
+# Nested validators, object + properties named data and children and data is required
+Tree = {data!: any, children: [Tree]} # shortcut for
+Tree = mapping<data!: any, children: iterable<Tree>>
+
+# Nested list
+NestedList = [NestedList | str]
+
+# Constant - when applied, the instance must be 4. "`" is used to denote constants
+validator = `4`
+validator = `"a string"`
+
+
+# User-defined validators are in capitalized, provided types are lowercase
+range06 = min(0) & max(6)
+
+# Parameterization of validators and values
+range<start: int, end: int> = min(start) & max(end)
+range<end: int> = min(0) & max(end)
+Nested<composite, default> = composite(composite | default)
+
+# if else then - make this a case statement!
+case =
+    str: rangeLength<1, 6>
+    default: None
+
+rangeLength<start, end> =
+    & minLength(start)
+    & maxLength(end)
+
+what about this instead?
+rangeLength<start, end> = &(
+    minLength(start),
+    maxLength(end)
+)
+
+
+# can be named
+
+StringRangeLength =
+    case =
+        str: rangeLength<1, 6>
+        default: None
+
+a =
+    & [str|int]
+
+
+
+# What is the basis of all constraint operations? define the smallest subset on top of
+# which everything else could be built
+# Need expressions - so should be able to count stuff and get results and check if two results are equal?
+#
+# things missing so far?
+# patternProps, additionalProps
+# items
+# autocomplete and linting and editor support
+# define how the the other main keywords would work.
+
+
+Basis set for all validation operations.
+How all the validation keywords in Json schema would be reimplemented
+# for strings
+regex is more than enough for as a basis for validating strings
+String = str
+PostCode = `[A-Z0-9]{6}`
+rangeLength = `.{3, 6}`
+minLength = `.{3,}`
+maxLength = `.{,10}`
+
+# for numbers
+Number = int
+Number = float
+
+# this is not necessarily a number, could be a date for example but the types are restricted
+min<num> = `lambda x: x > num`
+max<num> = `lambda x: x < num`
+
+range<start, end> = min<start> & max<end>
+inclusiveMin<num> = `x >= num`
+exclusiveMin<num> = `x <= num`
+multipleOf<num> = `x % num == 0`
+
+# boolean
+Boolean = boolean   # primitive
+
+# Null
+Null = null         # primitive
+
+# constants
+Four = `4`       # any type of int, string, boolean, float, array, object
+
+# enum - the values need to be constant
+State =
+    | "Active"
+    | "Inactive"
+
+Status =
+    | "Activated"
+    | "Deactivated"
+
+# array
+items<schema> = [all=schema]                                       # items
+contains<schema> = [contains=schema, range={1}]                     # contains
+maxContains<schema, num> = [contains=schema, range={,num}]          # maxContains
+minContains<schema, num> = [contains=schema, range={num,}]          # minContains
+minItems<num> = [contains=Any, range={num,}]                        # minItems
+maxItems<num> = [contains=Any, range={,num}]                        # maxItems
+Unique = [unique=True]                                             # unique
+
+# Regex inspired syntax
+items<schema> = [^, schema*, $]
+contains<schema> = [schema+]
+minContains<schema, num> = [schema{num,}]
+maxContains<schema, num> = [schema{, num}]
+minItems<num> = [^, any{num,}, $]
+maxItems<num> = [^, any{, num}, $]
+rangeItems<schema, start, end> = [^, schema{start, end}, $]
+unique = unique
+
+Combined<allSchema, containsSchema> =
+    & [all=restSchema]
+    & [contains=containsSchema, min=1, max=4}]
+    & [unique=true]
+
+# object keywords
+
+Profile = {"name": maxLength<20>}           # properties
+Profile = {"x-[a-z]+": minLength<10>}       # patternProperties
+Profile = {rest=false}                      # additionalProperties
+Profile = {required=`["name", "surname"]`}    # required
+Profile = {"x-[a-z]+": any, min=1, max=3}  # min and maxProperties
+Profile = {"x-[a-z]+": any}                # propertyNames
+Profile = {                                 # DependentRequired
+    dependentRequired=`{"name": ["surname", "address"]}`
+}
+Profile =
+    & {"name": maxLength<20>}
+    & {required=["name", "surname"]}
+    & {dependentRequired={"name": ["surname", "address"]}
+
+not<schema> = ~schema
+The core grammar.
+Features - Special symbol - `[`, `]`, "`", `"`,
+
+Any exported types need to have no parameters

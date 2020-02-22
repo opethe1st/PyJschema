@@ -36,19 +36,5 @@ for instance in [True, 1234, {"key": "value"}, "string", ["abc"]]:
 This is similar to compiling regex and you can get significant speed improvements by compiling schemas that are used often
 
 
-## Benchmarks
-Pyjschema is pretty fast
-
-![compile+run](/images/compile-run-benchmark.png)
-
-
-![run](/images/run-benchmark.png)
-
-Compared to the python jsonschema library it is some multiplies faster (at least 8). Compared to fastjsonschema it is faster when the validator is compiled everytime validation happens. If the validator is compiled and then reused then it is like 75 percent slower.
-
-Keep in mind that fastjsonschema makes use of Exceptions to indicate validation errors and this is the reason it is faster
-(I created a [branch](https://github.com/opethe1st/PyJschema/compare/raise-exceptions-instead-of-returns) to test this assumption. You can run perf.py in that branch and see that this library is faster. The code change was raising Exceptions.
-You can't generate a list of all the validation errors when you use exceptions that way. That's an important feature so I accept the speed penalty for supporting listing all the errors that occur 😄
-
 ## Feedback?
 You can tweet at me at @opeispo. Did you find this code easy to read and understand? What would you do differently? Liked the approach?

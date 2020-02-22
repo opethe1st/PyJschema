@@ -1,25 +1,19 @@
-from pyjschema.common import AValidator, KeywordGroup, ValidationError
+from pyjschema.common import AValidator, Keyword, ValidationError
 
 
-class Const(KeywordGroup):
-    def __init__(self, schema: dict, location=None):
-        super().__init__(schema=schema, location=location)
-        const = schema["const"]
-        self.value = (const)
+class Const(Keyword):
+    keyword = "const"
 
     def validate(self, instance):
         ok = equals(self.value, instance)
         return True if ok else ValidationError()
 
 
-class Enum(KeywordGroup):
-    def __init__(self, schema: dict, location=None):
-        super().__init__(schema=schema, location=location)
-        enum = schema["enum"]
-        self._values = enum
+class Enum(Keyword):
+    keyword = "enum"
 
     def validate(self, instance):
-        for value in self._values:
+        for value in self.value:
             if equals(value, instance):
                 return True
         return ValidationError()
@@ -43,16 +37,22 @@ def equals(a, b):
 
 
 class AcceptAll(AValidator):
-    def __init__(self, schema=None, location=None):
+    def __init__(self, schema=None, location=None, parent=None):
         self.location = location
 
     def validate(self, instance):
         return True
 
+    def __repr__(self):
+        return "AcceptAll()"
+
 
 class RejectAll(AValidator):
-    def __init__(self, schema=None, location=None):
+    def __init__(self, schema=None, location=None, parent=None):
         self.location = location
 
     def validate(self, instance):
         return ValidationError(messages=["This fails for every value"])
+
+    def __repr__(self):
+        return "RejectAll()"

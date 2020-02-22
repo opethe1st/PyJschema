@@ -6,6 +6,7 @@ from .ref import Ref
 class DummyRef(Ref):
     def __init__(self):
         self.value = None
+        self._validator = None
 
 
 class DummyValidator:
@@ -13,7 +14,6 @@ class DummyValidator:
 
 
 class TestRefResolve(unittest.TestCase):
-
     def test(self):
         ref = DummyRef()
         ref.base_uri = "https://localhost:5000/root.json"

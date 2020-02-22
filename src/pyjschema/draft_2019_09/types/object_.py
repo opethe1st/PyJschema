@@ -1,31 +1,45 @@
 import itertools
 import re
 
-from pyjschema.common import KeywordGroup, ValidationError
+from pyjschema.common import KeywordGroup, ValidationError, Keyword
 
 from .common import validate_max, validate_min, correct_type
 
 
 class _Property(KeywordGroup):
-    def __init__(self, schema: dict, location=None):
+    def __init__(self, schema: dict, location=None, parent=None):
         from pyjschema.draft_2019_09 import build_validator
 
+        self.parent = parent
         properties = schema.get("properties")
         additionalProperties = schema.get("additionalProperties")
         patternProperties = schema.get("patternProperties")
         self._validators = (
-            {key: build_validator(schema=prop, location=f"{location}/properties/{key}") for key, prop in properties.items()}
+            {
+                key: build_validator(
+                    schema=prop, location=f"{location}/properties/{key}", parent=self
+                )
+                for key, prop in properties.items()
+            }
             if properties
             else {}
         )
         self._additional_validator = (
-            build_validator(schema=additionalProperties, location=f"{location}/additionalProperties")
+            build_validator(
+                schema=additionalProperties,
+                location=f"{location}/additionalProperties",
+                parent=self,
+            )
             if additionalProperties is not None
             else None
         )
         self._pattern_validators = (
             {
-                re.compile(key): build_validator(schema=properties, location=f"{location}/patternProperties/{key}")
+                re.compile(key): build_validator(
+                    schema=properties,
+                    location=f"{location}/patternProperties/{key}",
+                    parent=self,
+                )
                 for key, properties in patternProperties.items()
             }
             if patternProperties
@@ -46,6 +60,9 @@ class _Property(KeywordGroup):
             return True
         else:
             return ValidationError(children=itertools.chain([first_result], errors))
+
+    def __repr__(self):
+        return f"Property(properties={self._validators}, additionalProperties={self._additional_validator}, patternProperties={self._pattern_validators})"
 
     def sub_validators(self):
         yield from self._validators.values()
@@ -86,9 +103,11 @@ def _validate(property_validators, additional_validator, pattern_validators, ins
                 yield result
 
 
-class _Required(KeywordGroup):
-    def __init__(self, schema: dict, location=None):
-        super().__init__(schema=schema, location=location)
+class _Required(Keyword):
+    keyword = "required"
+
+    def __init__(self, schema: dict, location=None, parent=None):
+        super().__init__(schema=schema, location=f"{location}/required", parent=parent)
         required = schema["required"]
         self.value = required
 
@@ -106,15 +125,16 @@ class _Required(KeywordGroup):
             return ValidationError(messages=messages)
 
 
-class _PropertyNames(KeywordGroup):
-    def __init__(self, schema: dict, location=None):
-        super().__init__(schema=schema, location=location)
+class _PropertyNames(Keyword):
+    keyword = "propertyNames"
+
+    def __init__(self, schema: dict, location=None, parent=None):
+        super().__init__(schema=schema, location=location, parent=parent)
         # add this to make sure that the type is string - I have seen it missing from
         # examples in the documentation so can only assume it's allowed
         from pyjschema.draft_2019_09 import build_validator
 
-        propertyNames = schema["propertyNames"]
-        self._validator = build_validator(schema=propertyNames, location=f"{location}/propertyNames")
+        self._validator = build_validator(schema=self.value, location=self.location)
 
     @correct_type(type_=dict)
     def validate(self, instance):
@@ -137,38 +157,28 @@ def validate_property_names(validator, instance):
             yield res
 
 
-class _MinProperties(KeywordGroup):
-    def __init__(self, schema: dict, location=None):
-        super().__init__(schema=schema, location=location)
-        self.value = schema["minProperties"]
+class _MinProperties(Keyword):
+    keyword = "minProperties"
 
     @correct_type(type_=dict)
     def validate(self, instance):
         return validate_min(instance=instance, value=self.value)
 
 
-class _MaxProperties(KeywordGroup):
-    def __init__(self, schema: dict, location=None):
-        super().__init__(schema=schema, location=location)
-        self.value = schema["maxProperties"]
+class _MaxProperties(Keyword):
+    keyword = "maxProperties"
 
     @correct_type(type_=dict)
     def validate(self, instance):
         return validate_max(instance=instance, value=self.value)
 
 
-class _DependentRequired(KeywordGroup):
-    def __init__(self, schema: dict, location=None):
-        super().__init__(schema=schema, location=location)
-        dependentRequired = schema["dependentRequired"]
-        self.dependentRequired = {
-            key: value
-            for key, value in dependentRequired.items()
-        }
+class _DependentRequired(Keyword):
+    keyword = "dependentRequired"
 
     @correct_type(type_=dict)
     def validate(self, instance):
-        for prop, dependentProperties in self.dependentRequired.items():
+        for prop, dependentProperties in self.value.items():
             if prop in instance:
                 if not (set(dependentProperties) < set(instance.keys())):
                     return ValidationError()

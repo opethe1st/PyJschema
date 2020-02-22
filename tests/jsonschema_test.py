@@ -66,7 +66,9 @@ CWD = os.path.dirname(__file__)
 
 KEYWORD_TESTS: t.List = []
 for keyword in KEYWORDS:
-    with open(os.path.join(CWD, f"json-schema-tests/tests/draft2019-09/{keyword}.json")) as file:
+    with open(
+        os.path.join(CWD, f"json-schema-tests/tests/draft2019-09/{keyword}.json")
+    ) as file:
         keyword_testcases = json.load(file)
         for testcase in keyword_testcases:
             testcase["keyword"] = keyword

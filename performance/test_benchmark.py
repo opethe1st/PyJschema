@@ -4,7 +4,7 @@ import fastjsonschema
 import jsonschema
 import pytest
 
-from benchmarks.large_schema import SCHEMA
+from performance.large_schema import SCHEMA
 from pyjschema.draft_2019_09 import construct_validator, validate_once
 
 INSTANCE = [9, "hello", [1, "a", True], {"a": "a", "b": "b", "d": "d"}, 42, 3]

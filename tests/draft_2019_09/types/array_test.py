@@ -133,7 +133,6 @@ class TestArrayValidation(unittest.TestCase):
                 },
                 [123, 124, "aa"],
             ),
-
         ]
     )
     def test_true(self, name, schema, instance):

@@ -2,9 +2,9 @@ import cProfile
 import io
 import pstats
 
-from jsonschema import Draft4Validator
+# from jsonschema import Draft4Validator
 
-from large_schema import SCHEMA
+from performance.large_schema import SCHEMA
 from pyjschema.draft_2019_09 import construct_validator
 
 

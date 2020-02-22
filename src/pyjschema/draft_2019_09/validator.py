@@ -2,17 +2,29 @@ import itertools
 import typing as t
 
 from pyjschema.common import AValidator, ValidationError
-from pyjschema.draft_2019_09.referencing import Ref
 
 from .constants import KEYWORDS_TO_VALIDATOR
 from .defs import Defs
+from .ref import RecursiveRef, Ref
+from .types.array import _Contains, _Items, _MaxItems, _MinItems, _UniqueItems
 from .types.common import validate_instance_against_all_validators
+from .types.number import (
+    _ExclusiveMaximum,
+    _ExclusiveMinimum,
+    _Maximum,
+    _Minimum,
+    _MultipleOf,
+)
+from .types.object_ import (
+    _DependentRequired,
+    _MaxProperties,
+    _MinProperties,
+    _Property,
+    _PropertyNames,
+    _Required,
+)
 from .types.string import _MaxLength, _MinLength, _Pattern
-from .types.number import _MultipleOf, _Minimum, _Maximum, _ExclusiveMinimum, _ExclusiveMaximum
-from .types.object_ import _Property, _Required, _PropertyNames, _MinProperties, _MaxProperties, _DependentRequired
-from .types.array import _Items, _Contains, _MinItems, _MaxItems, _UniqueItems
 from .types.type_ import Type
-
 
 # this should probably be in the files for each type
 TYPE_TO_KEYWORD_VALIDATORS = {
@@ -58,9 +70,14 @@ class Validator(AValidator):
     This corresponds to a schema
     """
 
-    def __init__(self, schema, location=None):
-        super().__init__(schema=schema, location=location)
+    def __init__(self, schema, location=None, parent=None):
+        super().__init__(schema=schema, location=location, parent=parent)
         self._validators: t.List[AValidator] = []
+
+        self.recursiveAnchor = schema.get("$recursiveAnchor", False)
+
+        if "$recursiveRef" in schema:
+            self._validators.append(RecursiveRef(schema=schema, parent=parent))
 
         if "$anchor" in schema:
             self.anchor = "#" + schema["$anchor"]
@@ -69,17 +86,18 @@ class Validator(AValidator):
             self.id = schema["$id"].rstrip("#")
 
         if "$defs" in schema:
-            self._validators.append(Defs(schema=schema, location=f"{location}/$defs"))
+            self._validators.append(
+                Defs(schema=schema, location=f"{location}/$defs", parent=self)
+            )
 
         if "$ref" in schema:
             self._validators.append(Ref(schema=schema))
-            # return earlier because all other keywords are ignored when there is a $ref
-            # - kinda think this is actually different in draft_2019_09
-            return
 
         for key, ValidatorClass in KEYWORDS_TO_VALIDATOR.items():
             if key in schema:
-                self._validators.append(ValidatorClass(schema=schema, location=f"{location}/{key}"))
+                self._validators.append(
+                    ValidatorClass(schema=schema, location=f"{location}", parent=self)
+                )
 
         types = schema.get("type")
         if isinstance(types, str):
@@ -91,10 +109,13 @@ class Validator(AValidator):
             if not types or type_ in types:
                 for keywords, KeywordValidator in keyword_to_keyword_validators.items():
                     if any(keyword in schema for keyword in keywords):
-                        self._validators.append(KeywordValidator(schema=schema, location=location))
+                        self._validators.append(
+                            KeywordValidator(
+                                schema=schema, location=location, parent=self
+                            )
+                        )
 
     def validate(self, instance):
-        # import pdb; pdb.set_trace()
         errors = validate_instance_against_all_validators(
             validators=self._validators, instance=instance
         )
@@ -109,3 +130,6 @@ class Validator(AValidator):
 
     def sub_validators(self):
         yield from self._validators
+
+    def __repr__(self):
+        return f"Validator(validators={self._validators})"

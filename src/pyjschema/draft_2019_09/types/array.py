@@ -1,35 +1,49 @@
-import typing as t
 import itertools
-from pyjschema.common import KeywordGroup, ValidationError
+import typing
 
-from .common import validate_max, validate_min, correct_type
+from pyjschema.common import Keyword, KeywordGroup, ValidationError
+
+from .common import correct_type, validate_max, validate_min
 
 
 class _Items(KeywordGroup):
-    def __init__(self, schema: dict, location=None):
+    def __init__(self, schema: dict, location=None, parent=None):
         from pyjschema.draft_2019_09 import build_validator
         from pyjschema.draft_2019_09.validator_construction import (
             BuildValidatorResultType,
         )
 
+        self.parent = parent
+
         items = schema.get("items")
         additionalItems = schema.get("additionalItems")
 
-        self._items_validator: t.Optional[BuildValidatorResultType] = None
-        self._items_validators: t.List[BuildValidatorResultType] = []
-        self._additional_items_validator: t.Optional[BuildValidatorResultType] = None
+        self._items_validator: typing.Optional[BuildValidatorResultType] = None
+        self._items_validators: typing.List[BuildValidatorResultType] = []
+        self._additional_items_validator: typing.Optional[
+            BuildValidatorResultType
+        ] = None
         if items is not None:
             if isinstance(items, list):
                 self._items_validators = [
-                    build_validator(schema=schema, location=f"{location}/items/{i}") for i, schema in enumerate(items)
+                    build_validator(
+                        schema=schema, location=f"{location}/items/{i}", parent=self
+                    )
+                    for i, schema in enumerate(items)
                 ]
                 if items is not None and additionalItems is not None:
                     self._additional_items_validator = build_validator(
                         schema=additionalItems,
-                        location=f"{location}/additionalItems"
+                        location=f"{location}/additionalItems",
+                        parent=self,
                     )
             else:
-                self._items_validator = build_validator(schema=items, location=f"{location}/items")
+                self._items_validator = build_validator(
+                    schema=items, location=f"{location}/items", parent=self
+                )
+
+    def __repr__(self):
+        return f"Items(items_validator(s)={self._items_validator or self._items_validators}, add_item_validator={self._additional_items_validator})"
 
     @correct_type(type_=list)
     def validate(self, instance):
@@ -102,15 +116,20 @@ def _validate_item_list(items_validators, additional_items_validator, instance):
 
 
 class _Contains(KeywordGroup):
-    def __init__(self, schema: dict, location=None):
-        super().__init__(schema=schema, location=location)
+    def __init__(self, schema: dict, location=None, parent=None):
         from pyjschema.draft_2019_09 import build_validator
 
         contains = schema.get("contains")
         maxContains = schema.get("maxContains")
         minContains = schema.get("minContains")
 
-        self._validator = build_validator(schema=contains, location=f"{location}/contains") if contains is not None else None
+        self._validator = (
+            build_validator(
+                schema=contains, location=f"{location}/contains", parent=self
+            )
+            if contains is not None
+            else None
+        )
         self.maxContainsValue = maxContains if maxContains else float("inf")
         self.minContainsValue = minContains if minContains else -float("inf")
 
@@ -149,30 +168,24 @@ class _Contains(KeywordGroup):
             yield self._validator
 
 
-class _MinItems(KeywordGroup):
-    def __init__(self, schema: dict, location=None):
-        super().__init__(schema=schema, location=location)
-        self.value = schema["minItems"]
+class _MinItems(Keyword):
+    keyword = "minItems"
 
     @correct_type(type_=list)
     def validate(self, instance):
         return validate_min(value=self.value, instance=instance)
 
 
-class _MaxItems(KeywordGroup):
-    def __init__(self, schema: dict, location=None):
-        super().__init__(schema=schema, location=location)
-        self.value = schema["maxItems"]
+class _MaxItems(Keyword):
+    keyword = "maxItems"
 
     @correct_type(type_=list)
     def validate(self, instance):
         return validate_max(value=self.value, instance=instance)
 
 
-class _UniqueItems(KeywordGroup):
-    def __init__(self, schema: dict, location=None):
-        super().__init__(schema=schema, location=location)
-        self.value = schema["uniqueItems"]
+class _UniqueItems(Keyword):
+    keyword = "uniqueItems"
 
     @correct_type(type_=list)
     def validate(self, instance):

@@ -1,22 +1,29 @@
-from pyjschema.common import KeywordGroup, ValidationError
+from pyjschema.common import KeywordGroup, ValidationError, Keyword
 
 
-class If(KeywordGroup):
-
-    def __init__(self, schema: dict, location=None):
-        super().__init__(schema=schema, location=location)
+class IfElseThen(KeywordGroup):
+    def __init__(self, schema: dict, location=None, parent=None):
         from .validator_construction import build_validator
 
-        self._if_validator = build_validator(schema=schema["if"], location=f"{location}/if")
+        self._if_validator = build_validator(
+            schema=schema["if"], location=f"{location}/if", parent=self
+        )
         self._then_validator = (
-            build_validator(schema=schema["then"], location=f"{location}/then") if schema.get("then") else None
+            build_validator(
+                schema=schema["then"], location=f"{location}/then", parent=self
+            )
+            if schema.get("then")
+            else None
         )
         self._else_validator = (
-            build_validator(schema=schema["else"], location=f"{location}/else") if schema.get("else") else None
+            build_validator(
+                schema=schema["else"], location=f"{location}/else", parent=self
+            )
+            if schema.get("else")
+            else None
         )
 
     def validate(self, instance):
-        # import pdb; pdb.set_trace()
         if self._if_validator.validate(instance=instance):
             if self._then_validator:
                 return self._then_validator.validate(instance=instance)
@@ -33,12 +40,17 @@ class If(KeywordGroup):
             yield self._else_validator
 
 
-class AllOf(KeywordGroup):
-    def __init__(self, schema: dict, location=None):
-        super().__init__(schema=schema, location=location)
+class AllOf(Keyword):
+    keyword = "allOf"
+
+    def __init__(self, schema: dict, location=None, parent=None):
+        super().__init__(schema=schema, location=location, parent=parent)
         from .validator_construction import build_validator
 
-        self._validators = [build_validator(schema=item, location=f"{location}/allOf") for item in schema["allOf"]]
+        self._validators = [
+            build_validator(schema=item, location=f"{self.location}", parent=self)
+            for item in self.value
+        ]
 
     def validate(self, instance):
         ok = all(
@@ -46,19 +58,21 @@ class AllOf(KeywordGroup):
         )
         return True if ok else ValidationError()
 
-    # WOAH: Not defining this resulted in an almost impossible to debug bug. SIGH!
-    # How do I prevent that in future
-    # this is required if a keyword
     def sub_validators(self):
         yield from self._validators
 
 
-class OneOf(KeywordGroup):
-    def __init__(self, schema: dict, location=None):
-        super().__init__(schema=schema, location=location)
+class OneOf(Keyword):
+    keyword = "oneOf"
+
+    def __init__(self, schema: dict, location=None, parent=None):
+        super().__init__(schema=schema, location=location, parent=parent)
         from .validator_construction import build_validator
 
-        self._validators = [build_validator(schema=item, location=f"{location}/oneOf") for item in schema["oneOf"]]
+        self._validators = [
+            build_validator(schema=item, location=self.location, parent=self)
+            for item in self.value
+        ]
 
     def validate(self, instance):
         oks = list(
@@ -73,12 +87,17 @@ class OneOf(KeywordGroup):
         return True if len(oks) == 1 else ValidationError()
 
 
-class AnyOf(KeywordGroup):
-    def __init__(self, schema: dict, location=None):
-        super().__init__(schema=schema, location=location)
+class AnyOf(Keyword):
+    keyword = "anyOf"
+
+    def __init__(self, schema: dict, location=None, parent=None):
+        super().__init__(schema=schema, location=location, parent=parent)
         from .validator_construction import build_validator
 
-        self._validators = [build_validator(schema=item, location=f"{location}/anyOf") for item in schema["anyOf"]]
+        self._validators = [
+            build_validator(schema=item, location=f"{self.location}", parent=self)
+            for item in self.value
+        ]
 
     def validate(self, instance):
         ok = any(
@@ -86,25 +105,25 @@ class AnyOf(KeywordGroup):
         )
         return True if ok else ValidationError()
 
-    # WOAH: Not defining this resulted in an almost impossible to debug bug. SIGH!
-    # How do I prevent that in future
     def sub_validators(self):
         yield from self._validators
 
 
-class Not(KeywordGroup):
-    def __init__(self, schema: dict, location=None):
-        super().__init__(schema=schema, location=location)
+class Not(Keyword):
+    keyword = "not"
+
+    def __init__(self, schema: dict, location=None, parent=None):
+        super().__init__(schema=schema, location=location, parent=parent)
         from .validator_construction import build_validator
 
-        self._validator = build_validator(schema=schema["not"], location=f"{location}/not")
+        self._validator = build_validator(
+            schema=self.value, location=f"{self.location}", parent=self
+        )
 
     def validate(self, instance):
         result = self._validator.validate(instance=instance)
-        return ValidationError(messages=["not"]) if result else True
+        return ValidationError(messages=["not {self._validator}"]) if result else True
 
-    # WOAH: Not defining this resulted in an almost impossible to debug bug. SIGH!
-    # How do I prevent that in future
     def sub_validators(self):
         if self._validator:
             yield self._validator
