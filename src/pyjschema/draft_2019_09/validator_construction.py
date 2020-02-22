@@ -3,8 +3,8 @@ import os
 import typing
 
 from pyjschema.common import ValidationError
+from pyjschema.exceptions import SchemaError
 
-from .exceptions import SchemaError
 from .referencing import resolve_references
 from .types import AcceptAll, RejectAll
 from .validator import Validator
@@ -13,18 +13,18 @@ __all__ = ["validate_once", "Validator", "construct_validator"]
 
 
 def construct_validator(schema):
-    schema_validator = meta_schema_validator(schema=schema.get("$schema"))
+    schema_validator = meta_schema_validator(schema=schema.get("$schema") if isinstance(schema, dict) else {})
     # Need to wrap schema errors here and reraisr as SchemaErrors
-    if schema_validator.validate(instance=schema):
+    if schema_validator(instance=schema):
         validator, _ = build_validator_and_resolve_references(schema=schema)
         return validator
     else:
-        raise Exception("Schema is invalid according to the meta-schema")
+        raise SchemaError("Schema is invalid according to the meta-schema")
 
 
 def validate_once(schema: typing.Union[dict, bool], instance: dict) -> ValidationError:
     validator, _ = build_validator_and_resolve_references(schema=schema)
-    return validator.validate(instance=instance)
+    return validator(instance=instance)
 
 
 def meta_schema_validator(schema):

@@ -12,7 +12,7 @@ INSTANCE = [9, "hello", [1, "a", True], {"a": "a", "b": "b", "d": "d"}, 42, 3]
 @profile
 def mem_profile_pyjschema():
     validator = construct_validator(schema=SCHEMA)
-    validator.validate(INSTANCE)
+    validator(INSTANCE)
 
 
 @profile

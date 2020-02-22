@@ -17,7 +17,7 @@ if __name__ == "__main__":
     # validator = Draft4Validator(SCHEMA)
     pr.enable()
     for _ in range(10000):
-        res = validator.validate(INSTANCE)
+        res = validator(INSTANCE)
         # print(res)
     pr.disable()
 

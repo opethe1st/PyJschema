@@ -2,6 +2,7 @@ import itertools
 import typing as t
 
 from pyjschema.common import AValidator, ValidationError
+from pyjschema.exceptions import SchemaError
 
 from .constants import KEYWORDS_TO_VALIDATOR
 from .defs import Defs
@@ -13,7 +14,7 @@ from .types.number import (
     _ExclusiveMinimum,
     _Maximum,
     _Minimum,
-    _MultipleOf,
+    _MultipleOf
 )
 from .types.object_ import (
     _DependentRequired,
@@ -21,9 +22,8 @@ from .types.object_ import (
     _MinProperties,
     _Property,
     _PropertyNames,
-    _Required,
+    _Required
 )
-from .exceptions import SchemaError
 from .types.string import _MaxLength, _MinLength, _Pattern
 from .types.type_ import Type
 
@@ -66,10 +66,9 @@ TYPE_TO_KEYWORD_VALIDATORS = {
 }
 
 
-KEYWORDS_THAT_REQUIRE_ANNOTATION_COLLECTION = set([
-    "unevaluatedProperties",
-    "unevaluatedItems"
-])
+KEYWORDS_THAT_REQUIRE_ANNOTATION_COLLECTION = set(
+    ["unevaluatedProperties", "unevaluatedItems"]
+)
 
 
 class Validator(AValidator):
@@ -79,7 +78,9 @@ class Validator(AValidator):
 
     def __init__(self, schema, location=None, parent=None):
         super().__init__(schema=schema, location=location, parent=parent)
-        unsupported_keywords = KEYWORDS_THAT_REQUIRE_ANNOTATION_COLLECTION & set(schema.keys())
+        unsupported_keywords = KEYWORDS_THAT_REQUIRE_ANNOTATION_COLLECTION & set(
+            schema.keys()
+        )
         if unsupported_keywords:
             raise SchemaError(
                 "Unable to process this Schema because this library doesn't support annotation collection"
@@ -99,9 +100,7 @@ class Validator(AValidator):
             self.id = schema["$id"].rstrip("#")
 
         if "$defs" in schema:
-            self._validators.append(
-                Defs(schema=schema, location=location, parent=self)
-            )
+            self._validators.append(Defs(schema=schema, location=location, parent=self))
 
         if "$ref" in schema:
             self._validators.append(Ref(schema=schema))
@@ -128,7 +127,7 @@ class Validator(AValidator):
                             )
                         )
 
-    def validate(self, instance):
+    def __call__(self, instance):
         errors = validate_instance_against_all_validators(
             validators=self._validators, instance=instance
         )

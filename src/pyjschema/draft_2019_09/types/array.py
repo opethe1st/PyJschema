@@ -46,7 +46,7 @@ class _Items(KeywordGroup):
         return f"Items(items_validator(s)={self._items_validator or self._items_validators}, add_item_validator={self._additional_items_validator})"
 
     @correct_type(type_=list)
-    def validate(self, instance):
+    def __call__(self, instance):
         if self._items_validator:
             return self._validate_items(instance=instance)
         elif self._items_validators:
@@ -56,8 +56,7 @@ class _Items(KeywordGroup):
     def _validate_items(self, instance):
         # TODO: shouldnt call this errors, more like results
         errors = filter(
-            lambda res: not res,
-            (self._items_validator.validate(value) for value in instance),
+            lambda res: not res, (self._items_validator(value) for value in instance),
         )
         first_result = next(errors, True)
         if first_result:
@@ -88,31 +87,28 @@ class _Items(KeywordGroup):
 
 
 def _validate_item_list(items_validators, additional_items_validator, instance):
-    if isinstance(instance, list):
 
-        i = 0
-        while i < len(items_validators):
-            if i >= len(instance):
-                break
+    i = 0
+    while i < len(items_validators):
+        if i >= len(instance):
+            break
 
-            res = items_validators[i].validate(instance[i])
+        res = items_validators[i](instance[i])
+
+        if not res:
+            yield res
+
+        i += 1
+
+    # additionalItem for the rest of the items in the instance
+    if additional_items_validator:
+        while i < len(instance):
+            res = additional_items_validator(instance[i])
 
             if not res:
                 yield res
 
             i += 1
-
-        # additionalItem for the rest of the items in the instance
-        if additional_items_validator:
-            while i < len(instance):
-                res = additional_items_validator.validate(instance[i])
-
-                if not res:
-                    yield res
-
-                i += 1
-    else:
-        yield ValidationError()
 
 
 class _Contains(KeywordGroup):
@@ -134,13 +130,13 @@ class _Contains(KeywordGroup):
         self.minContainsValue = minContains if minContains else -float("inf")
 
     @correct_type(type_=list)
-    def validate(self, instance):
+    def __call__(self, instance):
 
         if self._validator:
             count = 0
             for value in instance:
                 # should just be one validator
-                res = self._validator.validate(value)
+                res = self._validator(value)
 
                 if res:
                     count += 1
@@ -172,7 +168,7 @@ class _MinItems(Keyword):
     keyword = "minItems"
 
     @correct_type(type_=list)
-    def validate(self, instance):
+    def __call__(self, instance):
         return validate_min(value=self.value, instance=instance)
 
 
@@ -180,7 +176,7 @@ class _MaxItems(Keyword):
     keyword = "maxItems"
 
     @correct_type(type_=list)
-    def validate(self, instance):
+    def __call__(self, instance):
         return validate_max(value=self.value, instance=instance)
 
 
@@ -188,7 +184,7 @@ class _UniqueItems(Keyword):
     keyword = "uniqueItems"
 
     @correct_type(type_=list)
-    def validate(self, instance):
+    def __call__(self, instance):
         if self.value:
             itemsset = set([str(value) for value in instance])
 

@@ -23,13 +23,13 @@ class IfElseThen(KeywordGroup):
             else None
         )
 
-    def validate(self, instance):
-        if self._if_validator.validate(instance=instance):
+    def __call__(self, instance):
+        if self._if_validator(instance=instance):
             if self._then_validator:
-                return self._then_validator.validate(instance=instance)
+                return self._then_validator(instance=instance)
         else:
             if self._else_validator:
-                return self._else_validator.validate(instance=instance)
+                return self._else_validator(instance=instance)
         return True
 
     def sub_validators(self):
@@ -52,10 +52,8 @@ class AllOf(Keyword):
             for item in self.value
         ]
 
-    def validate(self, instance):
-        ok = all(
-            validator.validate(instance=instance) for validator in self._validators
-        )
+    def __call__(self, instance):
+        ok = all(validator(instance=instance) for validator in self._validators)
         return True if ok else ValidationError()
 
     def sub_validators(self):
@@ -74,14 +72,11 @@ class OneOf(Keyword):
             for item in self.value
         ]
 
-    def validate(self, instance):
+    def __call__(self, instance):
         oks = list(
             filter(
                 lambda res: res,
-                (
-                    validator.validate(instance=instance)
-                    for validator in self._validators
-                ),
+                (validator(instance=instance) for validator in self._validators),
             )
         )
         return True if len(oks) == 1 else ValidationError()
@@ -99,10 +94,8 @@ class AnyOf(Keyword):
             for item in self.value
         ]
 
-    def validate(self, instance):
-        ok = any(
-            validator.validate(instance=instance) for validator in self._validators
-        )
+    def __call__(self, instance):
+        ok = any(validator(instance=instance) for validator in self._validators)
         return True if ok else ValidationError()
 
     def sub_validators(self):
@@ -120,8 +113,8 @@ class Not(Keyword):
             schema=self.value, location=f"{self.location}", parent=self
         )
 
-    def validate(self, instance):
-        result = self._validator.validate(instance=instance)
+    def __call__(self, instance):
+        result = self._validator(instance=instance)
         return ValidationError(messages=["not {self._validator}"]) if result else True
 
     def sub_validators(self):

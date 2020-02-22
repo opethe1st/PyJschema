@@ -4,3 +4,7 @@ class SchemaError(Exception):
 
 class InstanceError(Exception):
     pass
+
+
+class InternalError(Exception):
+    pass

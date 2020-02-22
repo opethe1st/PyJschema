@@ -3,6 +3,8 @@ import numbers
 import typing
 from collections.abc import Mapping, Sequence
 
+from pyjschema.exceptions import InternalError
+
 from .validation_error import ValidationError
 
 JsonType = typing.Union[str, numbers.Number, bool, None, Mapping, Sequence]
@@ -21,7 +23,7 @@ class AValidator(abc.ABC):
         self.anchor = schema["$anchor"] if schema.get("$anchor") else None
 
     @abc.abstractmethod
-    def validate(self, instance: JsonType) -> ValidationError:
+    def __call__(self, instance: JsonType) -> ValidationError:
         raise NotImplementedError
 
     def sub_validators(self) -> typing.Iterable["AValidator"]:
@@ -45,7 +47,7 @@ class Keyword(AValidator):
 
     def __init__(self, schema: dict, location=None, parent=None):
         if self.keyword is None:
-            raise Exception("You need to provide a keyword to this function")
+            raise InternalError("You need to provide a keyword to this function")
         self.value = schema[self.keyword]
         super().__init__(schema=schema, location=location, parent=parent)
         self.location = f"{self.location}/{self.keyword}"
