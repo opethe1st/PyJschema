@@ -37,4 +37,3 @@ class _Pattern(Keyword):
         if not self.regex.search(instance):
             return ValidationError(messages=[f"{instance} failed {self}"])
         return True
-

@@ -4,7 +4,7 @@ from uritools import urijoin
 
 from pyjschema.common import AValidator
 
-from .ref import Ref
+from .ref import Ref, RecursiveRef
 from .utils import to_canonical_uri
 from .validator import Validator
 
@@ -59,10 +59,14 @@ def _generate_context(
 def _resolve_references(
     validator: AValidator, uri_to_validator: Dict
 ):
+
     if isinstance(validator, Ref):
         validator.resolve(
             uri_to_validator=uri_to_validator
         )
+
+    if isinstance(validator, RecursiveRef):
+        validator.resolve()
 
     for sub_validator in validator.sub_validators():
         _resolve_references(

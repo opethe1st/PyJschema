@@ -1,25 +1,19 @@
-from pyjschema.common import AValidator, KeywordGroup, ValidationError
+from pyjschema.common import AValidator, Keyword, ValidationError
 
 
-class Const(KeywordGroup):
-    def __init__(self, schema: dict, location=None, parent=None):
-        super().__init__(schema=schema, location=location, parent=parent)
-        const = schema["const"]
-        self.value = (const)
+class Const(Keyword):
+    keyword = "const"
 
     def validate(self, instance):
         ok = equals(self.value, instance)
         return True if ok else ValidationError()
 
 
-class Enum(KeywordGroup):
-    def __init__(self, schema: dict, location=None, parent=None):
-        super().__init__(schema=schema, location=location, parent=parent)
-        enum = schema["enum"]
-        self._values = enum
+class Enum(Keyword):
+    keyword = "enum"
 
     def validate(self, instance):
-        for value in self._values:
+        for value in self.value:
             if equals(value, instance):
                 return True
         return ValidationError()

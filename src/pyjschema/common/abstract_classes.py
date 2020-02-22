@@ -36,4 +36,15 @@ class KeywordGroup(AValidator):
     This also includes the case where there is one keyword
     """
 
-    pass
+
+class Keyword(KeywordGroup):
+    keyword: typing.Optional[str] = None
+
+    def __init__(self, schema: dict, location=None, parent=None):
+        if self.keyword is None:
+            raise Exception("You need to provide a keyword to this function")
+        self.value = schema[self.keyword]
+        super().__init__(schema=schema, location=location, parent=parent)
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}({self.value})"

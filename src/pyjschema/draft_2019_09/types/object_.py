@@ -152,6 +152,9 @@ class _MinProperties(KeywordGroup):
     def validate(self, instance):
         return validate_min(instance=instance, value=self.value)
 
+    def __repr__(self):
+        return f"MinProperties(value={self.value!r})"
+
 
 class _MaxProperties(KeywordGroup):
     def __init__(self, schema: dict, location=None, parent=None):
@@ -161,6 +164,9 @@ class _MaxProperties(KeywordGroup):
     @correct_type(type_=dict)
     def validate(self, instance):
         return validate_max(instance=instance, value=self.value)
+
+    def __repr__(self):
+        return f"MaxProperties(value={self.value!r})"
 
 
 class _DependentRequired(KeywordGroup):
@@ -179,3 +185,6 @@ class _DependentRequired(KeywordGroup):
                 if not (set(dependentProperties) < set(instance.keys())):
                     return ValidationError()
         return True
+
+    def __repr__(self):
+        return f"DependentRequired({self.dependentRequired}"

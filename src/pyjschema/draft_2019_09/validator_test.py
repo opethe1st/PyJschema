@@ -46,7 +46,8 @@ class TestValidator(unittest.TestCase):
 class TestRecursiveRef(unittest.TestCase):
     @parameterized.parameterized.expand(
         [
-            ({"data": [{"data": "innner data"}], "children": []}, True),
+            ({"data": [{"data": "innner data"}]}, True),
+            ({"data": [{"data": "innner data"}], "anotherProperty": []}, False),
 
         ]
     )
@@ -55,16 +56,19 @@ class TestRecursiveRef(unittest.TestCase):
             "$schema": "schema",
             "$id": "https://example.com/schema",
             "$ref": "tree",
-            "$recursiveAnchor": True,
+            "$recursiveAnchor": False,
+            "maxProperties": 1,
             "$defs": {
                 "tree": {
                     "$id": "tree",
-                    "$recursiveAnchor": True,
+                    "$recursiveAnchor": False,
 
                     "type": "object",
                     "properties": {
                         "data": True,
                         "children": {
+                            "$recursiveAnchor": True,
+
                             "type": "array",
                             "items": {"$recursiveRef": "#"},
                         }

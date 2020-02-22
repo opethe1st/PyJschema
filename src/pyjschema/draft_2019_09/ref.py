@@ -61,3 +61,31 @@ class Ref(KeywordGroup):
 
     def __repr__(self):
         return f"Ref(value={self.abs_uri!r})"
+
+
+class RecursiveRef(KeywordGroup):
+    def __init__(self, schema, parent=None):
+        super().__init__(schema=schema, parent=parent)
+        self.value = uridecode(schema["$recursiveRef"].replace("~1", "/").replace("~0", "~"))
+        self._validator = None
+        self.abs_uri = None
+        self.is_resolved = False
+
+    def resolve(self):
+        from .validator import Validator
+
+        validator = self
+        while validator.parent is not None:
+            if isinstance(validator, Validator) and validator.recursiveAnchor is False:
+                break
+            validator = validator.parent
+
+        self._validator = validator
+        self.is_resolved = True
+
+    @raise_if_not_ready
+    def validate(self, instance):
+        return self._validator.validate(instance)
+
+    def __repr__(self):
+        return "RecursiveRef()"
