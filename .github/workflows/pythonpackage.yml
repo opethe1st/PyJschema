@@ -36,8 +36,8 @@ jobs:
     - name: Test
       run: |
         coverage run -m unittest discover -qp "*_test.py" -s src
-        coverage run -m unittest discover -qp "*_test.py" -s tests
-        coverage report
+        coverage run --append -m unittest discover -qp "*_test.py" -s tests
+        coverage report --skip-covered
     - name: benchmarks
       run: |
         pytest performance

@@ -1,7 +1,7 @@
 import unittest
 
 from .ref import Ref
-from .referencing import _attach_base_URIs, _generate_context, _resolve_references
+from .referencing import _set_to_canonical_uri, _generate_context, _resolve_references
 from .validator import Validator
 
 
@@ -31,7 +31,7 @@ class Test_AttachBaseURIs(unittest.TestCase):
         validator = DummyValidator(
             id=validator_id, validators=[sub_validator3, sub_validator2,]
         )
-        _attach_base_URIs(validator=validator, parent_URI="")
+        _set_to_canonical_uri(validator=validator, parent_URI="")
         self.assertEqual(sub_validator1.base_uri, validator_id)
         self.assertEqual(sub_validator2.base_uri, validator_id)
         self.assertEqual(sub_validator3.base_uri, validator_id)
@@ -50,7 +50,7 @@ class Test_AttachBaseURIs(unittest.TestCase):
         validator = DummyValidator(
             id=validator_id, validators=[sub_validator3, sub_validator2,]
         )
-        _attach_base_URIs(validator=validator, parent_URI="")
+        _set_to_canonical_uri(validator=validator, parent_URI="")
         self.assertEqual(sub_validator1.base_uri, sub_validator_id)
         self.assertEqual(sub_validator2.base_uri, sub_validator_id)
         self.assertEqual(sub_validator3.base_uri, validator_id)
@@ -73,7 +73,9 @@ class Test_AttachBaseURIs(unittest.TestCase):
         validator = DummyValidator(
             id=validator_id, validators=[sub_validator2, sub_validator3,]
         )
-        _attach_base_URIs(validator=validator, parent_URI="")
+
+        _set_to_canonical_uri(validator=validator, parent_URI="")
+
         self.assertEqual(sub_validator1.base_uri, sub_validator2_id)
         self.assertEqual(sub_validator2.base_uri, sub_validator2_id)
         self.assertEqual(sub_validator3.base_uri, sub_validator3_id)
@@ -96,7 +98,9 @@ class Test_AttachBaseURIs(unittest.TestCase):
         validator = DummyValidator(
             id=validator_id, validators=[sub_validator2, sub_validator3,]
         )
-        _attach_base_URIs(validator=validator, parent_URI="")
+
+        _set_to_canonical_uri(validator=validator, parent_URI="")
+
         self.assertEqual(sub_validator1.base_uri, sub_validator2_id)
         self.assertEqual(sub_validator2.base_uri, sub_validator2_id)
         self.assertEqual(sub_validator3.base_uri, sub_validator3_id)

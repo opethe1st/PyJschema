@@ -9,7 +9,8 @@ from .utils import to_canonical_uri
 from .validator import Validator
 
 
-def _attach_base_URIs(validator: AValidator, parent_URI):
+# actually, I could do this in the constructor instead of here.
+def _set_to_canonical_uri(validator: AValidator, parent_URI):
     if not validator.base_uri:
         validator.base_uri = parent_URI
     elif validator.id is not None:
@@ -18,7 +19,7 @@ def _attach_base_URIs(validator: AValidator, parent_URI):
         )
 
     for sub_validator in validator.sub_validators():
-        _attach_base_URIs(validator=sub_validator, parent_URI=validator.base_uri)
+        _set_to_canonical_uri(validator=sub_validator, parent_URI=validator.base_uri)
 
 
 def _generate_context(
@@ -28,9 +29,9 @@ def _generate_context(
     uri_to_root_location: Dict,
 ):
     """
-    This needs to be run after _attach_base_URIs because _attach_base_URIs propagates
+    This needs to be run after _set_to_canonical_uri because _set_to_canonical_uri propagates
     the base_URIs through the subschemas.
-    returns a dictionary with uri to validator.
+    returns a dictionary of the uri to validator mapping
     the uris are of three types.
     - canonical id
     - canonical id + location
@@ -73,7 +74,7 @@ def _resolve_references(validator: AValidator, uri_to_validator: Dict):
 
 
 def resolve_references(root_validator):
-    _attach_base_URIs(
+    _set_to_canonical_uri(
         validator=root_validator, parent_URI=root_validator.base_uri or ""
     )
     uri_to_root_location = {"": root_validator.base_uri, "#": root_validator.base_uri}

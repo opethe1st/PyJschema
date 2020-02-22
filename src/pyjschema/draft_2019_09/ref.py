@@ -38,23 +38,25 @@ class Ref(Keyword):
         return self._validator.validate(instance)
 
     def resolve(self, uri_to_validator):
-        self.abs_uri = self._get_abs_uri()
-        self._validator = self._get_validator(uri_to_validator=uri_to_validator)
+        abs_uri = self._get_abs_uri()
+        self.abs_uri = abs_uri
+        self._validator = self._get_validator(
+            abs_uri=abs_uri, uri_to_validator=uri_to_validator
+        )
 
     def _get_abs_uri(self):
-        # needs to be called after self.base)uri has been set to canonical form
+        if self.base_uri is None:
+            raise Exception("base_uri cannot be None")
         if self.value == "#":
             return self.value
         return to_canonical_uri(uri=self.value, current_base_uri=self.base_uri or "")
 
-    def _get_validator(self, uri_to_validator):
-        # test this?
-        validator = uri_to_validator.get(self.abs_uri)
+    def _get_validator(self, abs_uri, uri_to_validator):
+        validator = uri_to_validator.get(abs_uri)
 
         if validator:
             return validator
         else:
-            # TODO(ope): better error message
             raise SchemaError(
                 f"Unable to locate the validator "
                 f"while trying to resolve this reference: {self.value!r} at {self.location} "
@@ -74,7 +76,10 @@ class RecursiveRef(Keyword):
         self.value = uridecode(self.value.replace("~1", "/").replace("~0", "~"))
         self._validator = None
         self.abs_uri = None
-        self.is_resolved = False
+
+    @property
+    def is_resolved(self):
+        return all([self.abs_uri is not None, self._validator is not None])
 
     def resolve(self):
         from .validator import Validator
@@ -86,11 +91,10 @@ class RecursiveRef(Keyword):
             validator = validator.parent
 
         self._validator = validator
-        self.is_resolved = True
 
     @raise_if_not_ready
     def validate(self, instance):
         return self._validator.validate(instance)
 
     def __repr__(self):
-        return "RecursiveRef()"
+        return f"RecursiveRef({self._validator})"
