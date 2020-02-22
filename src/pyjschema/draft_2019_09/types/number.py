@@ -1,22 +1,11 @@
 import numbers
-from typing import Optional
 
-from pyjschema.common import KeywordGroup, ValidationError
+from pyjschema.common import ValidationError, Keyword
 
 from .common import correct_type
 
 
-class Primitive(KeywordGroup):
-    keyword: Optional[str] = None
-
-    def __init__(self, schema: dict, location=None, parent=None):
-        if self.keyword is None:
-            raise Exception("You need to provide a key to this function")
-        self.value = schema[self.keyword]
-        super().__init__(schema=schema, location=location, parent=parent)
-
-
-class _MultipleOf(Primitive):
+class _MultipleOf(Keyword):
     keyword = "multipleOf"
 
     @correct_type(type_=(int, numbers.Number))
@@ -30,7 +19,7 @@ class _MultipleOf(Primitive):
         return True
 
 
-class _Minimum(Primitive):
+class _Minimum(Keyword):
     keyword = "minimum"
 
     @correct_type(type_=(int, numbers.Number))
@@ -40,7 +29,7 @@ class _Minimum(Primitive):
         return True
 
 
-class _Maximum(Primitive):
+class _Maximum(Keyword):
     keyword = "maximum"
 
     @correct_type(type_=(int, numbers.Number))
@@ -50,7 +39,7 @@ class _Maximum(Primitive):
         return True
 
 
-class _ExclusiveMinimum(Primitive):
+class _ExclusiveMinimum(Keyword):
     keyword = "exclusiveMinimum"
 
     @correct_type(type_=(int, numbers.Number))
@@ -60,7 +49,7 @@ class _ExclusiveMinimum(Primitive):
         return True
 
 
-class _ExclusiveMaximum(Primitive):
+class _ExclusiveMaximum(Keyword):
     keyword = "exclusiveMaximum"
 
     @correct_type(type_=(int, numbers.Number))
