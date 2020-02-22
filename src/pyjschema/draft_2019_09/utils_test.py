@@ -1,6 +1,8 @@
 import unittest
-from .utils import to_canonical_uri
+
 import parameterized
+
+from .utils import to_canonical_uri
 
 
 class TestToCanonicalURI(unittest.TestCase):
