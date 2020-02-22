@@ -4,7 +4,7 @@ from uritools import uridecode
 
 from pyjschema.common import Keyword
 
-from .exceptions import SchemaError
+from .exceptions import InternalError, SchemaError
 from .utils import to_canonical_uri
 
 
@@ -12,7 +12,7 @@ def raise_if_not_ready(func):
     @wraps(func)
     def wrapper(self, *arg, **kwargs):
         if not self.is_resolved:
-            raise Exception(
+            raise InternalError(
                 "You are trying to call a method on a reference that is not resolved. Call the resolve method"
             )
         return func(self, *arg, **kwargs)
@@ -79,7 +79,7 @@ class RecursiveRef(Keyword):
 
     @property
     def is_resolved(self):
-        return all([self.abs_uri is not None, self._validator is not None])
+        return all([self._validator is not None])
 
     def resolve(self):
         from .validator import Validator
