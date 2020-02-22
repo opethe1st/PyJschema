@@ -43,7 +43,7 @@ class _Items(KeywordGroup):
                 )
 
     def __repr__(self):
-        return f"Items(items_validator={self._items_validator}, items_validators={self._items_validators}, add_item_validator={self._additional_items_validator})"
+        return f"Items(items_validator(s)={self._items_validator or self._items_validators}, add_item_validator={self._additional_items_validator})"
 
     @correct_type(type_=list)
     def validate(self, instance):
