@@ -2,9 +2,10 @@ import unittest
 
 import parameterized
 
+from pyjschema.exceptions import SchemaError
+
 from .validator import Validator
 from .validator_construction import build_validator_and_resolve_references
-from .exceptions import SchemaError
 
 
 class TestValidator(unittest.TestCase):

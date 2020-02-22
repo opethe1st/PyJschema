@@ -3,7 +3,7 @@ import numbers
 import typing
 from collections.abc import Mapping, Sequence
 
-from pyjschema.draft_2019_09.exceptions import InternalError
+from pyjschema.exceptions import InternalError
 
 from .validation_error import ValidationError
 

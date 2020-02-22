@@ -3,8 +3,8 @@ import os
 import typing
 
 from pyjschema.common import ValidationError
+from pyjschema.exceptions import SchemaError
 
-from .exceptions import SchemaError
 from .referencing import resolve_references
 from .types import AcceptAll, RejectAll
 from .validator import Validator

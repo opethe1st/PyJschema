@@ -1,8 +1,9 @@
 import unittest
 
-from .ref import Ref, RecursiveRef
+from pyjschema.exceptions import InternalError, SchemaError
+
+from .ref import RecursiveRef, Ref
 from .validator import Validator
-from .exceptions import SchemaError, InternalError
 
 
 class DummyValidator(Validator):

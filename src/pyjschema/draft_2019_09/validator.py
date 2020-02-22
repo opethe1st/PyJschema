@@ -2,6 +2,7 @@ import itertools
 import typing as t
 
 from pyjschema.common import AValidator, ValidationError
+from pyjschema.exceptions import SchemaError
 
 from .constants import KEYWORDS_TO_VALIDATOR
 from .defs import Defs
@@ -13,7 +14,7 @@ from .types.number import (
     _ExclusiveMinimum,
     _Maximum,
     _Minimum,
-    _MultipleOf,
+    _MultipleOf
 )
 from .types.object_ import (
     _DependentRequired,
@@ -21,9 +22,8 @@ from .types.object_ import (
     _MinProperties,
     _Property,
     _PropertyNames,
-    _Required,
+    _Required
 )
-from .exceptions import SchemaError
 from .types.string import _MaxLength, _MinLength, _Pattern
 from .types.type_ import Type
 

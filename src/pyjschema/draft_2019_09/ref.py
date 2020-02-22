@@ -3,8 +3,8 @@ from functools import wraps
 from uritools import uridecode
 
 from pyjschema.common import Keyword
+from pyjschema.exceptions import InternalError, SchemaError
 
-from .exceptions import InternalError, SchemaError
 from .utils import to_canonical_uri
 
 
