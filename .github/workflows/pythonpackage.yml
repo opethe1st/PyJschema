@@ -40,4 +40,4 @@ jobs:
         coverage report
     - name: benchmarks
       run: |
-        pytest benchmarks
+        pytest performance
