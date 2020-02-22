@@ -23,6 +23,7 @@ from .types.object_ import (
     _PropertyNames,
     _Required,
 )
+from .exceptions import SchemaError
 from .types.string import _MaxLength, _MinLength, _Pattern
 from .types.type_ import Type
 
@@ -65,6 +66,12 @@ TYPE_TO_KEYWORD_VALIDATORS = {
 }
 
 
+KEYWORDS_THAT_REQUIRE_ANNOTATION_COLLECTION = set([
+    "unevaluatedProperties",
+    "unevaluatedItems"
+])
+
+
 class Validator(AValidator):
     """
     This corresponds to a schema
@@ -72,6 +79,12 @@ class Validator(AValidator):
 
     def __init__(self, schema, location=None, parent=None):
         super().__init__(schema=schema, location=location, parent=parent)
+        unsupported_keywords = KEYWORDS_THAT_REQUIRE_ANNOTATION_COLLECTION & set(schema.keys())
+        if unsupported_keywords:
+            raise SchemaError(
+                "Unable to process this Schema because this library doesn't support annotation collection"
+                f" - which is required for these keywords- {unsupported_keywords} present in the schema"
+            )
         self._validators: t.List[AValidator] = []
 
         self.recursiveAnchor = schema.get("$recursiveAnchor", False)
@@ -87,7 +100,7 @@ class Validator(AValidator):
 
         if "$defs" in schema:
             self._validators.append(
-                Defs(schema=schema, location=f"{location}/$defs", parent=self)
+                Defs(schema=schema, location=location, parent=self)
             )
 
         if "$ref" in schema:
@@ -96,7 +109,7 @@ class Validator(AValidator):
         for key, ValidatorClass in KEYWORDS_TO_VALIDATOR.items():
             if key in schema:
                 self._validators.append(
-                    ValidatorClass(schema=schema, location=f"{location}", parent=self)
+                    ValidatorClass(schema=schema, location=location, parent=self)
                 )
 
         types = schema.get("type")

@@ -11,7 +11,7 @@ class Defs(Keyword):
 
         self._validators = {
             key: build_validator(
-                schema=value, location=f"{location}/{key}", parent=self
+                schema=value, location=f"{self.location}/{key}", parent=self
             )
             for key, value in self.value.items()
         }
