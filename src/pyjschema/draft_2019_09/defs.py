@@ -1,18 +1,18 @@
-from pyjschema.common import KeywordGroup
+from pyjschema.common import Keyword
 
 
-class Defs(KeywordGroup):
+class Defs(Keyword):
     """
     This is corresponds to the $defs keyword
     """
+    keyword = "$defs"
 
     def __init__(self, schema: dict, location=None, parent=None):
         super().__init__(schema=schema, location=location, parent=parent)
-        defs = schema["$defs"]
         from .validator_construction import build_validator
 
         self._validators = {
-            key: build_validator(schema=value, location=f'{location}/{key}', parent=self) for key, value in defs.items()
+            key: build_validator(schema=value, location=f'{location}/{key}', parent=self) for key, value in self.value.items()
         }
 
     def validate(self, instance):

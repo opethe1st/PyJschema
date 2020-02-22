@@ -1,7 +1,7 @@
 import itertools
 import typing
 
-from pyjschema.common import KeywordGroup, ValidationError
+from pyjschema.common import Keyword, KeywordGroup, ValidationError
 
 from .common import correct_type, validate_max, validate_min
 
@@ -109,7 +109,6 @@ def _validate_item_list(items_validators, additional_items_validator, instance):
 
 class _Contains(KeywordGroup):
     def __init__(self, schema: dict, location=None, parent=None):
-        super().__init__(schema=schema, location=location, parent=parent)
         from pyjschema.draft_2019_09 import build_validator
 
         contains = schema.get("contains")
@@ -155,30 +154,24 @@ class _Contains(KeywordGroup):
             yield self._validator
 
 
-class _MinItems(KeywordGroup):
-    def __init__(self, schema: dict, location=None, parent=None):
-        super().__init__(schema=schema, location=location, parent=parent)
-        self.value = schema["minItems"]
+class _MinItems(Keyword):
+    keyword = "minItems"
 
     @correct_type(type_=list)
     def validate(self, instance):
         return validate_min(value=self.value, instance=instance)
 
 
-class _MaxItems(KeywordGroup):
-    def __init__(self, schema: dict, location=None, parent=None):
-        super().__init__(schema=schema, location=location, parent=parent)
-        self.value = schema["maxItems"]
+class _MaxItems(Keyword):
+    keyword = "maxItems"
 
     @correct_type(type_=list)
     def validate(self, instance):
         return validate_max(value=self.value, instance=instance)
 
 
-class _UniqueItems(KeywordGroup):
-    def __init__(self, schema: dict, location=None, parent=None):
-        super().__init__(schema=schema, location=location, parent=parent)
-        self.value = schema["uniqueItems"]
+class _UniqueItems(Keyword):
+    keyword = "uniqueItems"
 
     @correct_type(type_=list)
     def validate(self, instance):

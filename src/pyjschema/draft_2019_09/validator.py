@@ -93,7 +93,7 @@ class Validator(AValidator):
 
         for key, ValidatorClass in KEYWORDS_TO_VALIDATOR.items():
             if key in schema:
-                self._validators.append(ValidatorClass(schema=schema, location=f"{location}/{key}", parent=self))
+                self._validators.append(ValidatorClass(schema=schema, location=f"{location}", parent=self))
 
         types = schema.get("type")
         if isinstance(types, str):

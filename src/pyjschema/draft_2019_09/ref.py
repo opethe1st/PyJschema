@@ -2,7 +2,7 @@ from functools import wraps
 
 from uritools import uridecode
 
-from pyjschema.common import KeywordGroup
+from pyjschema.common import Keyword
 
 from .exceptions import SchemaError
 from .utils import to_canonical_uri
@@ -20,10 +20,12 @@ def raise_if_not_ready(func):
     return wrapper
 
 
-class Ref(KeywordGroup):
+class Ref(Keyword):
+    keyword = "$ref"
+
     def __init__(self, schema):
         super().__init__(schema=schema)
-        self.value = uridecode(schema["$ref"].replace("~1", "/").replace("~0", "~"))
+        self.value = uridecode(self.value.replace("~1", "/").replace("~0", "~"))
         self._validator = None
         self.abs_uri = None
 
@@ -63,10 +65,13 @@ class Ref(KeywordGroup):
         return f"Ref(value={self.abs_uri!r})"
 
 
-class RecursiveRef(KeywordGroup):
+class RecursiveRef(Keyword):
+
+    keyword = "$recursiveRef"
+
     def __init__(self, schema, parent=None):
         super().__init__(schema=schema, parent=parent)
-        self.value = uridecode(schema["$recursiveRef"].replace("~1", "/").replace("~0", "~"))
+        self.value = uridecode(self.value.replace("~1", "/").replace("~0", "~"))
         self._validator = None
         self.abs_uri = None
         self.is_resolved = False

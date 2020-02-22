@@ -33,11 +33,16 @@ class AValidator(abc.ABC):
 class KeywordGroup(AValidator):
     """
     Validator for a group of keywords that are dependent on each other.
-    This also includes the case where there is one keyword
     """
 
+    def __init__(self):
+        raise NotImplementedError
 
-class Keyword(KeywordGroup):
+    def sub_validators(self) -> typing.Iterable["AValidator"]:
+        raise NotImplementedError
+
+
+class Keyword(AValidator):
     keyword: typing.Optional[str] = None
 
     def __init__(self, schema: dict, location=None, parent=None):
@@ -45,6 +50,7 @@ class Keyword(KeywordGroup):
             raise Exception("You need to provide a keyword to this function")
         self.value = schema[self.keyword]
         super().__init__(schema=schema, location=location, parent=parent)
+        self.location = f"{self.location}/{self.keyword}"
 
     def __repr__(self):
         return f"{self.__class__.__name__}({self.value})"
