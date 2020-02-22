@@ -1,0 +1,81 @@
+
+
+$(id: "schema.org"){
+    type string {
+        pattern: "[a-zA-Z][\w]*"
+        minLength: 20
+        maxLength: 20
+    }
+}
+
+
+$(id: "schema.org"){
+    enum {
+        "ACTIVE"
+        "INACTIVE"
+        "PENDING"
+    }
+}
+
+$(id: "schema.org"){
+    const {
+        "key": "value"
+        "key2": "value2"
+    }
+}
+
+$(id: "schema.org"){
+    type array {
+        items ${
+            type string {
+                minLength: 0
+            }
+        }
+    }
+}
+
+----
+$(
+    id: "schema.org"
+    title: "My schema"
+    description: "Some description"
+    # put other annotations about the schema here
+){
+    object Person {
+        propGroup {
+            props {
+                string! name
+                GreaterThan18! age
+                string description
+                [Person] neighbors
+            }
+            remainingProps string
+            patternProps {
+                string "abc"
+            }
+        }
+        minItems 1
+        maxItems 10
+    }
+}
+
+defs {
+    GreaterThan18 {
+        string
+    }
+}
+----
+
+# is type needed? Just have object - we can deduce that there is a type.
+The grammar is ${} - schema.
+keyword <name> <(annotations)>{assertions}
+
+Rules
+---
+string takes these assertions -
+* pattern - needs to be valid regex
+* minLength - needs to be a nonegative integer
+* maxLength - needs to be a nonegative integer
+
+integer/number takes these assertions -
+* maximum
