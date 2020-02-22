@@ -2,9 +2,7 @@ from pyjschema.common import Keyword
 
 
 class Defs(Keyword):
-    """
-    This is corresponds to the $defs keyword
-    """
+
     keyword = "$defs"
 
     def __init__(self, schema: dict, location=None, parent=None):

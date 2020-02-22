@@ -1,7 +1,7 @@
 from pyjschema.common import KeywordGroup, ValidationError, Keyword
 
 
-class If(KeywordGroup):
+class IfElseThen(KeywordGroup):
 
     def __init__(self, schema: dict, location=None, parent=None):
         from .validator_construction import build_validator
