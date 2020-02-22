@@ -107,7 +107,7 @@ class _Required(Keyword):
     keyword = "required"
 
     def __init__(self, schema: dict, location=None, parent=None):
-        super().__init__(schema=schema, location=f"{location}/required", parent=parent)
+        super().__init__(schema=schema, location=location, parent=parent)
         required = schema["required"]
         self.value = required
 
