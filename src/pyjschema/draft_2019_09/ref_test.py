@@ -14,7 +14,6 @@ class DummyValidator:
 
 
 class TestRefResolve(unittest.TestCase):
-
     def test(self):
         ref = DummyRef()
         ref.base_uri = "https://localhost:5000/root.json"

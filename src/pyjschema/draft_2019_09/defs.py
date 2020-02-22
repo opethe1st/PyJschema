@@ -10,7 +10,10 @@ class Defs(Keyword):
         from .validator_construction import build_validator
 
         self._validators = {
-            key: build_validator(schema=value, location=f'{location}/{key}', parent=self) for key, value in self.value.items()
+            key: build_validator(
+                schema=value, location=f"{location}/{key}", parent=self
+            )
+            for key, value in self.value.items()
         }
 
     def validate(self, instance):

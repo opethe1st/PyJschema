@@ -6,7 +6,6 @@ from .validator_construction import build_validator_and_resolve_references
 
 
 class TestValidator(unittest.TestCase):
-
     @parameterized.parameterized.expand(
         [
             ({"data": [{"data": "innner data"}], "children": []}, True),
@@ -25,21 +24,19 @@ class TestValidator(unittest.TestCase):
                     "type": "object",
                     "properties": {
                         "data": True,
-                        "children": {
-                            "type": "array",
-                            "items": {"$ref": "tree"},
-                        }
+                        "children": {"type": "array", "items": {"$ref": "tree"},},
                     },
-                    "required": ["data", "children"]
+                    "required": ["data", "children"],
                 }
-            }
+            },
         }
 
-        validator, uri_to_validator = build_validator_and_resolve_references(schema=schema)
+        validator, uri_to_validator = build_validator_and_resolve_references(
+            schema=schema
+        )
 
         self.assertEqual(
-            result,
-            bool(validator.validate(instance=instance)),
+            result, bool(validator.validate(instance=instance)),
         )
 
 
@@ -48,7 +45,6 @@ class TestRecursiveRef(unittest.TestCase):
         [
             ({"data": [{"data": "innner data"}]}, True),
             ({"data": [{"data": "innner data"}], "anotherProperty": []}, False),
-
         ]
     )
     def test_recursive_ref(self, instance, result):
@@ -62,24 +58,23 @@ class TestRecursiveRef(unittest.TestCase):
                 "tree": {
                     "$id": "tree",
                     "$recursiveAnchor": False,
-
                     "type": "object",
                     "properties": {
                         "data": True,
                         "children": {
                             "$recursiveAnchor": True,
-
                             "type": "array",
                             "items": {"$recursiveRef": "#"},
-                        }
+                        },
                     },
                 }
-            }
+            },
         }
 
-        validator, uri_to_validator = build_validator_and_resolve_references(schema=schema)
+        validator, uri_to_validator = build_validator_and_resolve_references(
+            schema=schema
+        )
 
         self.assertEqual(
-            result,
-            bool(validator.validate(instance=instance)),
+            result, bool(validator.validate(instance=instance)),
         )

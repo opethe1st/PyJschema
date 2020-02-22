@@ -5,7 +5,6 @@ from typing import List
 
 
 class IValidator(ABC):
-
     def __init__(self):
         self.context = {}
 
@@ -57,6 +56,7 @@ class Pattern(IValidator):
     def __init__(self, value: str):
         # needs to a valid regex
         import re
+
         self.value = value
         self.regex = re.compile(self.value)
 
@@ -166,7 +166,9 @@ class Zip(IValidator):
         # need to make sure instance is a list - (need to a be ordered)
         if not isinstance(instance, list):
             return False
-        return all(validator(value) for value, validator in zip(instance, self.validators))
+        return all(
+            validator(value) for value, validator in zip(instance, self.validators)
+        )
 
 
 class Each(IValidator):
@@ -238,7 +240,6 @@ class Enum(IValidator):
 
 
 class Unique(IValidator):
-
     def __call__(self, instance):
         # needs to a sequence
         return len(set(instance)) == len(instance)
@@ -317,12 +318,7 @@ Make sure this works with recursive Schemas
 
 if __name__ == "__main__":
     validator = And(
-        Each(
-            validator=Or(
-                Ref('nested-list'),
-                Types(str),
-            ),
-        ),
+        Each(validator=Or(Ref("nested-list"), Types(str),),),
         Types(list),
         name="nested-list",
     )

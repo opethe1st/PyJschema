@@ -12,6 +12,7 @@ class _Items(KeywordGroup):
         from pyjschema.draft_2019_09.validator_construction import (
             BuildValidatorResultType,
         )
+
         self.parent = parent
 
         items = schema.get("items")
@@ -19,20 +20,27 @@ class _Items(KeywordGroup):
 
         self._items_validator: typing.Optional[BuildValidatorResultType] = None
         self._items_validators: typing.List[BuildValidatorResultType] = []
-        self._additional_items_validator: typing.Optional[BuildValidatorResultType] = None
+        self._additional_items_validator: typing.Optional[
+            BuildValidatorResultType
+        ] = None
         if items is not None:
             if isinstance(items, list):
                 self._items_validators = [
-                    build_validator(schema=schema, location=f"{location}/items/{i}", parent=self) for i, schema in enumerate(items)
+                    build_validator(
+                        schema=schema, location=f"{location}/items/{i}", parent=self
+                    )
+                    for i, schema in enumerate(items)
                 ]
                 if items is not None and additionalItems is not None:
                     self._additional_items_validator = build_validator(
                         schema=additionalItems,
                         location=f"{location}/additionalItems",
-                        parent=self
+                        parent=self,
                     )
             else:
-                self._items_validator = build_validator(schema=items, location=f"{location}/items", parent=self)
+                self._items_validator = build_validator(
+                    schema=items, location=f"{location}/items", parent=self
+                )
 
     def __repr__(self):
         return f"Items(items_validator={self._items_validator}, items_validators={self._items_validators}, add_item_validator={self._additional_items_validator})"
@@ -115,7 +123,13 @@ class _Contains(KeywordGroup):
         maxContains = schema.get("maxContains")
         minContains = schema.get("minContains")
 
-        self._validator = build_validator(schema=contains, location=f"{location}/contains", parent=self) if contains is not None else None
+        self._validator = (
+            build_validator(
+                schema=contains, location=f"{location}/contains", parent=self
+            )
+            if contains is not None
+            else None
+        )
         self.maxContainsValue = maxContains if maxContains else float("inf")
         self.minContainsValue = minContains if minContains else -float("inf")
 

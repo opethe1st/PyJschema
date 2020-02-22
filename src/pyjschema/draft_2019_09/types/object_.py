@@ -15,18 +15,31 @@ class _Property(KeywordGroup):
         additionalProperties = schema.get("additionalProperties")
         patternProperties = schema.get("patternProperties")
         self._validators = (
-            {key: build_validator(schema=prop, location=f"{location}/properties/{key}", parent=self) for key, prop in properties.items()}
+            {
+                key: build_validator(
+                    schema=prop, location=f"{location}/properties/{key}", parent=self
+                )
+                for key, prop in properties.items()
+            }
             if properties
             else {}
         )
         self._additional_validator = (
-            build_validator(schema=additionalProperties, location=f"{location}/additionalProperties", parent=self)
+            build_validator(
+                schema=additionalProperties,
+                location=f"{location}/additionalProperties",
+                parent=self,
+            )
             if additionalProperties is not None
             else None
         )
         self._pattern_validators = (
             {
-                re.compile(key): build_validator(schema=properties, location=f"{location}/patternProperties/{key}", parent=self)
+                re.compile(key): build_validator(
+                    schema=properties,
+                    location=f"{location}/patternProperties/{key}",
+                    parent=self,
+                )
                 for key, properties in patternProperties.items()
             }
             if patternProperties

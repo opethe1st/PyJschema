@@ -43,9 +43,9 @@ class Ref(Keyword):
 
     def _get_abs_uri(self):
         # needs to be called after self.base)uri has been set to canonical form
-        if self.value == '#':
+        if self.value == "#":
             return self.value
-        return to_canonical_uri(uri=self.value, current_base_uri=self.base_uri or '')
+        return to_canonical_uri(uri=self.value, current_base_uri=self.base_uri or "")
 
     def _get_validator(self, uri_to_validator):
         # test this?

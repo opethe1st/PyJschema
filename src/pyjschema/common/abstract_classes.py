@@ -16,9 +16,7 @@ class AValidator(abc.ABC):
     def __init__(self, schema: typing.Dict, location=None, parent=None):
         schema = {} if isinstance(schema, bool) else schema
         self.parent = parent
-        self.id = self.base_uri = (
-            schema["$id"] if schema.get("$id") else None
-        )
+        self.id = self.base_uri = schema["$id"] if schema.get("$id") else None
         self.location = location
         self.anchor = schema["$anchor"] if schema.get("$anchor") else None
 

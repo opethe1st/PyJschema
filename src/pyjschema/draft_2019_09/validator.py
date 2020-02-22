@@ -13,7 +13,7 @@ from .types.number import (
     _ExclusiveMinimum,
     _Maximum,
     _Minimum,
-    _MultipleOf
+    _MultipleOf,
 )
 from .types.object_ import (
     _DependentRequired,
@@ -21,7 +21,7 @@ from .types.object_ import (
     _MinProperties,
     _Property,
     _PropertyNames,
-    _Required
+    _Required,
 )
 from .types.string import _MaxLength, _MinLength, _Pattern
 from .types.type_ import Type
@@ -86,14 +86,18 @@ class Validator(AValidator):
             self.id = schema["$id"].rstrip("#")
 
         if "$defs" in schema:
-            self._validators.append(Defs(schema=schema, location=f"{location}/$defs", parent=self))
+            self._validators.append(
+                Defs(schema=schema, location=f"{location}/$defs", parent=self)
+            )
 
         if "$ref" in schema:
             self._validators.append(Ref(schema=schema))
 
         for key, ValidatorClass in KEYWORDS_TO_VALIDATOR.items():
             if key in schema:
-                self._validators.append(ValidatorClass(schema=schema, location=f"{location}", parent=self))
+                self._validators.append(
+                    ValidatorClass(schema=schema, location=f"{location}", parent=self)
+                )
 
         types = schema.get("type")
         if isinstance(types, str):
@@ -105,7 +109,11 @@ class Validator(AValidator):
             if not types or type_ in types:
                 for keywords, KeywordValidator in keyword_to_keyword_validators.items():
                     if any(keyword in schema for keyword in keywords):
-                        self._validators.append(KeywordValidator(schema=schema, location=location, parent=self))
+                        self._validators.append(
+                            KeywordValidator(
+                                schema=schema, location=location, parent=self
+                            )
+                        )
 
     def validate(self, instance):
         errors = validate_instance_against_all_validators(

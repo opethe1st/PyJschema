@@ -46,5 +46,7 @@ def correct_type(type_):
                 return func(self=self, instance=instance)
             else:
                 return True
+
         return wrapped_function
+
     return wrapper
