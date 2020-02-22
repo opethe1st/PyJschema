@@ -24,21 +24,6 @@ def validate_instance_against_all_validators(
     )
 
 
-def validate_instance_against_any_validator(
-    validators: typing.List[AValidator], instance
-):
-    errors = []
-
-    for validator in validators:
-        res = validator.validate(instance=instance)
-        if res:
-            return True
-        else:
-            errors.append(res)
-
-    yield from errors
-
-
 def correct_type(type_):
     def wrapper(func):
         def wrapped_function(self, instance):

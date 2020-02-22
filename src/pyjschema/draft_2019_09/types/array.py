@@ -139,7 +139,6 @@ class _Contains(KeywordGroup):
         if self._validator:
             count = 0
             for value in instance:
-                # should just be one validator
                 res = self._validator.validate(value)
 
                 if res:
