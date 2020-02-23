@@ -9,9 +9,7 @@ from .validator import Validator
 
 
 def _populate_uri_to_validator(
-    validator: AValidator,
-    root_base_uri,
-    uri_to_validator: Dict,
+    validator: AValidator, root_base_uri, uri_to_validator: Dict,
 ):
     """
     This needs to be run after _set_to_canonical_uri because _set_to_canonical_uri propagates
@@ -22,7 +20,11 @@ def _populate_uri_to_validator(
     - canonical id + location
     - canonical id + anchor
     """
-    if isinstance(validator, (Keyword, AValidator)) and not isinstance(validator, KeywordGroup) and validator.location:
+    if (
+        isinstance(validator, (Keyword, AValidator))
+        and not isinstance(validator, KeywordGroup)
+        and validator.location
+    ):
         uri_to_validator[urijoin(root_base_uri, "#" + validator.location)] = validator
 
     if validator.id is not None and isinstance(validator, Validator):

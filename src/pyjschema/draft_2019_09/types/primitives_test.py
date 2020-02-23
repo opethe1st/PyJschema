@@ -27,7 +27,9 @@ class TestConst(unittest.TestCase):
 
 class TestEnum(unittest.TestCase):
     def test_const_true(self):
-        validator = Enum(schema={"enum": [5432, "a string", [], {}]}, location=None, parent=None)
+        validator = Enum(
+            schema={"enum": [5432, "a string", [], {}]}, location=None, parent=None
+        )
         assert validator(instance="a string")
 
     def test_const_false(self):

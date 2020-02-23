@@ -14,7 +14,7 @@ from .types.number import (
     _ExclusiveMinimum,
     _Maximum,
     _Minimum,
-    _MultipleOf
+    _MultipleOf,
 )
 from .types.object_ import (
     _DependentRequired,
@@ -22,7 +22,7 @@ from .types.object_ import (
     _MinProperties,
     _Property,
     _PropertyNames,
-    _Required
+    _Required,
 )
 from .types.string import _MaxLength, _MinLength, _Pattern
 from .types.type_ import Type
@@ -91,7 +91,9 @@ class Validator(AValidator):
         self.recursiveAnchor = schema.get("$recursiveAnchor", False)
 
         if "$recursiveRef" in schema:
-            self._validators.append(RecursiveRef(schema=schema, location=location, parent=parent))
+            self._validators.append(
+                RecursiveRef(schema=schema, location=location, parent=parent)
+            )
 
         if "$anchor" in schema:
             self.anchor = "#" + schema["$anchor"]
@@ -100,7 +102,9 @@ class Validator(AValidator):
             self._validators.append(Defs(schema=schema, location=location, parent=self))
 
         if "$ref" in schema:
-            self._validators.append(Ref(schema=schema, location=location, parent=parent))
+            self._validators.append(
+                Ref(schema=schema, location=location, parent=parent)
+            )
 
         for key, ValidatorClass in KEYWORDS_TO_VALIDATOR.items():
             if key in schema:

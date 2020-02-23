@@ -25,6 +25,7 @@ def validate_instance_against_all_validators(
 
 def validate_only(type_):
     "this is makes sure that we only validate instance of the correct type"
+
     def wrapper(validate):
         def wrapped_function(self, instance):
             if isinstance(instance, type_):

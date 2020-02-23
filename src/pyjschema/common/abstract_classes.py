@@ -19,7 +19,9 @@ class AValidator(abc.ABC):
     def __init__(self, schema: typing.Dict, location=None, parent=None):
         schema = {} if isinstance(schema, bool) else schema
         if "$id" in schema:
-            self.id = to_canonical_uri(current_base_uri=parent.base_uri if parent else "", uri=schema["$id"])
+            self.id = to_canonical_uri(
+                current_base_uri=parent.base_uri if parent else "", uri=schema["$id"]
+            )
             self.base_uri = self.id
         else:
             self.base_uri = parent.base_uri if parent else ""
@@ -39,6 +41,7 @@ class KeywordGroup(AValidator):
     """
     Validator for a group of keywords that are dependent on each other.
     """
+
     # I could do something similar to what I did for Keyword here by having a keyword class variable
 
     def sub_validators(self) -> typing.Iterable["AValidator"]:
