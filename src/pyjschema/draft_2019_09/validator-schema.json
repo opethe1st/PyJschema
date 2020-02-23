@@ -62,6 +62,10 @@
                     "uniqueItems": true
                 }
             ]
+        },
+        "$defs": {
+            "type": "object",
+            "additionalProperties": {"$ref": "#"}
         }
     },
     "$defs": {

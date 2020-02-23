@@ -14,36 +14,37 @@ __all__ = ["validate_once", "Validator", "construct_validator"]
 
 def construct_validator(schema):
     schema_validator = meta_schema_validator(
-        schema=schema.get("$schema") if isinstance(schema, dict) else {}
+        schema=schema.get("$schema") if isinstance(schema, dict) else {}, uri_to_validator={}
     )
-    # Need to wrap schema errors here and reraisr as SchemaErrors
-    if schema_validator(instance=schema):
-        validator, _ = build_validator_and_resolve_references(schema=schema)
+    error = schema_validator(instance=schema)
+    uri_to_validator = {schema_validator.id: schema_validator}
+    if error:
+        validator = build_validator_and_resolve_references(schema=schema, uri_to_validator=uri_to_validator)
         return validator
     else:
         raise SchemaError("Schema is invalid according to the meta-schema")
 
 
 def validate_once(schema: typing.Union[dict, bool], instance: dict) -> ValidationError:
-    validator, _ = build_validator_and_resolve_references(schema=schema)
+    validator = construct_validator(schema=schema)
     return validator(instance=instance)
 
 
-def meta_schema_validator(schema):
+def meta_schema_validator(schema, uri_to_validator):
     base_dir = os.path.dirname(__file__)
     with open(os.path.join(base_dir, "validator-schema.json"), "r") as file:
         schema = json.load(file)
-    validator, _ = build_validator_and_resolve_references(schema)
+    validator = build_validator_and_resolve_references(schema, uri_to_validator)
     return validator
 
 
 BuildValidatorResultType = typing.Union[AcceptAll, RejectAll, Validator]
 
 
-def build_validator_and_resolve_references(schema):
+def build_validator_and_resolve_references(schema, uri_to_validator):
     validator = build_validator(schema=schema)
-    uri_to_validator = resolve_references(root_validator=validator)
-    return validator, uri_to_validator
+    resolve_references(root_validator=validator, uri_to_validator=uri_to_validator)
+    return validator
 
 
 def build_validator(

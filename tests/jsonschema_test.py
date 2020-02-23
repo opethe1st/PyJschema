@@ -50,13 +50,13 @@ KEYWORDS = (
     + ARRAY_KEYWORDS
     + OBJECT_KEYWORDS
     + [
-        "anchor",  # need to support non-canonical URIs - support relate pointers in $id
-        # "defs", # needs "https://json-schema.org/draft/2019-09/schema" in the ref
+        "anchor",
+        "defs",
         "const",
         "enum",
         "boolean_schema",
         "default",
-        "ref",  # need root ref - #, also escaped json-pointers,
+        "ref",
         # "refRemote",
     ]
 )

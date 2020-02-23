@@ -34,8 +34,9 @@ class TestValidator(unittest.TestCase):
             },
         }
 
-        validator, uri_to_validator = build_validator_and_resolve_references(
-            schema=schema
+        validator = build_validator_and_resolve_references(
+            schema=schema,
+            uri_to_validator= {}
         )
 
         self.assertEqual(
@@ -81,8 +82,9 @@ class TestRecursiveRef(unittest.TestCase):
             },
         }
 
-        validator, uri_to_validator = build_validator_and_resolve_references(
-            schema=schema
+        validator = build_validator_and_resolve_references(
+            schema=schema,
+            uri_to_validator={},
         )
 
         self.assertEqual(
