@@ -1,6 +1,6 @@
 import unittest
 
-from pyjschema.exceptions import InternalError, SchemaError
+from pyjschema.exceptions import ProgrammerError, SchemaError
 
 from .ref import RecursiveRef, Ref
 from .validator import Validator
@@ -78,5 +78,5 @@ class TestRecursiveRef(unittest.TestCase):
         validator = DummyValidator(parent=parent, recursiveAnchor=True)
         recursiveRef = RecursiveRef(schema={"$recursiveRef": "#"}, parent=validator)
 
-        with self.assertRaises(InternalError):
+        with self.assertRaises(ProgrammerError):
             recursiveRef(True)

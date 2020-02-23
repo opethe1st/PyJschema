@@ -3,7 +3,7 @@ from functools import wraps
 from uritools import uridecode
 
 from pyjschema.common import Keyword
-from pyjschema.exceptions import InternalError, SchemaError
+from pyjschema.exceptions import ProgrammerError, SchemaError
 
 from .utils import to_canonical_uri
 
@@ -12,7 +12,7 @@ def raise_if_not_ready(func):
     @wraps(func)
     def wrapper(self, *arg, **kwargs):
         if not self.is_resolved:
-            raise InternalError(
+            raise ProgrammerError(
                 "You are trying to call a method on a reference that is not resolved. Call the resolve method"
             )
         return func(self, *arg, **kwargs)
@@ -46,7 +46,7 @@ class Ref(Keyword):
 
     def _get_abs_uri(self):
         if self.base_uri is None:
-            raise Exception("base_uri cannot be None")
+            raise ProgrammerError("base_uri cannot be None")
         if self.value == "#":
             return self.value
         return to_canonical_uri(uri=self.value, current_base_uri=self.base_uri or "")

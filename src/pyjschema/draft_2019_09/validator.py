@@ -84,7 +84,7 @@ class Validator(AValidator):
         if unsupported_keywords:
             raise SchemaError(
                 "Unable to process this Schema because this library doesn't support annotation collection"
-                f" - which is required for these keywords- {unsupported_keywords} present in the schema"
+                f" - which is required for these keywords - {unsupported_keywords} present in the schema"
             )
         self._validators: t.List[AValidator] = []
 
