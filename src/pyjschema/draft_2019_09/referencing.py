@@ -2,31 +2,14 @@ from typing import Dict
 
 from uritools import urijoin
 
-from pyjschema.common import AValidator
+from pyjschema.common import AValidator, Keyword, KeywordGroup
 
-from .ref import Ref, RecursiveRef
-from .utils import to_canonical_uri
+from .ref import RecursiveRef, Ref
 from .validator import Validator
 
 
-# actually, I could do this in the constructor instead of here.
-def _set_to_canonical_uri(validator: AValidator, parent_URI):
-    if not validator.base_uri:
-        validator.base_uri = parent_URI
-    elif validator.id is not None:
-        validator.id = validator.base_uri = to_canonical_uri(
-            current_base_uri=parent_URI, uri=validator.base_uri
-        )
-
-    for sub_validator in validator.sub_validators():
-        _set_to_canonical_uri(validator=sub_validator, parent_URI=validator.base_uri)
-
-
-def _generate_context(
-    validator: AValidator,
-    root_base_uri,
-    uri_to_validator: Dict,
-    uri_to_root_location: Dict,
+def _populate_uri_to_validator(
+    validator: AValidator, root_base_uri, uri_to_validator: Dict,
 ):
     """
     This needs to be run after _set_to_canonical_uri because _set_to_canonical_uri propagates
@@ -37,13 +20,16 @@ def _generate_context(
     - canonical id + location
     - canonical id + anchor
     """
-    if hasattr(validator, "location") and validator.location:
+    if (
+        isinstance(validator, (Keyword, AValidator))
+        and not isinstance(validator, KeywordGroup)
+        and validator.location
+    ):
         uri_to_validator[urijoin(root_base_uri, "#" + validator.location)] = validator
 
     if validator.id is not None and isinstance(validator, Validator):
         validator_id = validator.id.rstrip("/")
         uri_to_validator[validator_id] = validator
-        uri_to_root_location[validator_id] = validator.location
 
     if validator.anchor:
         uri_to_validator[
@@ -51,11 +37,10 @@ def _generate_context(
         ] = validator
 
     for sub_validator in validator.sub_validators():
-        _generate_context(
+        _populate_uri_to_validator(
             validator=sub_validator,
             root_base_uri=root_base_uri,
             uri_to_validator=uri_to_validator,
-            uri_to_root_location=uri_to_root_location,
         )
 
 
@@ -74,15 +59,10 @@ def _resolve_references(validator: AValidator, uri_to_validator: Dict):
 
 
 def resolve_references(root_validator):
-    _set_to_canonical_uri(
-        validator=root_validator, parent_URI=root_validator.base_uri or ""
-    )
-    uri_to_root_location = {"": root_validator.base_uri, "#": root_validator.base_uri}
     uri_to_validator = {"": root_validator, "#": root_validator}
-    _generate_context(
+    _populate_uri_to_validator(
         validator=root_validator,
         root_base_uri=root_validator.base_uri or "",
-        uri_to_root_location=uri_to_root_location,
         uri_to_validator=uri_to_validator,
     )
     _resolve_references(

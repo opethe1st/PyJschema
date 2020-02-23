@@ -2,13 +2,13 @@ import numbers
 
 from pyjschema.common import ValidationError, Keyword
 
-from .common import correct_type
+from .common import validate_only
 
 
 class _MultipleOf(Keyword):
     keyword = "multipleOf"
 
-    @correct_type(type_=(int, numbers.Number))
+    @validate_only(type_=(int, numbers.Number))
     def __call__(self, instance):
         # using this multipier here so that the precision is better
         multiplier = 100000
@@ -22,7 +22,7 @@ class _MultipleOf(Keyword):
 class _Minimum(Keyword):
     keyword = "minimum"
 
-    @correct_type(type_=(int, numbers.Number))
+    @validate_only(type_=(int, numbers.Number))
     def __call__(self, instance):
         if instance < self.value:
             return ValidationError()
@@ -32,7 +32,7 @@ class _Minimum(Keyword):
 class _Maximum(Keyword):
     keyword = "maximum"
 
-    @correct_type(type_=(int, numbers.Number))
+    @validate_only(type_=(int, numbers.Number))
     def __call__(self, instance):
         if self.value < instance:
             return ValidationError()
@@ -42,7 +42,7 @@ class _Maximum(Keyword):
 class _ExclusiveMinimum(Keyword):
     keyword = "exclusiveMinimum"
 
-    @correct_type(type_=(int, numbers.Number))
+    @validate_only(type_=(int, numbers.Number))
     def __call__(self, instance):
         if instance <= self.value:
             return ValidationError()
@@ -52,7 +52,7 @@ class _ExclusiveMinimum(Keyword):
 class _ExclusiveMaximum(Keyword):
     keyword = "exclusiveMaximum"
 
-    @correct_type(type_=(int, numbers.Number))
+    @validate_only(type_=(int, numbers.Number))
     def __call__(self, instance):
         if self.value <= instance:
             return ValidationError()

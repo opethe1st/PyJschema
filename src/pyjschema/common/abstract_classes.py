@@ -3,7 +3,8 @@ import numbers
 import typing
 from collections.abc import Mapping, Sequence
 
-from pyjschema.exceptions import InternalError
+from pyjschema.utils import to_canonical_uri
+from pyjschema.exceptions import ProgrammerError
 
 from .validation_error import ValidationError
 
@@ -17,10 +18,16 @@ class AValidator(abc.ABC):
 
     def __init__(self, schema: typing.Dict, location=None, parent=None):
         schema = {} if isinstance(schema, bool) else schema
+        if "$id" in schema:
+            self.id = to_canonical_uri(
+                current_base_uri=parent.base_uri if parent else "", uri=schema["$id"]
+            )
+            self.base_uri = self.id
+        else:
+            self.base_uri = parent.base_uri if parent else ""
         self.parent = parent
-        self.id = self.base_uri = schema["$id"] if schema.get("$id") else None
         self.location = location
-        self.anchor = schema["$anchor"] if schema.get("$anchor") else None
+        self.anchor = schema.get("$anchor")
 
     @abc.abstractmethod
     def __call__(self, instance: JsonType) -> ValidationError:
@@ -35,8 +42,7 @@ class KeywordGroup(AValidator):
     Validator for a group of keywords that are dependent on each other.
     """
 
-    def __init__(self):
-        raise NotImplementedError
+    # I could do something similar to what I did for Keyword here by having a keyword class variable
 
     def sub_validators(self) -> typing.Iterable["AValidator"]:
         raise NotImplementedError
@@ -45,9 +51,9 @@ class KeywordGroup(AValidator):
 class Keyword(AValidator):
     keyword: typing.Optional[str] = None
 
-    def __init__(self, schema: dict, location=None, parent=None):
+    def __init__(self, schema: dict, location, parent):
         if self.keyword is None:
-            raise InternalError("You need to provide a keyword to this function")
+            raise ProgrammerError("You need to provide a keyword to this function")
         self.value = schema[self.keyword]
         super().__init__(schema=schema, location=location, parent=parent)
         self.location = f"{self.location}/{self.keyword}"

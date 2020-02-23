@@ -3,16 +3,16 @@ from functools import wraps
 from uritools import uridecode
 
 from pyjschema.common import Keyword
-from pyjschema.exceptions import InternalError, SchemaError
+from pyjschema.exceptions import ProgrammerError, SchemaError
 
-from .utils import to_canonical_uri
+from pyjschema.utils import to_canonical_uri
 
 
 def raise_if_not_ready(func):
     @wraps(func)
     def wrapper(self, *arg, **kwargs):
         if not self.is_resolved:
-            raise InternalError(
+            raise ProgrammerError(
                 "You are trying to call a method on a reference that is not resolved. Call the resolve method"
             )
         return func(self, *arg, **kwargs)
@@ -23,8 +23,8 @@ def raise_if_not_ready(func):
 class Ref(Keyword):
     keyword = "$ref"
 
-    def __init__(self, schema):
-        super().__init__(schema=schema)
+    def __init__(self, schema, location, parent):
+        super().__init__(schema=schema, location=location, parent=parent)
         self.value = uridecode(self.value.replace("~1", "/").replace("~0", "~"))
         self._validator = None
         self.abs_uri = None
@@ -46,7 +46,7 @@ class Ref(Keyword):
 
     def _get_abs_uri(self):
         if self.base_uri is None:
-            raise Exception("base_uri cannot be None")
+            raise ProgrammerError("base_uri cannot be None")
         if self.value == "#":
             return self.value
         return to_canonical_uri(uri=self.value, current_base_uri=self.base_uri or "")
@@ -71,8 +71,8 @@ class RecursiveRef(Keyword):
 
     keyword = "$recursiveRef"
 
-    def __init__(self, schema, parent=None):
-        super().__init__(schema=schema, parent=parent)
+    def __init__(self, schema, location, parent):
+        super().__init__(schema=schema, location=location, parent=parent)
         self.value = uridecode(self.value.replace("~1", "/").replace("~0", "~"))
         self._validator = None
         self.abs_uri = None

@@ -1,6 +1,6 @@
 import unittest
 
-from pyjschema.exceptions import InternalError, SchemaError
+from pyjschema.exceptions import ProgrammerError, SchemaError
 
 from .ref import RecursiveRef, Ref
 from .validator import Validator
@@ -17,7 +17,7 @@ class DummyValidator(Validator):
 
 class TestRefResolve(unittest.TestCase):
     def test(self):
-        ref = Ref(schema={"$ref": "other.json"})
+        ref = Ref(schema={"$ref": "other.json"}, location=None, parent=None)
         ref.base_uri = "https://localhost:5000/root.json"
         validator = DummyValidator()
 
@@ -26,7 +26,7 @@ class TestRefResolve(unittest.TestCase):
         self.assertEqual(ref._validator, validator)
 
     def test_unknown_validator(self):
-        ref = Ref(schema={"$ref": "other.json"})
+        ref = Ref(schema={"$ref": "other.json"}, location=None, parent=None)
         ref.base_uri = "https://localhost:5000/root.json"
         validator = DummyValidator()
 
@@ -39,7 +39,9 @@ class TestRefResolve(unittest.TestCase):
 class TestRecursiveRef(unittest.TestCase):
     def test_is_root(self):
         validator = DummyValidator()
-        recursiveRef = RecursiveRef(schema={"$recursiveRef": "#"}, parent=validator)
+        recursiveRef = RecursiveRef(
+            schema={"$recursiveRef": "#"}, location=None, parent=validator
+        )
 
         recursiveRef.resolve()
 
@@ -48,7 +50,9 @@ class TestRecursiveRef(unittest.TestCase):
     def test_is_not_root(self):
         parent = DummyValidator()
         validator = DummyValidator(parent=parent, recursiveAnchor=False)
-        recursiveRef = RecursiveRef(schema={"$recursiveRef": "#"}, parent=validator)
+        recursiveRef = RecursiveRef(
+            schema={"$recursiveRef": "#"}, location=None, parent=validator
+        )
 
         recursiveRef.resolve()
 
@@ -57,7 +61,9 @@ class TestRecursiveRef(unittest.TestCase):
     def test_is_recursive_ref_true(self):
         parent = DummyValidator()
         validator = DummyValidator(parent=parent, recursiveAnchor=True)
-        recursiveRef = RecursiveRef(schema={"$recursiveRef": "#"}, parent=validator)
+        recursiveRef = RecursiveRef(
+            schema={"$recursiveRef": "#"}, location=None, parent=validator
+        )
 
         recursiveRef.resolve()
 
@@ -66,7 +72,9 @@ class TestRecursiveRef(unittest.TestCase):
     def test_recursive_anchor_true_at_root(self):
         parent = DummyValidator(recursiveAnchor=True)
         validator = DummyValidator(parent=parent, recursiveAnchor=True)
-        recursiveRef = RecursiveRef(schema={"$recursiveRef": "#"}, parent=validator)
+        recursiveRef = RecursiveRef(
+            schema={"$recursiveRef": "#"}, location=None, parent=validator
+        )
 
         recursiveRef.resolve()
 
@@ -76,7 +84,9 @@ class TestRecursiveRef(unittest.TestCase):
     def test_resolve_before_validator_resolved(self):
         parent = DummyValidator(recursiveAnchor=True)
         validator = DummyValidator(parent=parent, recursiveAnchor=True)
-        recursiveRef = RecursiveRef(schema={"$recursiveRef": "#"}, parent=validator)
+        recursiveRef = RecursiveRef(
+            schema={"$recursiveRef": "#"}, location=None, parent=validator
+        )
 
-        with self.assertRaises(InternalError):
+        with self.assertRaises(ProgrammerError):
             recursiveRef(True)

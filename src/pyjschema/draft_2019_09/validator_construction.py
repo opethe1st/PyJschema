@@ -13,7 +13,9 @@ __all__ = ["validate_once", "Validator", "construct_validator"]
 
 
 def construct_validator(schema):
-    schema_validator = meta_schema_validator(schema=schema.get("$schema") if isinstance(schema, dict) else {})
+    schema_validator = meta_schema_validator(
+        schema=schema.get("$schema") if isinstance(schema, dict) else {}
+    )
     # Need to wrap schema errors here and reraisr as SchemaErrors
     if schema_validator(instance=schema):
         validator, _ = build_validator_and_resolve_references(schema=schema)
@@ -39,8 +41,7 @@ BuildValidatorResultType = typing.Union[AcceptAll, RejectAll, Validator]
 
 
 def build_validator_and_resolve_references(schema):
-    schemaInstance = schema
-    validator = build_validator(schema=schemaInstance)
+    validator = build_validator(schema=schema)
     uri_to_validator = resolve_references(root_validator=validator)
     return validator, uri_to_validator
 

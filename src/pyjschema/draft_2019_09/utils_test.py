@@ -2,7 +2,7 @@ import unittest
 
 import parameterized
 
-from .utils import to_canonical_uri
+from pyjschema.utils import to_canonical_uri
 
 
 class TestToCanonicalURI(unittest.TestCase):
