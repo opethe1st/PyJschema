@@ -3,7 +3,7 @@ from pyjschema.common import KeywordGroup, ValidationError, Keyword
 
 class IfElseThen(KeywordGroup):
     def __init__(self, schema: dict, location=None, parent=None):
-        super().__init__(schema=schema, location=location, parent=None)
+        super().__init__(schema=schema, location=location, parent=parent)
         from .validator_construction import build_validator
 
         self._if_validator = build_validator(

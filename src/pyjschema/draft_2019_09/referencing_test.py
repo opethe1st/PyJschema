@@ -44,7 +44,6 @@ class Test_GenerateContext(unittest.TestCase):
             validator=validator,
             root_base_uri=validator.base_uri,
             uri_to_validator=uri_to_validator,
-            # uri_to_root_location=uri_to_root_location,
         )
 
         self.assertDictEqual(
