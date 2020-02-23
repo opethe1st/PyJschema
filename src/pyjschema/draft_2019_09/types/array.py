@@ -9,18 +9,13 @@ from .common import validate_only, validate_max, validate_min
 class _Items(KeywordGroup):
     def __init__(self, schema: dict, location=None, parent=None):
         super().__init__(schema=schema, location=location, parent=parent)
-        from pyjschema.draft_2019_09.validator_construction import (
-            BuildValidatorResultType,
-        )
 
         items = schema.get("items")
         additionalItems = schema.get("additionalItems")
 
-        self._items_validator: typing.Optional[BuildValidatorResultType] = None
-        self._items_validators: typing.List[BuildValidatorResultType] = []
-        self._additional_items_validator: typing.Optional[
-            BuildValidatorResultType
-        ] = None
+        self._items_validator: typing.Optional = None
+        self._items_validators: typing.List = []
+        self._additional_items_validator: typing.Optional = None
         if items is not None:
             if isinstance(items, list):
                 self._items_validators = [
