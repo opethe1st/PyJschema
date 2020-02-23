@@ -12,7 +12,6 @@ def _populate_uri_to_validator(
     validator: AValidator,
     root_base_uri,
     uri_to_validator: Dict,
-    uri_to_root_location: Dict,
 ):
     """
     This needs to be run after _set_to_canonical_uri because _set_to_canonical_uri propagates
@@ -29,7 +28,6 @@ def _populate_uri_to_validator(
     if validator.id is not None and isinstance(validator, Validator):
         validator_id = validator.id.rstrip("/")
         uri_to_validator[validator_id] = validator
-        uri_to_root_location[validator_id] = validator.location
 
     if validator.anchor:
         uri_to_validator[
@@ -41,7 +39,6 @@ def _populate_uri_to_validator(
             validator=sub_validator,
             root_base_uri=root_base_uri,
             uri_to_validator=uri_to_validator,
-            uri_to_root_location=uri_to_root_location,
         )
 
 
@@ -60,12 +57,10 @@ def _resolve_references(validator: AValidator, uri_to_validator: Dict):
 
 
 def resolve_references(root_validator):
-    uri_to_root_location = {"": root_validator.base_uri, "#": root_validator.base_uri}
     uri_to_validator = {"": root_validator, "#": root_validator}
     _populate_uri_to_validator(
         validator=root_validator,
         root_base_uri=root_validator.base_uri or "",
-        uri_to_root_location=uri_to_root_location,
         uri_to_validator=uri_to_validator,
     )
     _resolve_references(

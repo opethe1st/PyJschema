@@ -39,13 +39,12 @@ class Test_GenerateContext(unittest.TestCase):
             id=validator_id, validators=[sub_validator2, sub_validator3,], location=""
         )
         uri_to_validator = {}
-        uri_to_root_location = {}
 
         _populate_uri_to_validator(
             validator=validator,
             root_base_uri=validator.base_uri,
             uri_to_validator=uri_to_validator,
-            uri_to_root_location=uri_to_root_location,
+            # uri_to_root_location=uri_to_root_location,
         )
 
         self.assertDictEqual(
@@ -58,14 +57,6 @@ class Test_GenerateContext(unittest.TestCase):
                 "http://localhost:5000/schema.json#schema456": sub_validator2,
                 "http://localhost:5000/schema.json#schema123/schema678": sub_validator4,
                 "http://localhost:5000/schema.json#schema456/schema789": sub_validator1,
-            },
-        )
-        self.assertDictEqual(
-            uri_to_root_location,
-            {
-                "http://localhost:5000/another.json": "schema456",
-                "http://localhost:5000/schema.json": "",
-                "http://localhost:5000/schema123.json": "schema123",
             },
         )
 
