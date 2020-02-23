@@ -23,11 +23,12 @@ def validate_instance_against_all_validators(
     )
 
 
-def correct_type(type_):
-    def wrapper(func):
+def validate_only(type_):
+    "this is makes sure that we only validate instance of the correct type"
+    def wrapper(validate):
         def wrapped_function(self, instance):
             if isinstance(instance, type_):
-                return func(self=self, instance=instance)
+                return validate(self=self, instance=instance)
             else:
                 return True
 

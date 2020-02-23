@@ -3,17 +3,16 @@ import typing
 
 from pyjschema.common import Keyword, KeywordGroup, ValidationError
 
-from .common import correct_type, validate_max, validate_min
+from .common import validate_only, validate_max, validate_min
 
 
 class _Items(KeywordGroup):
     def __init__(self, schema: dict, location=None, parent=None):
+        super().__init__(schema=schema, location=location, parent=parent)
         from pyjschema.draft_2019_09 import build_validator
         from pyjschema.draft_2019_09.validator_construction import (
             BuildValidatorResultType,
         )
-
-        self.parent = parent
 
         items = schema.get("items")
         additionalItems = schema.get("additionalItems")
@@ -45,7 +44,7 @@ class _Items(KeywordGroup):
     def __repr__(self):
         return f"Items(items_validator(s)={self._items_validator or self._items_validators}, add_item_validator={self._additional_items_validator})"
 
-    @correct_type(type_=list)
+    @validate_only(type_=list)
     def __call__(self, instance):
         if self._items_validator:
             return self._validate_items(instance=instance)
@@ -113,6 +112,7 @@ def _validate_item_list(items_validators, additional_items_validator, instance):
 
 class _Contains(KeywordGroup):
     def __init__(self, schema: dict, location=None, parent=None):
+        super().__init__(schema=schema, location=location, parent=parent)
         from pyjschema.draft_2019_09 import build_validator
 
         contains = schema.get("contains")
@@ -129,7 +129,7 @@ class _Contains(KeywordGroup):
         self.maxContainsValue = maxContains if maxContains else float("inf")
         self.minContainsValue = minContains if minContains else -float("inf")
 
-    @correct_type(type_=list)
+    @validate_only(type_=list)
     def __call__(self, instance):
 
         if self._validator:
@@ -167,7 +167,7 @@ class _Contains(KeywordGroup):
 class _MinItems(Keyword):
     keyword = "minItems"
 
-    @correct_type(type_=list)
+    @validate_only(type_=list)
     def __call__(self, instance):
         return validate_min(value=self.value, instance=instance)
 
@@ -175,7 +175,7 @@ class _MinItems(Keyword):
 class _MaxItems(Keyword):
     keyword = "maxItems"
 
-    @correct_type(type_=list)
+    @validate_only(type_=list)
     def __call__(self, instance):
         return validate_max(value=self.value, instance=instance)
 
@@ -183,7 +183,7 @@ class _MaxItems(Keyword):
 class _UniqueItems(Keyword):
     keyword = "uniqueItems"
 
-    @correct_type(type_=list)
+    @validate_only(type_=list)
     def __call__(self, instance):
         if self.value:
             itemsset = set([str(value) for value in instance])

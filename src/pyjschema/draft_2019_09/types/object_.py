@@ -3,14 +3,14 @@ import re
 
 from pyjschema.common import KeywordGroup, ValidationError, Keyword
 
-from .common import validate_max, validate_min, correct_type
+from .common import validate_max, validate_min, validate_only
 
 
 class _Property(KeywordGroup):
     def __init__(self, schema: dict, location=None, parent=None):
+        super().__init__(schema=schema, location=location, parent=parent)
         from pyjschema.draft_2019_09 import build_validator
 
-        self.parent = parent
         properties = schema.get("properties")
         additionalProperties = schema.get("additionalProperties")
         patternProperties = schema.get("patternProperties")
@@ -46,7 +46,7 @@ class _Property(KeywordGroup):
             else {}
         )
 
-    @correct_type(type_=dict)
+    @validate_only(type_=dict)
     def __call__(self, instance):
 
         errors = _validate(
@@ -111,7 +111,7 @@ class _Required(Keyword):
         required = schema["required"]
         self.value = required
 
-    @correct_type(type_=dict)
+    @validate_only(type_=dict)
     def __call__(self, instance):
         messages = []
         if set(self.value) - set(instance.keys()):
@@ -136,7 +136,7 @@ class _PropertyNames(Keyword):
 
         self._validator = build_validator(schema=self.value, location=self.location)
 
-    @correct_type(type_=dict)
+    @validate_only(type_=dict)
     def __call__(self, instance):
         errors = validate_property_names(validator=self._validator, instance=instance)
         first_result = next(errors, True)
@@ -160,7 +160,7 @@ def validate_property_names(validator, instance):
 class _MinProperties(Keyword):
     keyword = "minProperties"
 
-    @correct_type(type_=dict)
+    @validate_only(type_=dict)
     def __call__(self, instance):
         return validate_min(instance=instance, value=self.value)
 
@@ -168,7 +168,7 @@ class _MinProperties(Keyword):
 class _MaxProperties(Keyword):
     keyword = "maxProperties"
 
-    @correct_type(type_=dict)
+    @validate_only(type_=dict)
     def __call__(self, instance):
         return validate_max(instance=instance, value=self.value)
 
@@ -176,7 +176,7 @@ class _MaxProperties(Keyword):
 class _DependentRequired(Keyword):
     keyword = "dependentRequired"
 
-    @correct_type(type_=dict)
+    @validate_only(type_=dict)
     def __call__(self, instance):
         for prop, dependentProperties in self.value.items():
             if prop in instance:

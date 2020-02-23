@@ -1,7 +1,5 @@
-# validation_result has to be imported before reference_resolver, because reference_resolver depends on it
-from .validation_error import ValidationError  # isort:skip
-
-from .abstract_classes import AValidator, KeywordGroup, Keyword
+from .abstract_classes import AValidator, Keyword, KeywordGroup
+from .validation_error import ValidationError
 
 __all__ = [
     "AValidator",

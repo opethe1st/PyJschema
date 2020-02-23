@@ -5,7 +5,7 @@ from uritools import uridecode
 from pyjschema.common import Keyword
 from pyjschema.exceptions import ProgrammerError, SchemaError
 
-from .utils import to_canonical_uri
+from pyjschema.utils import to_canonical_uri
 
 
 def raise_if_not_ready(func):

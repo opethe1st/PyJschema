@@ -2,14 +2,15 @@ from typing import Dict
 
 from uritools import urijoin
 
-from pyjschema.common import AValidator
+from pyjschema.common import AValidator, KeywordGroup, Keyword
 
 from .ref import Ref, RecursiveRef
-from .utils import to_canonical_uri
+from pyjschema.utils import to_canonical_uri
 from .validator import Validator
 
 
-# actually, I could do this in the constructor instead of here.
+# # actually, I could do this in the constructor instead of here.
+# doesnt work but not sure why
 def _set_to_canonical_uri(validator: AValidator, parent_URI):
     if not validator.base_uri:
         validator.base_uri = parent_URI
@@ -37,7 +38,7 @@ def _generate_context(
     - canonical id + location
     - canonical id + anchor
     """
-    if hasattr(validator, "location") and validator.location:
+    if isinstance(validator, (Keyword, AValidator)) and not isinstance(validator, KeywordGroup) and validator.location:
         uri_to_validator[urijoin(root_base_uri, "#" + validator.location)] = validator
 
     if validator.id is not None and isinstance(validator, Validator):
