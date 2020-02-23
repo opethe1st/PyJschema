@@ -18,20 +18,14 @@ class AValidator(abc.ABC):
 
     def __init__(self, schema: typing.Dict, location=None, parent=None):
         schema = {} if isinstance(schema, bool) else schema
+        if "$id" in schema:
+            self.id = to_canonical_uri(current_base_uri=parent.base_uri if parent else "", uri=schema["$id"])
+            self.base_uri = self.id
+        else:
+            self.base_uri = parent.base_uri if parent else ""
         self.parent = parent
-        self.id = self.base_uri = schema.get("$id")
         self.location = location
         self.anchor = schema.get("$anchor")
-        self._set_base_uri()
-
-    # to replace _set_to_canonical_uri once I can use the same init in KeywordGroup
-    def _set_base_uri(self):
-        if not self.base_uri:
-            self.base_uri = self.parent.base_uri if self.parent else ""
-        elif self.id is not None:
-            self.id = self.base_uri = to_canonical_uri(
-                current_base_uri=self.parent.base_uri if self.parent else "", uri=self.base_uri
-            )
 
     @abc.abstractmethod
     def __call__(self, instance: JsonType) -> ValidationError:
@@ -54,7 +48,7 @@ class KeywordGroup(AValidator):
 class Keyword(AValidator):
     keyword: typing.Optional[str] = None
 
-    def __init__(self, schema: dict, location=None, parent=None):
+    def __init__(self, schema: dict, location, parent):
         if self.keyword is None:
             raise ProgrammerError("You need to provide a keyword to this function")
         self.value = schema[self.keyword]

@@ -1,7 +1,7 @@
 import unittest
 
 from .ref import Ref
-from .referencing import _set_to_canonical_uri, _generate_context, _resolve_references
+from .referencing import _populate_uri_to_validator, _resolve_references
 from .validator import Validator
 
 
@@ -18,94 +18,6 @@ class DummyValidator(Validator):
 
     def sub_validators(self):
         return self._validators
-
-
-class Test_AttachBaseURIs(unittest.TestCase):
-    # test that given a validator with just one base_uri, every validator within it has the same base_uri
-    def test_one_base_uri(self):
-        sub_validator1 = DummyValidator()
-        sub_validator2 = DummyValidator(validators=[sub_validator1])
-        sub_validator3 = DummyValidator()
-
-        validator_id = "http://localhost:5000/schema.json"
-        validator = DummyValidator(
-            id=validator_id, validators=[sub_validator3, sub_validator2,]
-        )
-        _set_to_canonical_uri(validator=validator, parent_URI="")
-        self.assertEqual(sub_validator1.base_uri, validator_id)
-        self.assertEqual(sub_validator2.base_uri, validator_id)
-        self.assertEqual(sub_validator3.base_uri, validator_id)
-        self.assertEqual(validator.base_uri, validator_id)
-
-    # test that given a validator with two nested base_uri this works
-    def test_two_base_uri(self):
-        sub_validator1 = DummyValidator()
-        sub_validator_id = "http://localhost:5000/another.json"
-        sub_validator2 = DummyValidator(
-            id=sub_validator_id, validators=[sub_validator1]
-        )
-        sub_validator3 = DummyValidator()
-
-        validator_id = "http://localhost:5000/schema.json"
-        validator = DummyValidator(
-            id=validator_id, validators=[sub_validator3, sub_validator2,]
-        )
-        _set_to_canonical_uri(validator=validator, parent_URI="")
-        self.assertEqual(sub_validator1.base_uri, sub_validator_id)
-        self.assertEqual(sub_validator2.base_uri, sub_validator_id)
-        self.assertEqual(sub_validator3.base_uri, validator_id)
-        self.assertEqual(validator.base_uri, validator_id)
-
-    # random test case
-    def test_three_base_uri(self):
-        sub_validator1 = DummyValidator()
-        sub_validator2_id = "http://localhost:5000/another.json"
-        sub_validator2 = DummyValidator(
-            id=sub_validator2_id, validators=[sub_validator1]
-        )
-        sub_validator4 = DummyValidator()
-        sub_validator3_id = "http://localhost:5000/schema124.json"
-        sub_validator3 = DummyValidator(
-            id=sub_validator3_id, validators=[sub_validator4]
-        )
-
-        validator_id = "http://localhost:5000/schema.json"
-        validator = DummyValidator(
-            id=validator_id, validators=[sub_validator2, sub_validator3,]
-        )
-
-        _set_to_canonical_uri(validator=validator, parent_URI="")
-
-        self.assertEqual(sub_validator1.base_uri, sub_validator2_id)
-        self.assertEqual(sub_validator2.base_uri, sub_validator2_id)
-        self.assertEqual(sub_validator3.base_uri, sub_validator3_id)
-        self.assertEqual(sub_validator4.base_uri, sub_validator3_id)
-        self.assertEqual(validator.base_uri, validator_id)
-
-    # resolve relative id
-    def test_resolve_relative_id(self):
-        sub_validator1 = DummyValidator()
-        sub_validator2_id = "http://localhost:5000/schema.json#anchor"
-        sub_validator2 = DummyValidator(id="#anchor", validators=[sub_validator1])
-        sub_validator4_id = "http://localhost:5000/schema124.json#/relative/fragment"
-        sub_validator4 = DummyValidator(id="#/relative/fragment")
-        sub_validator3_id = "http://localhost:5000/schema124.json"
-        sub_validator3 = DummyValidator(
-            id="schema124.json", validators=[sub_validator4]
-        )
-
-        validator_id = "http://localhost:5000/schema.json"
-        validator = DummyValidator(
-            id=validator_id, validators=[sub_validator2, sub_validator3,]
-        )
-
-        _set_to_canonical_uri(validator=validator, parent_URI="")
-
-        self.assertEqual(sub_validator1.base_uri, sub_validator2_id)
-        self.assertEqual(sub_validator2.base_uri, sub_validator2_id)
-        self.assertEqual(sub_validator3.base_uri, sub_validator3_id)
-        self.assertEqual(sub_validator4.base_uri, sub_validator4_id)
-        self.assertEqual(validator.base_uri, validator_id)
 
 
 class Test_GenerateContext(unittest.TestCase):
@@ -129,7 +41,7 @@ class Test_GenerateContext(unittest.TestCase):
         uri_to_validator = {}
         uri_to_root_location = {}
 
-        _generate_context(
+        _populate_uri_to_validator(
             validator=validator,
             root_base_uri=validator.base_uri,
             uri_to_validator=uri_to_validator,

@@ -91,19 +91,16 @@ class Validator(AValidator):
         self.recursiveAnchor = schema.get("$recursiveAnchor", False)
 
         if "$recursiveRef" in schema:
-            self._validators.append(RecursiveRef(schema=schema, parent=parent))
+            self._validators.append(RecursiveRef(schema=schema, location=location, parent=parent))
 
         if "$anchor" in schema:
             self.anchor = "#" + schema["$anchor"]
-
-        if "$id" in schema:
-            self.id = schema["$id"].rstrip("#")
 
         if "$defs" in schema:
             self._validators.append(Defs(schema=schema, location=location, parent=self))
 
         if "$ref" in schema:
-            self._validators.append(Ref(schema=schema))
+            self._validators.append(Ref(schema=schema, location=location, parent=parent))
 
         for key, ValidatorClass in KEYWORDS_TO_VALIDATOR.items():
             if key in schema:

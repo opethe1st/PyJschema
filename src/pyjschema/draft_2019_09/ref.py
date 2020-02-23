@@ -23,8 +23,8 @@ def raise_if_not_ready(func):
 class Ref(Keyword):
     keyword = "$ref"
 
-    def __init__(self, schema):
-        super().__init__(schema=schema)
+    def __init__(self, schema, location, parent):
+        super().__init__(schema=schema, location=location, parent=parent)
         self.value = uridecode(self.value.replace("~1", "/").replace("~0", "~"))
         self._validator = None
         self.abs_uri = None
@@ -71,8 +71,8 @@ class RecursiveRef(Keyword):
 
     keyword = "$recursiveRef"
 
-    def __init__(self, schema, parent=None):
-        super().__init__(schema=schema, parent=parent)
+    def __init__(self, schema, location, parent):
+        super().__init__(schema=schema, location=location, parent=parent)
         self.value = uridecode(self.value.replace("~1", "/").replace("~0", "~"))
         self._validator = None
         self.abs_uri = None

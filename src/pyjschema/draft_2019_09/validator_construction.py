@@ -39,8 +39,7 @@ BuildValidatorResultType = typing.Union[AcceptAll, RejectAll, Validator]
 
 
 def build_validator_and_resolve_references(schema):
-    schemaInstance = schema
-    validator = build_validator(schema=schemaInstance)
+    validator = build_validator(schema=schema)
     uri_to_validator = resolve_references(root_validator=validator)
     return validator, uri_to_validator
 
