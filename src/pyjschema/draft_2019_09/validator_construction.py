@@ -12,12 +12,16 @@ from .validator import Validator
 __all__ = ["validate_once", "Validator", "construct_validator"]
 
 
-def construct_validator(schema):
-    schema_validator = meta_schema_validator(
-        schema=schema.get("$schema") if isinstance(schema, dict) else {}, uri_to_validator={}
-    )
-    error = schema_validator(instance=schema)
-    uri_to_validator = {schema_validator.id: schema_validator}
+def construct_validator(schema, check_schema=True):
+    if check_schema:
+        schema_validator = meta_schema_validator(
+            schema=schema.get("$schema") if isinstance(schema, dict) else {}, uri_to_validator={}
+        )
+        error = schema_validator(instance=schema)
+        uri_to_validator = {schema_validator.id: schema_validator}
+    else:
+        error = True
+        uri_to_validator = {}
     if error:
         validator = build_validator_and_resolve_references(schema=schema, uri_to_validator=uri_to_validator)
         return validator
@@ -25,8 +29,8 @@ def construct_validator(schema):
         raise SchemaError("Schema is invalid according to the meta-schema")
 
 
-def validate_once(schema: typing.Union[dict, bool], instance: dict) -> ValidationError:
-    validator = construct_validator(schema=schema)
+def validate_once(schema: typing.Union[dict, bool], instance: dict, check_schema=True) -> ValidationError:
+    validator = construct_validator(schema=schema, check_schema=check_schema)
     return validator(instance=instance)
 
 
