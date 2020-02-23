@@ -2,7 +2,7 @@ import json
 import os
 import typing
 
-from pyjschema.common import ValidationError
+from pyjschema.common import ValidationError, AValidator
 from pyjschema.exceptions import SchemaError
 
 from .referencing import resolve_references
@@ -13,6 +13,8 @@ __all__ = ["validate_once", "Validator", "construct_validator"]
 
 
 def construct_validator(schema):
+    # this sets build_valdator for all instances.
+    AValidator.build_validator = staticmethod(build_validator)
     schema_validator = meta_schema_validator(
         schema=schema.get("$schema") if isinstance(schema, dict) else {}
     )
@@ -25,7 +27,7 @@ def construct_validator(schema):
 
 
 def validate_once(schema: typing.Union[dict, bool], instance: dict) -> ValidationError:
-    validator, _ = build_validator_and_resolve_references(schema=schema)
+    validator = construct_validator(schema=schema)
     return validator(instance=instance)
 
 
@@ -37,9 +39,6 @@ def meta_schema_validator(schema):
     return validator
 
 
-BuildValidatorResultType = typing.Union[AcceptAll, RejectAll, Validator]
-
-
 def build_validator_and_resolve_references(schema):
     validator = build_validator(schema=schema)
     uri_to_validator = resolve_references(root_validator=validator)
@@ -48,7 +47,7 @@ def build_validator_and_resolve_references(schema):
 
 def build_validator(
     schema: typing.Union[bool, dict], location="", parent=None
-) -> BuildValidatorResultType:
+) -> typing.Union[AcceptAll, RejectAll, Validator]:
     if isinstance(schema, dict):
         if schema.items():
             return Validator(schema=schema, location=location, parent=parent)

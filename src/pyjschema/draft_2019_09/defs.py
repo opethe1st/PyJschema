@@ -7,10 +7,9 @@ class Defs(Keyword):
 
     def __init__(self, schema: dict, location=None, parent=None):
         super().__init__(schema=schema, location=location, parent=parent)
-        from .validator_construction import build_validator
 
         self._validators = {
-            key: build_validator(
+            key: self.build_validator(
                 schema=value, location=f"{self.location}/{key}", parent=self
             )
             for key, value in self.value.items()

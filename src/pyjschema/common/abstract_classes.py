@@ -15,6 +15,7 @@ class AValidator(abc.ABC):
     id = None  # and remove this line
     base_uri = None
     anchor = None
+    build_validator = typing.Optional[typing.Callable]  # this needs to be set before instances of this class are used. build_validator is shared by all instances
 
     def __init__(self, schema: typing.Dict, location=None, parent=None):
         schema = {} if isinstance(schema, bool) else schema
