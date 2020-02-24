@@ -1,3 +1,7 @@
+from collections import ChainMap
+
+from pyjschema.exceptions import SchemaError
+
 from .boolean_applicators import AllOf, AnyOf, IfElseThen, Not, OneOf
 from .defs import Defs
 from .ref import RecursiveRef, Ref
@@ -8,7 +12,7 @@ from .types.number import (
     _ExclusiveMinimum,
     _Maximum,
     _Minimum,
-    _MultipleOf,
+    _MultipleOf
 )
 from .types.object_ import (
     _DependentRequired,
@@ -16,7 +20,7 @@ from .types.object_ import (
     _MinProperties,
     _Property,
     _PropertyNames,
-    _Required,
+    _Required
 )
 from .types.string import _MaxLength, _MinLength, _Pattern
 from .types.type_ import Type
@@ -67,3 +71,26 @@ APPLICATOR_VOCABULARY = {
     # "unevaluatedItems": UnevaluatedItems,
     # "unevaluatedProperties": UnevaluatedProperties,
 }
+
+
+def get_vocabularies(schema):
+    # Vocabularies only apply to meta-schemas right?
+    schema = schema if isinstance(schema, dict) else {}
+    # add vocabulary to the chain if it is the vocabulary
+    VOCABULARY_ID_TO_VOCABULARY = {
+        "https://json-schema.org/draft/2019-09/vocab/core": CORE_VOCABULARY,
+        "https://json-schema.org/draft/2019-09/vocab/validation": VALIDATOR_VOCABULARY,
+        "https://json-schema.org/draft/2019-09/vocab/applicator": APPLICATOR_VOCABULARY,
+    }
+    vocabularies = []
+    for vocabulary_id, required in schema.get("$vocabularies", []):
+        if required and vocabulary_id not in VOCABULARY_ID_TO_VOCABULARY:
+            raise SchemaError(f"Unsupport vocabulary: {vocabulary_id}")
+        vocabularies.append(VOCABULARY_ID_TO_VOCABULARY[vocabulary_id])
+
+    vocabularies = [
+        CORE_VOCABULARY,
+        VALIDATOR_VOCABULARY,
+        APPLICATOR_VOCABULARY,
+    ]
+    return ChainMap(*vocabularies)

@@ -1,21 +1,16 @@
 import json
 import os
 import typing
-from collections import ChainMap
 
 from pyjschema.common import ValidationError
 from pyjschema.exceptions import SchemaError
 from pyjschema.utils import context
 
-from .constants import (
-    APPLICATOR_VOCABULARY,
-    CORE_VOCABULARY,
-    VALIDATOR_VOCABULARY
-)
 from .context import BUILD_VALIDATOR, VOCABULARIES
 from .referencing import resolve_references
 from .types import AcceptAll, RejectAll
 from .validator import Validator
+from .vocabularies import get_vocabularies
 
 __all__ = ["validate_once", "Validator", "construct_validator"]
 
@@ -48,15 +43,11 @@ def meta_schema_validator(schema):
         raise SchemaError(f"Unknown meta-schema: {meta_schema}")
 
 
-def get_vocabularies(schema):
-    # add vocabulary to the chain if it is the vocabulary
-    return ChainMap(CORE_VOCABULARY, VALIDATOR_VOCABULARY, APPLICATOR_VOCABULARY)
-
-
 BuildValidatorResultType = typing.Union[AcceptAll, RejectAll, Validator]
 
 
 def build_validator_and_resolve_references(schema):
+    # Only checked when building a schema?
     vocabularies = get_vocabularies(schema=schema)
     # challenge here is that contextvars is only supported by python 3.7 upwards
     with context(VOCABULARIES, vocabularies), context(BUILD_VALIDATOR, build_validator):
