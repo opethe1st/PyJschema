@@ -47,6 +47,12 @@ class KeywordGroup(AValidator):
     def sub_validators(self) -> typing.Iterable["AValidator"]:
         raise NotImplementedError
 
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.location == other.location
+
+    def __hash__(self):
+        return hash((self.location, self.parent, self.__class__.__name__))
+
 
 class Keyword(AValidator):
     keyword: typing.Optional[str] = None
@@ -60,3 +66,9 @@ class Keyword(AValidator):
 
     def __repr__(self):
         return f"{self.__class__.__name__}({self.value})"
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.value == other.value
+
+    def __hash__(self):
+        return hash(str((self.value, self.__class__)))

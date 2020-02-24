@@ -6,25 +6,29 @@ class IfElseThen(KeywordGroup):
         super().__init__(schema=schema, location=location, parent=parent)
         from .validator_construction import build_validator
 
-        self._if_validator = build_validator(
-            schema=schema["if"], location=f"{location}/if", parent=self
+        self._if_validator = (
+            build_validator(schema=schema["if"], location=f"{location}/if", parent=self)
+            if schema.get("if")
+            else None
         )
         self._then_validator = (
             build_validator(
                 schema=schema["then"], location=f"{location}/then", parent=self
             )
-            if schema.get("then")
+            if schema.get("then") and schema.get("if")
             else None
         )
         self._else_validator = (
             build_validator(
                 schema=schema["else"], location=f"{location}/else", parent=self
             )
-            if schema.get("else")
+            if schema.get("else") and schema.get("if")
             else None
         )
 
     def __call__(self, instance):
+        if not self._if_validator:
+            return True
         if self._if_validator(instance=instance):
             if self._then_validator:
                 return self._then_validator(instance=instance)
@@ -34,7 +38,8 @@ class IfElseThen(KeywordGroup):
         return True
 
     def sub_validators(self):
-        yield self._if_validator
+        if self._if_validator:
+            yield self._if_validator
         if self._then_validator:
             yield self._then_validator
         if self._else_validator:
