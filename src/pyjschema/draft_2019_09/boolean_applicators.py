@@ -1,10 +1,11 @@
 from pyjschema.common import KeywordGroup, ValidationError, Keyword
+from pyjschema.draft_2019_09.context import BUILD_VALIDATOR
 
 
 class IfElseThen(KeywordGroup):
     def __init__(self, schema: dict, location=None, parent=None):
         super().__init__(schema=schema, location=location, parent=parent)
-        from .validator_construction import build_validator
+        build_validator = BUILD_VALIDATOR.get()
 
         self._if_validator = (
             build_validator(schema=schema["if"], location=f"{location}/if", parent=self)
@@ -51,7 +52,7 @@ class AllOf(Keyword):
 
     def __init__(self, schema: dict, location=None, parent=None):
         super().__init__(schema=schema, location=location, parent=parent)
-        from .validator_construction import build_validator
+        build_validator = BUILD_VALIDATOR.get()
 
         self._validators = [
             build_validator(schema=item, location=f"{self.location}", parent=self)
@@ -71,7 +72,7 @@ class OneOf(Keyword):
 
     def __init__(self, schema: dict, location=None, parent=None):
         super().__init__(schema=schema, location=location, parent=parent)
-        from .validator_construction import build_validator
+        build_validator = BUILD_VALIDATOR.get()
 
         self._validators = [
             build_validator(schema=item, location=self.location, parent=self)
@@ -93,7 +94,7 @@ class AnyOf(Keyword):
 
     def __init__(self, schema: dict, location=None, parent=None):
         super().__init__(schema=schema, location=location, parent=parent)
-        from .validator_construction import build_validator
+        build_validator = BUILD_VALIDATOR.get()
 
         self._validators = [
             build_validator(schema=item, location=f"{self.location}", parent=self)
@@ -113,7 +114,7 @@ class Not(Keyword):
 
     def __init__(self, schema: dict, location=None, parent=None):
         super().__init__(schema=schema, location=location, parent=parent)
-        from .validator_construction import build_validator
+        build_validator = BUILD_VALIDATOR.get()
 
         self._validator = build_validator(
             schema=self.value, location=f"{self.location}", parent=self

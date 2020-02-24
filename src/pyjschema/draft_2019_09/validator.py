@@ -2,11 +2,10 @@ import itertools
 import typing as t
 
 from pyjschema.common import AValidator, ValidationError
+from pyjschema.draft_2019_09.context import VOCABULARIES
 from pyjschema.exceptions import SchemaError
 
-from .constants import KEYWORD_TO_VALIDATOR
 from .types.common import validate_instance_against_all_validators
-
 
 KEYWORDS_THAT_REQUIRE_ANNOTATION_COLLECTION = set(
     ["unevaluatedProperties", "unevaluatedItems"]
@@ -35,10 +34,12 @@ class Validator(AValidator):
         if "$anchor" in schema:
             self.anchor = "#" + schema["$anchor"]
 
-        for key, ValidatorClass in KEYWORD_TO_VALIDATOR.items():
+        KEYWORD_TO_VALIDATOR = VOCABULARIES.get()
+
+        for key, KeywordClass in KEYWORD_TO_VALIDATOR.items():
             if key in schema:
                 self._validators.add(
-                    ValidatorClass(schema=schema, location=location, parent=self)
+                    KeywordClass(schema=schema, location=location, parent=self)
                 )
 
     def __call__(self, instance):

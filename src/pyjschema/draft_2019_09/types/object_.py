@@ -1,7 +1,8 @@
 import itertools
 import re
 
-from pyjschema.common import KeywordGroup, ValidationError, Keyword
+from pyjschema.common import Keyword, KeywordGroup, ValidationError
+from pyjschema.draft_2019_09.context import BUILD_VALIDATOR
 
 from .common import validate_max, validate_min, validate_only
 
@@ -9,7 +10,7 @@ from .common import validate_max, validate_min, validate_only
 class _Property(KeywordGroup):
     def __init__(self, schema: dict, location=None, parent=None):
         super().__init__(schema=schema, location=location, parent=parent)
-        from pyjschema.draft_2019_09 import build_validator
+        build_validator = BUILD_VALIDATOR.get()
 
         properties = schema.get("properties")
         additionalProperties = schema.get("additionalProperties")
@@ -132,7 +133,7 @@ class _PropertyNames(Keyword):
         super().__init__(schema=schema, location=location, parent=parent)
         # add this to make sure that the type is string - I have seen it missing from
         # examples in the documentation so can only assume it's allowed
-        from pyjschema.draft_2019_09 import build_validator
+        build_validator = BUILD_VALIDATOR.get()
 
         self._validator = build_validator(schema=self.value, location=self.location)
 

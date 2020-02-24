@@ -1,5 +1,3 @@
-from collections import ChainMap
-
 from .boolean_applicators import AllOf, AnyOf, IfElseThen, Not, OneOf
 from .defs import Defs
 from .ref import RecursiveRef, Ref
@@ -69,8 +67,3 @@ APPLICATOR_VOCABULARY = {
     # "unevaluatedItems": UnevaluatedItems,
     # "unevaluatedProperties": UnevaluatedProperties,
 }
-
-
-KEYWORD_TO_VALIDATOR = ChainMap(
-    CORE_VOCABULARY, VALIDATOR_VOCABULARY, APPLICATOR_VOCABULARY
-)
