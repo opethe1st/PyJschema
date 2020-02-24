@@ -14,7 +14,7 @@ __all__ = ["validate_once", "Validator", "construct_validator"]
 
 def construct_validator(schema):
     schema_validator = meta_schema_validator(
-        schema=schema.get("$schema") if isinstance(schema, dict) else {}
+        schema=schema
     )
     # Need to wrap schema errors here and reraisr as SchemaErrors
     if schema_validator(instance=schema):
@@ -30,11 +30,16 @@ def validate_once(schema: typing.Union[dict, bool], instance: dict) -> Validatio
 
 
 def meta_schema_validator(schema):
-    base_dir = os.path.dirname(__file__)
-    with open(os.path.join(base_dir, "validator-schema.json"), "r") as file:
-        schema = json.load(file)
-    validator, _ = build_validator_and_resolve_references(schema)
-    return validator
+    schema = schema if isinstance(schema, dict) else {}
+    meta_schema = schema.get("$schema", "https://json-schema.org/draft/2019-09/schema")
+    if meta_schema == "https://json-schema.org/draft/2019-09/schema":
+        base_dir = os.path.dirname(__file__)
+        with open(os.path.join(base_dir, "validator-schema.json"), "r") as file:
+            schema = json.load(file)
+        validator, _ = build_validator_and_resolve_references(schema)
+        return validator
+    else:
+        raise SchemaError(f"Unknown meta-schema: {meta_schema}")
 
 
 BuildValidatorResultType = typing.Union[AcceptAll, RejectAll, Validator]
