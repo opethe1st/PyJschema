@@ -5,12 +5,17 @@ from collections import ChainMap
 
 from pyjschema.common import ValidationError
 from pyjschema.exceptions import SchemaError
+from pyjschema.utils import context
 
-from .constants import APPLICATOR_VOCABULARY, CORE_VOCABULARY, VALIDATOR_VOCABULARY
+from .constants import (
+    APPLICATOR_VOCABULARY,
+    CORE_VOCABULARY,
+    VALIDATOR_VOCABULARY
+)
+from .context import BUILD_VALIDATOR, VOCABULARIES
 from .referencing import resolve_references
 from .types import AcceptAll, RejectAll
 from .validator import Validator
-from .context import VOCABULARIES, BUILD_VALIDATOR
 
 __all__ = ["validate_once", "Validator", "construct_validator"]
 
@@ -54,12 +59,9 @@ BuildValidatorResultType = typing.Union[AcceptAll, RejectAll, Validator]
 def build_validator_and_resolve_references(schema):
     vocabularies = get_vocabularies(schema=schema)
     # challenge here is that contextvars is only supported by python 3.7 upwards
-    vocabularies_token = VOCABULARIES.set(vocabularies)
-    build_validator_token = BUILD_VALIDATOR.set(build_validator)
-    validator = build_validator(schema=schema)
-    uri_to_validator = resolve_references(root_validator=validator)
-    VOCABULARIES.reset(vocabularies_token)
-    BUILD_VALIDATOR.reset(build_validator_token)
+    with context(VOCABULARIES, vocabularies), context(BUILD_VALIDATOR, build_validator):
+        validator = build_validator(schema=schema)
+        uri_to_validator = resolve_references(root_validator=validator)
     return validator, uri_to_validator
 
 
