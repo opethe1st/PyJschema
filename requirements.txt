@@ -1,2 +1,2 @@
 dataclasses==0.6
-uritools==3.0.0
+contextvars==2.4
