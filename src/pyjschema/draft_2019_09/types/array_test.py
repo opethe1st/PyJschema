@@ -1,6 +1,6 @@
 import unittest
 
-from pyjschema.draft_2019_09 import construct_validator
+from pyjschema.draft_2019_09 import validate_once
 
 
 class Test(unittest.TestCase):
@@ -25,5 +25,4 @@ class Test(unittest.TestCase):
             "items": [{"$ref": "#/$defs/item"},],
         }
 
-        validator = construct_validator(schema=schema)
-        self.assertEqual(bool(validator(instance)), False)
+        self.assertEqual(bool(validate_once(schema=schema, instance=instance)), False)

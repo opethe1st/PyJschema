@@ -7,7 +7,7 @@ class TestRand(unittest.TestCase):
     def test(self):
         res = validate_once(
             schema={
-                "$schema": "http://json-schema.org/draft-07/schema#",
+                "$schema": "https://json-schema.org/draft/2019-09/schema",
                 "$id": "http://example.com/product.schema.json",
                 "title": "Product",
                 "description": "A product from Acme's catalog",
