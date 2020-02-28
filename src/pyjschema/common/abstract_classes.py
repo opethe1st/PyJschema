@@ -18,6 +18,7 @@ class AValidator(abc.ABC):
 
     def __init__(self, schema: typing.Dict, location=None, parent=None):
         schema = {} if isinstance(schema, bool) else schema
+        self.schema = schema
         if "$id" in schema:
             self.id = to_canonical_uri(
                 current_base_uri=parent.base_uri if parent else "", uri=schema["$id"]

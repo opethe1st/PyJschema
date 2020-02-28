@@ -58,9 +58,47 @@ class TestRecursiveRef(unittest.TestCase):
 
         self.assertEqual(recursiveRef._validator, validator)
 
-    def test_is_recursive_ref_true(self):
-        parent = DummyValidator()
+    @unittest.expectedFailure
+    def test_use_top_parent_false(self):
+        parent = DummyValidator(recursiveAnchor=False)
+        # immediate parent is ignored
+        validator = DummyValidator(parent=parent, recursiveAnchor=False)
+        recursiveRef = RecursiveRef(
+            schema={"$recursiveRef": "#"}, location=None, parent=validator
+        )
+
+        recursiveRef.resolve()
+
+        self.assertEqual(recursiveRef._validator, parent)
+
+    def test_use_top_parent_true(self):
+        parent = DummyValidator(recursiveAnchor=True)
+        # immediate parent is ignored
+        validator = DummyValidator(parent=parent, recursiveAnchor=False)
+        recursiveRef = RecursiveRef(
+            schema={"$recursiveRef": "#"}, location=None, parent=validator
+        )
+
+        recursiveRef.resolve()
+
+        self.assertEqual(recursiveRef._validator, parent)
+
+    def test_immediate_parent_is_ignored_true(self):
+        parent = DummyValidator(recursiveAnchor=True)
+        # immediate parent is ignored
         validator = DummyValidator(parent=parent, recursiveAnchor=True)
+        recursiveRef = RecursiveRef(
+            schema={"$recursiveRef": "#"}, location=None, parent=validator
+        )
+
+        recursiveRef.resolve()
+
+        self.assertEqual(recursiveRef._validator, parent)
+
+    def test_immediate_parent_is_ignored_false(self):
+        parent = DummyValidator(recursiveAnchor=True)
+        # immediate parent is ignored
+        validator = DummyValidator(parent=parent, recursiveAnchor=False)
         recursiveRef = RecursiveRef(
             schema={"$recursiveRef": "#"}, location=None, parent=validator
         )

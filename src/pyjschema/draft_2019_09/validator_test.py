@@ -5,7 +5,7 @@ import parameterized
 from pyjschema.exceptions import SchemaError
 
 from .validator import Validator
-from .validator_construction import build_validator_and_resolve_references
+from .validator_construction import construct_validator
 
 
 class TestValidator(unittest.TestCase):
@@ -18,7 +18,6 @@ class TestValidator(unittest.TestCase):
     )
     def test_recursive_ref(self, instance, result):
         schema = {
-            "$schema": "schema",
             "$id": "https://example.com/schema",
             "$ref": "tree",
             "$defs": {
@@ -34,9 +33,7 @@ class TestValidator(unittest.TestCase):
             },
         }
 
-        validator, uri_to_validator = build_validator_and_resolve_references(
-            schema=schema
-        )
+        validator = construct_validator(schema=schema)
 
         self.assertEqual(
             result, bool(validator(instance=instance)),
@@ -59,7 +56,6 @@ class TestRecursiveRef(unittest.TestCase):
     )
     def test_recursive_ref(self, instance, result):
         schema = {
-            "$schema": "schema",
             "$id": "https://example.com/schema",
             "$ref": "tree",
             "$recursiveAnchor": False,
@@ -81,9 +77,7 @@ class TestRecursiveRef(unittest.TestCase):
             },
         }
 
-        validator, uri_to_validator = build_validator_and_resolve_references(
-            schema=schema
-        )
+        validator = construct_validator(schema=schema)
 
         self.assertEqual(
             result, bool(validator(instance=instance)),

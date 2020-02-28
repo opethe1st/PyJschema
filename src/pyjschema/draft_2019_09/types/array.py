@@ -2,14 +2,15 @@ import itertools
 import typing
 
 from pyjschema.common import Keyword, KeywordGroup, ValidationError
+from pyjschema.draft_2019_09.context import BUILD_VALIDATOR
 
-from .common import validate_only, validate_max, validate_min
+from .common import validate_max, validate_min, validate_only
 
 
 class _Items(KeywordGroup):
     def __init__(self, schema: dict, location=None, parent=None):
         super().__init__(schema=schema, location=location, parent=parent)
-        from pyjschema.draft_2019_09 import build_validator
+        build_validator = BUILD_VALIDATOR.get()
         from pyjschema.draft_2019_09.validator_construction import (
             BuildValidatorResultType,
         )
@@ -113,7 +114,7 @@ def _validate_item_list(items_validators, additional_items_validator, instance):
 class _Contains(KeywordGroup):
     def __init__(self, schema: dict, location=None, parent=None):
         super().__init__(schema=schema, location=location, parent=parent)
-        from pyjschema.draft_2019_09 import build_validator
+        build_validator = BUILD_VALIDATOR.get()
 
         contains = schema.get("contains")
         maxContains = schema.get("maxContains")

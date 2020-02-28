@@ -44,6 +44,12 @@ class TestToCanonicalURI(unittest.TestCase):
                 "/path/to/other.json",
                 "http://localhost:5000/path/to/other.json",
             ),
+            (
+                "with path",
+                "http://localhost:5000/schemas/root.json",
+                "other.json",
+                "http://localhost:5000/schemas/other.json",
+            ),
         ]
     )
     def test(self, description, current_base_uri, uri, expected_uri):
