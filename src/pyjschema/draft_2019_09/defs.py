@@ -1,4 +1,5 @@
 from pyjschema.common import Keyword
+from pyjschema.draft_2019_09.context import BUILD_VALIDATOR
 
 
 class Defs(Keyword):
@@ -7,7 +8,7 @@ class Defs(Keyword):
 
     def __init__(self, schema: dict, location=None, parent=None):
         super().__init__(schema=schema, location=location, parent=parent)
-        from .validator_construction import build_validator
+        build_validator = BUILD_VALIDATOR.get()
 
         self._validators = {
             key: build_validator(

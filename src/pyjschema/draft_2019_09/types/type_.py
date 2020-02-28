@@ -1,6 +1,6 @@
 import numbers
 
-from pyjschema.common import AValidator, ValidationError
+from pyjschema.common import Keyword, ValidationError
 
 NAME_TO_TYPE = {
     "string": str,
@@ -13,8 +13,10 @@ NAME_TO_TYPE = {
 }
 
 
-class Type(AValidator):
+class Type(Keyword):
     """Validator for a type"""
+
+    keyword = "type"
 
     def __init__(self, schema, location=None, parent=None):
         super().__init__(schema=schema, location=location, parent=parent)

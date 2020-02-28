@@ -58,11 +58,13 @@ def _resolve_references(validator: AValidator, uri_to_validator: Dict):
         )
 
 
-def resolve_references(root_validator):
-    uri_to_validator = {"": root_validator, "#": root_validator}
+def resolve_references(root_validator, uri_to_validator):
+    uri_to_validator[""] = root_validator
+    uri_to_validator["#"] = root_validator
+    uri_to_validator[root_validator.id] = root_validator
     _populate_uri_to_validator(
         validator=root_validator,
-        root_base_uri=root_validator.base_uri or "",
+        root_base_uri=root_validator.base_uri,
         uri_to_validator=uri_to_validator,
     )
     _resolve_references(
