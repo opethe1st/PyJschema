@@ -73,6 +73,9 @@ APPLICATOR_VOCABULARY = {
 }
 
 
+METASCHEMA_VALIDATORS = ChainMap(CORE_VOCABULARY, APPLICATOR_VOCABULARY, VALIDATOR_VOCABULARY)
+
+
 def get_vocabularies(schema):
     # Vocabularies only apply to meta-schemas right?
     schema = schema if isinstance(schema, dict) else {}
@@ -83,7 +86,7 @@ def get_vocabularies(schema):
         "https://json-schema.org/draft/2019-09/vocab/applicator": APPLICATOR_VOCABULARY,
     }
     vocabularies = []
-    for vocabulary_id, required in schema.get("$vocabularies", []):
+    for vocabulary_id, required in schema.get("$vocabularies", [("https://json-schema.org/draft/2019-09/vocab/core", True)]):
         if required and vocabulary_id not in VOCABULARY_ID_TO_VOCABULARY:
             raise SchemaError(f"Unsupport vocabulary: {vocabulary_id}")
         vocabularies.append(VOCABULARY_ID_TO_VOCABULARY[vocabulary_id])
