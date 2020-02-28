@@ -84,13 +84,15 @@ class RecursiveRef(Keyword):
     def resolve(self):
         from .validator import Validator
 
-        validator = self
-        while validator.parent is not None:
+        validator = self.parent.parent
+        parent_validator = self.parent
+        while validator:
             if isinstance(validator, Validator) and validator.recursiveAnchor is False:
                 break
+            parent_validator = validator
             validator = validator.parent
 
-        self._validator = validator
+        self._validator = parent_validator
 
     @raise_if_not_ready
     def __call__(self, instance):
