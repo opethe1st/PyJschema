@@ -1,10 +1,11 @@
 import contextlib
 import contextvars
-from urllib import parse
+
+from uritools import urijoin
 
 
 def to_canonical_uri(current_base_uri, uri):
-    return parse.urljoin(current_base_uri, uri)
+    return urijoin(current_base_uri, uri)
 
 
 @contextlib.contextmanager

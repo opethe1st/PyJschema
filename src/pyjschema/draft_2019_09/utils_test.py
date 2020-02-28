@@ -30,7 +30,7 @@ class TestToCanonicalURI(unittest.TestCase):
                 "with empty anchor fragment",
                 "http://localhost:5000/root.json",
                 "#",
-                "http://localhost:5000/root.json",
+                "http://localhost:5000/root.json#",
             ),
             (
                 "with json pointer",
