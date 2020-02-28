@@ -1,6 +1,6 @@
 import numbers
 
-from pyjschema.common import Keyword, ValidationError
+from pyjschema.common import Keyword
 
 NAME_TO_TYPE = {
     "string": str,
@@ -25,7 +25,7 @@ class Type(Keyword):
             types = [schema["type"]]
         self._types = types
 
-    def __call__(self, instance):
+    def __call__(self, instance, output, location=None):
         messages = []
         for type_ in self._types:
 
@@ -39,7 +39,7 @@ class Type(Keyword):
                 messages.append(f"instance is not a {type_}")
 
         if messages:
-            return ValidationError(messages=messages)
+            return False
         return True
 
     def __repr__(self):

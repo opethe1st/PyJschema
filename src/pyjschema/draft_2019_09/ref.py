@@ -34,7 +34,7 @@ class Ref(Keyword):
         return all([self.abs_uri is not None, self._validator is not None])
 
     @raise_if_not_ready
-    def __call__(self, instance):
+    def __call__(self, instance, output, location=None):
         return self._validator(instance)
 
     def resolve(self, uri_to_validator):
@@ -95,7 +95,7 @@ class RecursiveRef(Keyword):
         self._validator = parent_validator
 
     @raise_if_not_ready
-    def __call__(self, instance):
+    def __call__(self, instance, output, location=None):
         return self._validator(instance)
 
     def __repr__(self):

@@ -48,7 +48,7 @@ class _Property(KeywordGroup):
         )
 
     @validate_only(type_=dict)
-    def __call__(self, instance):
+    def __call__(self, instance, output, location=None):
 
         errors = _validate(
             property_validators=self._validators,
@@ -113,7 +113,7 @@ class _Required(Keyword):
         self.value = required
 
     @validate_only(type_=dict)
-    def __call__(self, instance):
+    def __call__(self, instance, output, location=None):
         messages = []
         if set(self.value) - set(instance.keys()):
             messages.append(
@@ -138,7 +138,7 @@ class _PropertyNames(Keyword):
         self._validator = build_validator(schema=self.value, location=self.location)
 
     @validate_only(type_=dict)
-    def __call__(self, instance):
+    def __call__(self, instance, output, location=None):
         errors = validate_property_names(validator=self._validator, instance=instance)
         first_result = next(errors, True)
         if first_result:
@@ -162,7 +162,7 @@ class _MinProperties(Keyword):
     keyword = "minProperties"
 
     @validate_only(type_=dict)
-    def __call__(self, instance):
+    def __call__(self, instance, output, location=None):
         return validate_min(instance=instance, value=self.value)
 
 
@@ -170,7 +170,7 @@ class _MaxProperties(Keyword):
     keyword = "maxProperties"
 
     @validate_only(type_=dict)
-    def __call__(self, instance):
+    def __call__(self, instance, output, location=None):
         return validate_max(instance=instance, value=self.value)
 
 
@@ -178,9 +178,9 @@ class _DependentRequired(Keyword):
     keyword = "dependentRequired"
 
     @validate_only(type_=dict)
-    def __call__(self, instance):
+    def __call__(self, instance, output, location=None):
         for prop, dependentProperties in self.value.items():
             if prop in instance:
                 if not (set(dependentProperties) < set(instance.keys())):
-                    return ValidationError()
+                    return False
         return True

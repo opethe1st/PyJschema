@@ -1,7 +1,6 @@
-import itertools
 import typing as t
 
-from pyjschema.common import AValidator, ValidationError
+from pyjschema.common import AValidator
 from pyjschema.draft_2019_09.context import VOCABULARIES
 from pyjschema.exceptions import SchemaError
 
@@ -42,7 +41,7 @@ class Validator(AValidator):
                     KeywordClass(schema=schema, location=location, parent=self)
                 )
 
-    def __call__(self, instance):
+    def __call__(self, instance, output, location=None):
         errors = validate_instance_against_all_validators(
             validators=self._validators, instance=instance
         )
@@ -50,10 +49,7 @@ class Validator(AValidator):
         if first_result:
             return True
         else:
-            return ValidationError(
-                messages=["error while validating this instance"],
-                children=itertools.chain([first_result], errors),
-            )
+            return False
 
     def sub_validators(self):
         yield from self._validators

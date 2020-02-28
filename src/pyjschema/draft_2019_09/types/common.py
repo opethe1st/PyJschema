@@ -1,17 +1,17 @@
 import typing
 
-from pyjschema.common import AValidator, ValidationError
+from pyjschema.common import AValidator
 
 
-def validate_min(value, instance, message=""):
+def validate_min(value, instance, output, location, keyword_location):
     if len(instance) < value:
-        return ValidationError(messages=[message])
+        return False
     return True
 
 
-def validate_max(value, instance, message=""):
+def validate_max(value, instance, output, location, keyword_location):
     if value < len(instance):
-        return ValidationError(messages=[message])
+        return False
     return True
 
 

@@ -1,7 +1,6 @@
-import itertools
 import typing
 
-from pyjschema.common import Keyword, KeywordGroup, ValidationError
+from pyjschema.common import Keyword, KeywordGroup
 from pyjschema.draft_2019_09.context import BUILD_VALIDATOR
 
 from .common import validate_max, validate_min, validate_only
@@ -46,7 +45,7 @@ class _Items(KeywordGroup):
         return f"Items(items_validator(s)={self._items_validator or self._items_validators}, add_item_validator={self._additional_items_validator})"
 
     @validate_only(type_=list)
-    def __call__(self, instance):
+    def __call__(self, instance, output, location=None):
         if self._items_validator:
             return self._validate_items(instance=instance)
         elif self._items_validators:
@@ -62,7 +61,7 @@ class _Items(KeywordGroup):
         if first_result:
             return True
         else:
-            return ValidationError(children=itertools.chain([first_result], errors))
+            return False
 
     def _validate_items_list(self, instance):
         results = _validate_item_list(
@@ -75,7 +74,7 @@ class _Items(KeywordGroup):
         if first_res:
             return True
         else:
-            return ValidationError(children=itertools.chain([first_res], results))
+            return False
 
     def sub_validators(self):
         if self._items_validator:
@@ -131,7 +130,7 @@ class _Contains(KeywordGroup):
         self.minContainsValue = minContains if minContains else -float("inf")
 
     @validate_only(type_=list)
-    def __call__(self, instance):
+    def __call__(self, instance, output, location=None):
 
         if self._validator:
             count = 0
@@ -144,19 +143,7 @@ class _Contains(KeywordGroup):
 
             if count and (self.minContainsValue <= count <= self.maxContainsValue):
                 return True
-
-            if not (self.minContainsValue <= count <= self.maxContainsValue):
-                return ValidationError(
-                    messages=[
-                        f"The number of items matching the contains keyword is not less than or equal to {self.minContainsValue} or greater than or equal to {self.maxContainsValue}"
-                    ]
-                )
-
-            return ValidationError(
-                messages=[
-                    "No item in this array matches the schema in the contains keyword"
-                ]
-            )
+            return False
         else:
             return True
 
@@ -169,7 +156,7 @@ class _MinItems(Keyword):
     keyword = "minItems"
 
     @validate_only(type_=list)
-    def __call__(self, instance):
+    def __call__(self, instance, output, location=None):
         return validate_min(value=self.value, instance=instance)
 
 
@@ -177,7 +164,7 @@ class _MaxItems(Keyword):
     keyword = "maxItems"
 
     @validate_only(type_=list)
-    def __call__(self, instance):
+    def __call__(self, instance, output, location=None):
         return validate_max(value=self.value, instance=instance)
 
 
@@ -185,12 +172,12 @@ class _UniqueItems(Keyword):
     keyword = "uniqueItems"
 
     @validate_only(type_=list)
-    def __call__(self, instance):
+    def __call__(self, instance, output, location=None):
         if self.value:
             itemsset = set([str(value) for value in instance])
 
             if len(itemsset) != len(instance):
-                return ValidationError()
+                return False
             # TODO(ope) - actually make sure the values are unique - is this even possible?
 
         return True

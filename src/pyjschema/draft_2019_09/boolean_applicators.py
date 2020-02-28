@@ -27,7 +27,7 @@ class IfElseThen(KeywordGroup):
             else None
         )
 
-    def __call__(self, instance):
+    def __call__(self, instance, output, location=None):
         if not self._if_validator:
             return True
         if self._if_validator(instance=instance):
@@ -59,7 +59,7 @@ class AllOf(Keyword):
             for item in self.value
         ]
 
-    def __call__(self, instance):
+    def __call__(self, instance, output, location=None):
         ok = all(validator(instance=instance) for validator in self._validators)
         return True if ok else ValidationError()
 
@@ -79,7 +79,7 @@ class OneOf(Keyword):
             for item in self.value
         ]
 
-    def __call__(self, instance):
+    def __call__(self, instance, output, location=None):
         oks = list(
             filter(
                 lambda res: res,
@@ -101,7 +101,7 @@ class AnyOf(Keyword):
             for item in self.value
         ]
 
-    def __call__(self, instance):
+    def __call__(self, instance, output, location=None):
         ok = any(validator(instance=instance) for validator in self._validators)
         return True if ok else ValidationError()
 
@@ -120,7 +120,7 @@ class Not(Keyword):
             schema=self.value, location=f"{self.location}", parent=self
         )
 
-    def __call__(self, instance):
+    def __call__(self, instance, output, location=None):
         result = self._validator(instance=instance)
         return ValidationError(messages=["not {self._validator}"]) if result else True
 

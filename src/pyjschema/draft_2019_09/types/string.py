@@ -1,4 +1,4 @@
-from pyjschema.common import Keyword, ValidationError
+from pyjschema.common import Keyword
 
 from .common import validate_max, validate_min, validate_only
 
@@ -7,9 +7,9 @@ class _MaxLength(Keyword):
     keyword = "maxLength"
 
     @validate_only(type_=str)
-    def __call__(self, instance):
+    def __call__(self, instance, output, location=None):
         return validate_max(
-            value=self.value, instance=instance, message=f"{instance} failed {self}"
+            value=self.value, instance=instance, output=output, location=location, keyword_location=self.location
         )
 
 
@@ -17,9 +17,9 @@ class _MinLength(Keyword):
     keyword = "minLength"
 
     @validate_only(type_=str)
-    def __call__(self, instance):
+    def __call__(self, instance, output, location=None):
         return validate_min(
-            value=self.value, instance=instance, message=f"{instance} failed {self}"
+            value=self.value, instance=instance, output=output, location=location, keyword_location=self.location
         )
 
 
@@ -33,7 +33,7 @@ class _Pattern(Keyword):
         self.regex = re.compile(pattern=self.value)
 
     @validate_only(type_=str)
-    def __call__(self, instance):
+    def __call__(self, instance, output, location=None):
         if not self.regex.search(instance):
-            return ValidationError(messages=[f"{instance} failed {self}"])
+            return False
         return True

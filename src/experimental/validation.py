@@ -9,7 +9,7 @@ class IValidator(ABC):
         self.context = {}
 
     @abc.abstractmethod
-    def __call__(self, instance):
+    def __call__(self, instance, output, location=None):
         pass
 
     def attach_context(self, context):
@@ -22,7 +22,7 @@ class Types(IValidator):
         super().__init__()
         self.types = types
 
-    def __call__(self, instance):
+    def __call__(self, instance, output, location=None):
         return isinstance(instance, self.types)
 
     def attach_context(self, context):
@@ -37,7 +37,7 @@ class MinLength(IValidator):
         # if not an int raise an error
         self.value = value
 
-    def __call__(self, instance):
+    def __call__(self, instance, output, location=None):
         # need to make sure it is a container first though
         return self.value < len(instance)
 
@@ -47,7 +47,7 @@ class MaxLength(IValidator):
         # if not an int raise an error
         self.value = value
 
-    def __call__(self, instance):
+    def __call__(self, instance, output, location=None):
         # need to make sure it is a Sequence first though. as long as it has a __len__ it is good
         return len(instance) < self.value
 
@@ -70,7 +70,7 @@ class Max(IValidator):
     def __init__(self, value):
         self.value = value
 
-    def __call__(self, instance):
+    def __call__(self, instance, output, location=None):
         # instance and value just need to be comparable that's all
         # so should be the same type and things like datetimes would also work
         if not isinstance(instance, self.value.__class__):
@@ -85,7 +85,7 @@ class Min(IValidator):
     def __init__(self, value):
         self.value = value
 
-    def __call__(self, instance):
+    def __call__(self, instance, output, location=None):
         # instance and value just need to be comparable that's all
         # so should be the same type and things like datetimes would also work
         return self.value < instance
@@ -98,7 +98,7 @@ class InclusiveMin(IValidator):
     def __init__(self, value):
         self.value = value
 
-    def __call__(self, instance):
+    def __call__(self, instance, output, location=None):
         return self.value <= instance
 
 
@@ -106,7 +106,7 @@ class InclusiveMax(IValidator):
     def __init__(self, value):
         self.value = value
 
-    def __call__(self, instance):
+    def __call__(self, instance, output, location=None):
         return instance <= self.value
 
 
@@ -114,7 +114,7 @@ class MultipleOf(IValidator):
     def __init__(self, value):
         self.value = value
 
-    def __call__(self, instance):
+    def __call__(self, instance, output, location=None):
         multiplier = 100000
         instance = instance * multiplier
         value = self.value * multiplier
@@ -130,7 +130,7 @@ class Or(IValidator):
         self.validators = validators
         self.context = {}
 
-    def __call__(self, instance):
+    def __call__(self, instance, output, location=None):
         # what about returning meaniful errors?
         return any(validator(instance) for validator in self.validators)
 
@@ -146,7 +146,7 @@ class And(IValidator):
         self.context = context if context else {}
         self.validators = validators
 
-    def __call__(self, instance):
+    def __call__(self, instance, output, location=None):
         return all(validator(instance) for validator in self.validators)
 
     def attach_context(self, context):
@@ -162,7 +162,7 @@ class Zip(IValidator):
     def __init__(self, validators: List):
         self.validators = validators
 
-    def __call__(self, instance):
+    def __call__(self, instance, output, location=None):
         # need to make sure instance is a list - (need to a be ordered)
         if not isinstance(instance, list):
             return False
@@ -176,7 +176,7 @@ class Each(IValidator):
         self.validator = validator
         self.context = {}
 
-    def __call__(self, instance):
+    def __call__(self, instance, output, location=None):
         #  need to be a sequence
         if isinstance(instance, str):
             return False
@@ -193,7 +193,7 @@ class PropertyNames(IValidator):
     def __init__(self, validator):
         self.validator = validator
 
-    def __call__(self, instance):
+    def __call__(self, instance, output, location=None):
         return all(self.validator(key) for key in instance.keys())
 
 
@@ -202,7 +202,7 @@ class PatternProperties(IValidator):
         # all keys need to be valid regexes
         self.pattern_to_validator = pattern_to_validator
 
-    def __call__(self, instance):
+    def __call__(self, instance, output, location=None):
         for pattern, validator in self.pattern_to_validator.items():
             for prop, value in instance.items():
                 if pattern.match(prop):
@@ -214,7 +214,7 @@ class Required(IValidator):
     def __init__(self, required: list):
         self.required = required
 
-    def __call__(self, instance):
+    def __call__(self, instance, output, location=None):
         return not bool(set(self.required) - set(instance.keys()))
 
 
@@ -226,7 +226,7 @@ class Equal(IValidator):
     def __init__(self, value):
         self.value = value
 
-    def __call__(self, instance):
+    def __call__(self, instance, output, location=None):
         return self.value == instance
 
 
@@ -235,23 +235,23 @@ class Enum(IValidator):
         # needs to be a list of values
         self.values = values
 
-    def __call__(self, instance):
+    def __call__(self, instance, output, location=None):
         return any(value == instance for value in self.values)
 
 
 class Unique(IValidator):
-    def __call__(self, instance):
+    def __call__(self, instance, output, location=None):
         # needs to a sequence
         return len(set(instance)) == len(instance)
 
 
 class Any(IValidator):
-    def __call__(self, instance):
+    def __call__(self, instance, output, location=None):
         return True
 
 
 class Nothing(IValidator):
-    def __call__(self, instance):
+    def __call__(self, instance, output, location=None):
         return False
 
 
@@ -261,7 +261,7 @@ class If(IValidator):
         self.then = then
         self.else_ = else_
 
-    def __call__(self, instance):
+    def __call__(self, instance, output, location=None):
         if self.condition(instance):
             return self.then(instance)
         else:
@@ -272,7 +272,7 @@ class Not(IValidator):
     def __init__(self, validator):
         self.validator = validator
 
-    def __call__(self, instance):
+    def __call__(self, instance, output, location=None):
         return not self.validator(instance)
 
 
@@ -288,7 +288,7 @@ class Ref(IValidator):
         self.value = value
         self.context = {}
 
-    def __call__(self, instance):
+    def __call__(self, instance, output, location=None):
         validator = self.context.get(self.value)
         if validator:
             return validator(instance=instance)
