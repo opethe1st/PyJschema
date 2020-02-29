@@ -2,7 +2,6 @@ import json
 import os
 import typing
 
-from pyjschema.common import ValidationError
 from pyjschema.exceptions import SchemaError
 from pyjschema.utils import context
 
@@ -26,9 +25,12 @@ def construct_validator(schema, check_schema=False):
         return validator
 
 
-def validate_once(schema: typing.Union[dict, bool], instance: dict, check_schema=False) -> ValidationError:
+def validate_once(schema: typing.Union[dict, bool], instance: dict, check_schema=False) -> bool:
     validator = construct_validator(schema=schema, check_schema=check_schema)
-    return validator(instance=instance)
+    output: dict = {"errors": []}
+    res = validator(instance=instance, output=output, location="")
+    output["valid"] = res
+    return res
 
 
 def meta_schema_validator(schema):

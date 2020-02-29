@@ -2,12 +2,13 @@ import numbers
 
 from pyjschema.common import Keyword
 
-from .common import validate_only
+from pyjschema.utils import validate_only, basic_output
 
 
 class _MultipleOf(Keyword):
     keyword = "multipleOf"
 
+    @basic_output(error_message="This instance {instance} is not a multiple of {value}")
     @validate_only(type_=(int, numbers.Number))
     def __call__(self, instance, output, location=None):
         # using this multipier here so that the precision is better
@@ -22,6 +23,7 @@ class _MultipleOf(Keyword):
 class _Minimum(Keyword):
     keyword = "minimum"
 
+    @basic_output("{instance} is less than {value}")
     @validate_only(type_=(int, numbers.Number))
     def __call__(self, instance, output, location=None):
         if instance < self.value:
@@ -32,6 +34,7 @@ class _Minimum(Keyword):
 class _Maximum(Keyword):
     keyword = "maximum"
 
+    @basic_output("{instance} is more than {value}")
     @validate_only(type_=(int, numbers.Number))
     def __call__(self, instance, output, location=None):
         if self.value < instance:
@@ -42,6 +45,7 @@ class _Maximum(Keyword):
 class _ExclusiveMinimum(Keyword):
     keyword = "exclusiveMinimum"
 
+    @basic_output("{instance} is more than or equal to {value}")
     @validate_only(type_=(int, numbers.Number))
     def __call__(self, instance, output, location=None):
         if instance <= self.value:
@@ -52,6 +56,7 @@ class _ExclusiveMinimum(Keyword):
 class _ExclusiveMaximum(Keyword):
     keyword = "exclusiveMaximum"
 
+    @basic_output("{instance} is less than or equal to {value}")
     @validate_only(type_=(int, numbers.Number))
     def __call__(self, instance, output, location=None):
         if self.value <= instance:

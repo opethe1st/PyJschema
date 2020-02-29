@@ -1,5 +1,6 @@
 import contextlib
 import contextvars
+import functools
 import json
 import os
 
@@ -29,3 +30,38 @@ class SchemaLoader:
                 return json.load(file)
         else:
             raise Exception(f"Unable to locate this authority: {self.authority}")
+
+
+def validate_only(type_):
+    "this is makes sure that we only validate instance of the correct type"
+
+    def wrapper(validate):
+        @functools.wraps(validate)
+        def wrapped_function(self, instance, output, location):
+            if isinstance(instance, type_):
+                return validate(self=self, instance=instance, output=output, location=location)
+            else:
+                return True
+
+        return wrapped_function
+
+    return wrapper
+
+
+def basic_output(error_message: str):
+    "if this __call__ function evaluates to false, add this message to errors"
+    def wrapper(validate):
+        @functools.wraps(validate)
+        def wrapped_function(self, instance, output, location):
+            res = validate(self=self, instance=instance, output=output, location=location)
+            if res is False:
+                output["errors"].append(
+                    {
+                        "keywordLocation": self.location,
+                        "instanceLocation": location,
+                        "error": error_message
+                    }
+                )
+            return res
+        return wrapped_function
+    return wrapper

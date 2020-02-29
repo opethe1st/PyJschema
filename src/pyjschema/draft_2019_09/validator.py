@@ -26,7 +26,7 @@ class Validator(AValidator):
                 "Unable to process this Schema because this library doesn't support annotation collection"
                 f" - which is required for these keywords - {unsupported_keywords} present in the schema"
             )
-        self._validators: t.List[AValidator] = set()
+        self._validators: t.Dict[str, AValidator] = dict()
 
         self.recursiveAnchor = schema.get("$recursiveAnchor", False)
 
@@ -37,13 +37,12 @@ class Validator(AValidator):
 
         for key, KeywordClass in KEYWORD_TO_VALIDATOR.items():
             if key in schema:
-                self._validators.add(
-                    KeywordClass(schema=schema, location=location, parent=self)
-                )
+                self._validators[key] = KeywordClass(schema=schema, location=location, parent=self)
 
     def __call__(self, instance, output, location=None):
+
         errors = validate_instance_against_all_validators(
-            validators=self._validators, instance=instance
+            validators=self._validators, instance=instance, output=output, location=location
         )
         first_result = next(errors, True)
         if first_result:
@@ -52,7 +51,7 @@ class Validator(AValidator):
             return False
 
     def sub_validators(self):
-        yield from self._validators
+        yield from self._validators.values()
 
     def __repr__(self):
         return f"Validator(validators={self._validators})"

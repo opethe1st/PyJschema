@@ -1,10 +1,10 @@
-import itertools
 import re
 
-from pyjschema.common import Keyword, KeywordGroup, ValidationError
+from pyjschema.common import Keyword, KeywordGroup
 from pyjschema.draft_2019_09.context import BUILD_VALIDATOR
+from pyjschema.utils import basic_output, validate_only
 
-from .common import validate_max, validate_min, validate_only
+from .common import validate_max, validate_min
 
 
 class _Property(KeywordGroup):
@@ -47,6 +47,7 @@ class _Property(KeywordGroup):
             else {}
         )
 
+    @basic_output("This instance: {instance} fails the combination of properties, patternProperties and additionalProperties")
     @validate_only(type_=dict)
     def __call__(self, instance, output, location=None):
 
@@ -55,12 +56,14 @@ class _Property(KeywordGroup):
             additional_validator=self._additional_validator,
             pattern_validators=self._pattern_validators,
             instance=instance,
+            location=location,
+            output=output,
         )
         first_result = next(errors, True)
         if first_result:
             return True
         else:
-            return ValidationError(children=itertools.chain([first_result], errors))
+            return False
 
     def __repr__(self):
         return f"Property(properties={self._validators}, additionalProperties={self._additional_validator}, patternProperties={self._pattern_validators})"
@@ -72,11 +75,11 @@ class _Property(KeywordGroup):
         yield from self._pattern_validators.values()
 
 
-def _validate(property_validators, additional_validator, pattern_validators, instance):
+def _validate(property_validators, additional_validator, pattern_validators, instance, location, output):
 
     for key in property_validators:
         if key in instance:
-            result = property_validators[key](instance[key])
+            result = property_validators[key](instance=instance[key], output=output, location=f"{location}/{key}")
 
             if not result:
                 yield result
@@ -88,7 +91,7 @@ def _validate(property_validators, additional_validator, pattern_validators, ins
         for key in remaining_properties:
             if regex.search(key):
                 properties_validated_by_pattern.add(key)
-                result = pattern_validators[regex](instance[key])
+                result = pattern_validators[regex](instance=instance[key], output=output, location=location)  # this is wrong. should be location/regex fix later
                 if not result:
                     yield result
 
@@ -99,7 +102,7 @@ def _validate(property_validators, additional_validator, pattern_validators, ins
 
     if additional_validator:
         for key in additionalProperties:
-            result = additional_validator(instance[key])
+            result = additional_validator(instance=instance[key], output=output, location=f"{location}/{key}")
             if not result:
                 yield result
 
@@ -112,18 +115,12 @@ class _Required(Keyword):
         required = schema["required"]
         self.value = required
 
+    @basic_output("This instance fails required")
     @validate_only(type_=dict)
     def __call__(self, instance, output, location=None):
-        messages = []
         if set(self.value) - set(instance.keys()):
-            messages.append(
-                f"There are some missing required fields: {set(self.value) - set(instance.keys())}"
-            )
-
-        if not messages:
-            return True
-        else:
-            return ValidationError(messages=messages)
+            return False
+        return True
 
 
 class _PropertyNames(Keyword):
@@ -137,22 +134,23 @@ class _PropertyNames(Keyword):
 
         self._validator = build_validator(schema=self.value, location=self.location)
 
+    @basic_output("Some propertyNames fails")
     @validate_only(type_=dict)
     def __call__(self, instance, output, location=None):
-        errors = validate_property_names(validator=self._validator, instance=instance)
+        errors = validate_property_names(validator=self._validator, instance=instance, output=output, location=location)
         first_result = next(errors, True)
         if first_result:
             return True
         else:
-            return ValidationError(children=itertools.chain([first_result], errors))
+            return False
 
     def sub_validators(self):
         yield self._validator
 
 
-def validate_property_names(validator, instance):
+def validate_property_names(validator, instance, output, location):
     for propertyName in instance:
-        res = validator(propertyName)
+        res = validator(instance=propertyName, output=output, location=f"{location}/{propertyName}")
 
         if not res:
             yield res
@@ -161,6 +159,7 @@ def validate_property_names(validator, instance):
 class _MinProperties(Keyword):
     keyword = "minProperties"
 
+    @basic_output("fails minProperties")
     @validate_only(type_=dict)
     def __call__(self, instance, output, location=None):
         return validate_min(instance=instance, value=self.value)
@@ -169,6 +168,7 @@ class _MinProperties(Keyword):
 class _MaxProperties(Keyword):
     keyword = "maxProperties"
 
+    @basic_output("fails maxProperties")
     @validate_only(type_=dict)
     def __call__(self, instance, output, location=None):
         return validate_max(instance=instance, value=self.value)
@@ -177,6 +177,7 @@ class _MaxProperties(Keyword):
 class _DependentRequired(Keyword):
     keyword = "dependentRequired"
 
+    @basic_output("fails dependentRequired")
     @validate_only(type_=dict)
     def __call__(self, instance, output, location=None):
         for prop, dependentProperties in self.value.items():

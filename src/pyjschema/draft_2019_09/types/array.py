@@ -2,8 +2,9 @@ import typing
 
 from pyjschema.common import Keyword, KeywordGroup
 from pyjschema.draft_2019_09.context import BUILD_VALIDATOR
+from pyjschema.utils import basic_output, validate_only
 
-from .common import validate_max, validate_min, validate_only
+from .common import validate_max, validate_min
 
 
 class _Items(KeywordGroup):
@@ -44,30 +45,32 @@ class _Items(KeywordGroup):
     def __repr__(self):
         return f"Items(items_validator(s)={self._items_validator or self._items_validators}, add_item_validator={self._additional_items_validator})"
 
+    @basic_output("this fails for items and additional_item")
     @validate_only(type_=list)
     def __call__(self, instance, output, location=None):
         if self._items_validator:
-            return self._validate_items(instance=instance)
+            return self._validate_items(instance=instance, output=output, location=location)
         elif self._items_validators:
-            return self._validate_items_list(instance=instance)
+            return self._validate_items_list(instance=instance, output=output, location=location)
         return True
 
-    def _validate_items(self, instance):
-        # TODO: shouldnt call this errors, more like results
-        errors = filter(
-            lambda res: not res, (self._items_validator(value) for value in instance),
+    def _validate_items(self, instance, output, location):
+        results = filter(
+            lambda res: not res, (self._items_validator(instance=value, output=output, location=f"{location}/{i}") for i, value in enumerate(instance)),
         )
-        first_result = next(errors, True)
+        first_result = next(results, True)
         if first_result:
             return True
         else:
             return False
 
-    def _validate_items_list(self, instance):
+    def _validate_items_list(self, instance, output, location):
         results = _validate_item_list(
             items_validators=self._items_validators,
             additional_items_validator=self._additional_items_validator,
             instance=instance,
+            output=output,
+            location=location
         )
         first_res = next(results, True)
 
@@ -85,14 +88,14 @@ class _Items(KeywordGroup):
             yield self._additional_items_validator
 
 
-def _validate_item_list(items_validators, additional_items_validator, instance):
+def _validate_item_list(items_validators, additional_items_validator, instance, output, location):
 
     i = 0
     while i < len(items_validators):
         if i >= len(instance):
             break
 
-        res = items_validators[i](instance[i])
+        res = items_validators[i](instance[i], output=output, location=f"{location}/{i}")
 
         if not res:
             yield res
@@ -102,7 +105,7 @@ def _validate_item_list(items_validators, additional_items_validator, instance):
     # additionalItem for the rest of the items in the instance
     if additional_items_validator:
         while i < len(instance):
-            res = additional_items_validator(instance[i])
+            res = additional_items_validator(instance[i], output=output, location=f"{location}/{i}")
 
             if not res:
                 yield res
@@ -129,14 +132,14 @@ class _Contains(KeywordGroup):
         self.maxContainsValue = maxContains if maxContains else float("inf")
         self.minContainsValue = minContains if minContains else -float("inf")
 
+    @basic_output("this instance: {instance} does not contain ")
     @validate_only(type_=list)
     def __call__(self, instance, output, location=None):
 
         if self._validator:
             count = 0
             for value in instance:
-                # should just be one validator
-                res = self._validator(value)
+                res = self._validator(instance=value, output=output, location=location)
 
                 if res:
                     count += 1
@@ -155,6 +158,7 @@ class _Contains(KeywordGroup):
 class _MinItems(Keyword):
     keyword = "minItems"
 
+    @basic_output("This has less than {value} items")
     @validate_only(type_=list)
     def __call__(self, instance, output, location=None):
         return validate_min(value=self.value, instance=instance)
@@ -163,6 +167,7 @@ class _MinItems(Keyword):
 class _MaxItems(Keyword):
     keyword = "maxItems"
 
+    @basic_output("This has more than {value} items")
     @validate_only(type_=list)
     def __call__(self, instance, output, location=None):
         return validate_max(value=self.value, instance=instance)
@@ -171,13 +176,14 @@ class _MaxItems(Keyword):
 class _UniqueItems(Keyword):
     keyword = "uniqueItems"
 
+    @basic_output("This doesnt have unique items")
     @validate_only(type_=list)
     def __call__(self, instance, output, location=None):
         if self.value:
             itemsset = set([str(value) for value in instance])
 
+            # TODO(ope) - actually make sure the values are unique - is this even possible?
             if len(itemsset) != len(instance):
                 return False
-            # TODO(ope) - actually make sure the values are unique - is this even possible?
 
         return True

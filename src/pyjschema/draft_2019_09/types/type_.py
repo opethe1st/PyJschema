@@ -1,6 +1,7 @@
 import numbers
 
 from pyjschema.common import Keyword
+from pyjschema.utils import basic_output
 
 NAME_TO_TYPE = {
     "string": str,
@@ -25,6 +26,7 @@ class Type(Keyword):
             types = [schema["type"]]
         self._types = types
 
+    @basic_output("this instance: {instance} is not of the right type: {value}")
     def __call__(self, instance, output, location=None):
         messages = []
         for type_ in self._types:
