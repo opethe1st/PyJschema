@@ -8,7 +8,7 @@ from pyjschema.utils import validate_only, basic_output
 class _MultipleOf(Keyword):
     keyword = "multipleOf"
 
-    @basic_output(error_message="This instance {instance} is not a multiple of {value}")
+    @basic_output(error_message="{instance!r} is not a multiple of {value!r}")
     @validate_only(type_=(int, numbers.Number))
     def __call__(self, instance, location=None):
         # using this multipier here so that the precision is better
@@ -23,42 +23,34 @@ class _MultipleOf(Keyword):
 class _Minimum(Keyword):
     keyword = "minimum"
 
-    @basic_output("{instance} is less than {value}")
+    @basic_output("{instance!r} is less than {value!r}")
     @validate_only(type_=(int, numbers.Number))
     def __call__(self, instance, location=None):
-        if instance < self.value:
-            return False
-        return True
+        return self.value <= instance
 
 
 class _Maximum(Keyword):
     keyword = "maximum"
 
-    @basic_output("{instance} is more than {value}")
+    @basic_output("{instance!r} is more than {value!r}")
     @validate_only(type_=(int, numbers.Number))
     def __call__(self, instance, location=None):
-        if self.value < instance:
-            return False
-        return True
+        return instance <= self.value
 
 
 class _ExclusiveMinimum(Keyword):
     keyword = "exclusiveMinimum"
 
-    @basic_output("{instance} is more than or equal to {value}")
+    @basic_output("{instance!r} is more than or equal to {value!r}")
     @validate_only(type_=(int, numbers.Number))
     def __call__(self, instance, location=None):
-        if instance <= self.value:
-            return False
-        return True
+        return self.value < instance
 
 
 class _ExclusiveMaximum(Keyword):
     keyword = "exclusiveMaximum"
 
-    @basic_output("{instance} is less than or equal to {value}")
+    @basic_output("{instance!r} is less than or equal to {value!r}")
     @validate_only(type_=(int, numbers.Number))
     def __call__(self, instance, location=None):
-        if self.value <= instance:
-            return False
-        return True
+        return instance < self.value

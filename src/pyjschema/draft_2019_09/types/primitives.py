@@ -5,7 +5,7 @@ from pyjschema.utils import basic_output
 class Const(Keyword):
     keyword = "const"
 
-    @basic_output("this instance {instance} is not equal to the constant {self.value}")
+    @basic_output("{instance!r} is not equal to the constant {value!r}")
     def __call__(self, instance, location=None):
         ok = equals(self.value, instance)
         return True if ok else False
@@ -14,7 +14,7 @@ class Const(Keyword):
 class Enum(Keyword):
     keyword = "enum"
 
-    @basic_output("this instance {instance} is not part of this enum {value}")
+    @basic_output("{instance!r} is not one of the values in this enum {value!r}")
     def __call__(self, instance, location=None):
         for value in self.value:
             if equals(value, instance):

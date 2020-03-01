@@ -4,8 +4,6 @@ from pyjschema.common import Keyword, KeywordGroup
 from pyjschema.draft_2019_09.context import BUILD_VALIDATOR
 from pyjschema.utils import basic_output, validate_only
 
-from .common import validate_max, validate_min
-
 
 class _Property(KeywordGroup):
     def __init__(self, schema: dict, location=None, parent=None):
@@ -177,7 +175,7 @@ class _MinProperties(Keyword):
     @basic_output("fails minProperties")
     @validate_only(type_=dict)
     def __call__(self, instance, location=None):
-        return validate_min(instance=instance, value=self.value)
+        return self.value <= len(instance)
 
 
 class _MaxProperties(Keyword):
@@ -186,7 +184,7 @@ class _MaxProperties(Keyword):
     @basic_output("fails maxProperties")
     @validate_only(type_=dict)
     def __call__(self, instance, location=None):
-        return validate_max(instance=instance, value=self.value)
+        return len(instance) <= self.value
 
 
 class _DependentRequired(Keyword):

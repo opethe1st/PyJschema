@@ -4,8 +4,6 @@ from pyjschema.common import Keyword, KeywordGroup
 from pyjschema.draft_2019_09.context import BUILD_VALIDATOR
 from pyjschema.utils import basic_output, validate_only
 
-from .common import validate_max, validate_min
-
 
 class _Items(KeywordGroup):
     def __init__(self, schema: dict, location=None, parent=None):
@@ -166,7 +164,7 @@ class _MinItems(Keyword):
     @basic_output("This has less than {value} items")
     @validate_only(type_=list)
     def __call__(self, instance, location=None):
-        return validate_min(value=self.value, instance=instance)
+        return self.value <= len(instance)
 
 
 class _MaxItems(Keyword):
@@ -175,7 +173,7 @@ class _MaxItems(Keyword):
     @basic_output("This has more than {value} items")
     @validate_only(type_=list)
     def __call__(self, instance, location=None):
-        return validate_max(value=self.value, instance=instance)
+        return len(instance) <= self.value
 
 
 class _UniqueItems(Keyword):

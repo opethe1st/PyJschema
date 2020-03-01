@@ -26,7 +26,7 @@ class Type(Keyword):
             types = [schema["type"]]
         self._types = types
 
-    @basic_output("this instance: {instance} is not of the right type: {value}")
+    @basic_output("{instance!r} is not of this type: {value!r}.")
     def __call__(self, instance, location=None):
         messages = []
         for type_ in self._types:
