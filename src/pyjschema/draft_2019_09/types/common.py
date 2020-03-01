@@ -16,8 +16,12 @@ def validate_max(value, instance):
 
 
 def validate_instance_against_all_validators(
-    validators: typing.Dict[str, AValidator], instance, location, output
+    validators: typing.Dict[str, AValidator], instance, location
 ):
     yield from filter(
-        lambda res: not res, (validator(instance=instance, output=output, location=f"{location}/{key}") for key, validator in validators.items()),
+        lambda res: not res,
+        (
+            validator(instance=instance, location=f"{location}/{key}")
+            for key, validator in validators.items()
+        ),
     )

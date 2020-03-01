@@ -11,7 +11,7 @@ class DummyValidator(Validator):
         self.parent = parent
         self.recursiveAnchor = recursiveAnchor
 
-    def __call__(self, instance, output, location=None):
+    def __call__(self, instance, location=None):
         return True
 
 

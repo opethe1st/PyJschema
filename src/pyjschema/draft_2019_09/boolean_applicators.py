@@ -29,15 +29,19 @@ class IfElseThen(KeywordGroup):
         )
 
     @basic_output("failed if then else")
-    def __call__(self, instance, output, location=None):
+    def __call__(self, instance, location=None):
         if not self._if_validator:
             return True
-        if self._if_validator(instance=instance, output=output, location=location):
+        if self._if_validator(instance=instance, location=location):
             if self._then_validator:
-                return self._then_validator(instance=instance, output=output, location=location) # this location is wrong
+                return self._then_validator(
+                    instance=instance, location=location
+                )  # this location is wrong
         else:
             if self._else_validator:
-                return self._else_validator(instance=instance, output=output, location=location)  # this location is wrong
+                return self._else_validator(
+                    instance=instance, location=location
+                )  # this location is wrong
         return True
 
     def sub_validators(self):
@@ -62,8 +66,11 @@ class AllOf(Keyword):
         ]
 
     @basic_output("fail allOf")
-    def __call__(self, instance, output, location=None):
-        ok = all(validator(instance=instance, output=output, location=location) for validator in self._validators)  # this location is probably wrong
+    def __call__(self, instance, location=None):
+        ok = all(
+            validator(instance=instance, location=location)
+            for validator in self._validators
+        )  # this location is probably wrong
         return True if ok else False
 
     def sub_validators(self):
@@ -83,11 +90,14 @@ class OneOf(Keyword):
         ]
 
     @basic_output("fail OneOf")
-    def __call__(self, instance, output, location=None):
+    def __call__(self, instance, location=None):
         oks = list(
             filter(
                 lambda res: res,
-                (validator(instance=instance, output=output, location=location) for validator in self._validators), # this location is probably wrong
+                (
+                    validator(instance=instance, location=location)
+                    for validator in self._validators
+                ),  # this location is probably wrong
             )
         )
         return True if len(oks) == 1 else False
@@ -106,8 +116,11 @@ class AnyOf(Keyword):
         ]
 
     @basic_output("fail AnyOf")
-    def __call__(self, instance, output, location=None):
-        ok = any(validator(instance=instance, output=output, location=location) for validator in self._validators)  # this location is probably wrong
+    def __call__(self, instance, location=None):
+        ok = any(
+            validator(instance=instance, location=location)
+            for validator in self._validators
+        )  # this location is probably wrong
         return True if ok else False
 
     def sub_validators(self):
@@ -126,8 +139,10 @@ class Not(Keyword):
         )
 
     @basic_output("failed Not validation")
-    def __call__(self, instance, output, location=None):
-        result = self._validator(instance=instance, output=output, location=location)
+    def __call__(self, instance, location=None):
+        # errors populated but not actual error.
+        # unset error?
+        result = self._validator(instance=instance, location=location)
         return False if result else True
 
     def sub_validators(self):

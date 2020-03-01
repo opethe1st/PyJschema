@@ -27,7 +27,7 @@ class Type(Keyword):
         self._types = types
 
     @basic_output("this instance: {instance} is not of the right type: {value}")
-    def __call__(self, instance, output, location=None):
+    def __call__(self, instance, location=None):
         messages = []
         for type_ in self._types:
 

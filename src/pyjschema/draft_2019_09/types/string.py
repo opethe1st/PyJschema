@@ -9,10 +9,8 @@ class _MaxLength(Keyword):
 
     @basic_output("this instance: {instance} length is more than max_length: {value}")
     @validate_only(type_=str)
-    def __call__(self, instance, output, location=None):
-        return validate_max(
-            value=self.value, instance=instance
-        )
+    def __call__(self, instance, location=None):
+        return validate_max(value=self.value, instance=instance)
 
 
 class _MinLength(Keyword):
@@ -20,10 +18,8 @@ class _MinLength(Keyword):
 
     @basic_output("this instance: {instance} length is less than min_length: {value}")
     @validate_only(type_=str)
-    def __call__(self, instance, output, location=None):
-        return validate_min(
-            value=self.value, instance=instance
-        )
+    def __call__(self, instance, location=None):
+        return validate_min(value=self.value, instance=instance)
 
 
 class _Pattern(Keyword):
@@ -37,7 +33,7 @@ class _Pattern(Keyword):
 
     @basic_output("this instance: {instance} doesnt match this pattern: {value}")
     @validate_only(type_=str)
-    def __call__(self, instance, output, location=None):
+    def __call__(self, instance, location=None):
         if not self.regex.search(instance):
             return False
         return True

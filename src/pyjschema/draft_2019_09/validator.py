@@ -37,12 +37,14 @@ class Validator(AValidator):
 
         for key, KeywordClass in KEYWORD_TO_VALIDATOR.items():
             if key in schema:
-                self._validators[key] = KeywordClass(schema=schema, location=location, parent=self)
+                self._validators[key] = KeywordClass(
+                    schema=schema, location=location, parent=self
+                )
 
-    def __call__(self, instance, output, location=None):
+    def __call__(self, instance, location=""):
 
         errors = validate_instance_against_all_validators(
-            validators=self._validators, instance=instance, output=output, location=location
+            validators=self._validators, instance=instance, location=location
         )
         first_result = next(errors, True)
         if first_result:

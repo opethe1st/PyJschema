@@ -35,8 +35,8 @@ class Ref(Keyword):
 
     @basic_output("failed recursiveRef")
     @raise_if_not_ready
-    def __call__(self, instance, output, location=None):
-        return self._validator(instance=instance, output=output, location=location)
+    def __call__(self, instance, location=None):
+        return self._validator(instance=instance, location=location)
 
     def resolve(self, uri_to_validator):
         abs_uri = self._get_abs_uri()
@@ -97,8 +97,8 @@ class RecursiveRef(Keyword):
 
     @basic_output("failed recursiveRef")
     @raise_if_not_ready
-    def __call__(self, instance, output, location=None):
-        return self._validator(instance=instance, output=output, location=location)
+    def __call__(self, instance, location=None):
+        return self._validator(instance=instance, location=location)
 
     def __repr__(self):
         return f"RecursiveRef({self._validator})"

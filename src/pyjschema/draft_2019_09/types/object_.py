@@ -47,9 +47,11 @@ class _Property(KeywordGroup):
             else {}
         )
 
-    @basic_output("This instance: {instance} fails the combination of properties, patternProperties and additionalProperties")
+    @basic_output(
+        "This instance: {instance} fails the combination of properties, patternProperties and additionalProperties"
+    )
     @validate_only(type_=dict)
-    def __call__(self, instance, output, location=None):
+    def __call__(self, instance, location=None):
 
         errors = _validate(
             property_validators=self._validators,
@@ -57,7 +59,6 @@ class _Property(KeywordGroup):
             pattern_validators=self._pattern_validators,
             instance=instance,
             location=location,
-            output=output,
         )
         first_result = next(errors, True)
         if first_result:
@@ -75,11 +76,19 @@ class _Property(KeywordGroup):
         yield from self._pattern_validators.values()
 
 
-def _validate(property_validators, additional_validator, pattern_validators, instance, location, output):
+def _validate(
+    property_validators,
+    additional_validator,
+    pattern_validators,
+    instance,
+    location,
+):
 
     for key in property_validators:
         if key in instance:
-            result = property_validators[key](instance=instance[key], output=output, location=f"{location}/{key}")
+            result = property_validators[key](
+                instance=instance[key], location=f"{location}/{key}"
+            )
 
             if not result:
                 yield result
@@ -91,7 +100,9 @@ def _validate(property_validators, additional_validator, pattern_validators, ins
         for key in remaining_properties:
             if regex.search(key):
                 properties_validated_by_pattern.add(key)
-                result = pattern_validators[regex](instance=instance[key], output=output, location=location)  # this is wrong. should be location/regex fix later
+                result = pattern_validators[regex](
+                    instance=instance[key], location=location
+                )  # this is wrong. should be location/regex fix later
                 if not result:
                     yield result
 
@@ -102,7 +113,9 @@ def _validate(property_validators, additional_validator, pattern_validators, ins
 
     if additional_validator:
         for key in additionalProperties:
-            result = additional_validator(instance=instance[key], output=output, location=f"{location}/{key}")
+            result = additional_validator(
+                instance=instance[key], location=f"{location}/{key}"
+            )
             if not result:
                 yield result
 
@@ -117,7 +130,7 @@ class _Required(Keyword):
 
     @basic_output("This instance fails required")
     @validate_only(type_=dict)
-    def __call__(self, instance, output, location=None):
+    def __call__(self, instance, location=None):
         if set(self.value) - set(instance.keys()):
             return False
         return True
@@ -136,8 +149,10 @@ class _PropertyNames(Keyword):
 
     @basic_output("Some propertyNames fails")
     @validate_only(type_=dict)
-    def __call__(self, instance, output, location=None):
-        errors = validate_property_names(validator=self._validator, instance=instance, output=output, location=location)
+    def __call__(self, instance, location=None):
+        errors = validate_property_names(
+            validator=self._validator, instance=instance, location=location
+        )
         first_result = next(errors, True)
         if first_result:
             return True
@@ -148,9 +163,9 @@ class _PropertyNames(Keyword):
         yield self._validator
 
 
-def validate_property_names(validator, instance, output, location):
+def validate_property_names(validator, instance, location):
     for propertyName in instance:
-        res = validator(instance=propertyName, output=output, location=f"{location}/{propertyName}")
+        res = validator(instance=propertyName, location=f"{location}/{propertyName}")
 
         if not res:
             yield res
@@ -161,7 +176,7 @@ class _MinProperties(Keyword):
 
     @basic_output("fails minProperties")
     @validate_only(type_=dict)
-    def __call__(self, instance, output, location=None):
+    def __call__(self, instance, location=None):
         return validate_min(instance=instance, value=self.value)
 
 
@@ -170,7 +185,7 @@ class _MaxProperties(Keyword):
 
     @basic_output("fails maxProperties")
     @validate_only(type_=dict)
-    def __call__(self, instance, output, location=None):
+    def __call__(self, instance, location=None):
         return validate_max(instance=instance, value=self.value)
 
 
@@ -179,7 +194,7 @@ class _DependentRequired(Keyword):
 
     @basic_output("fails dependentRequired")
     @validate_only(type_=dict)
-    def __call__(self, instance, output, location=None):
+    def __call__(self, instance, location=None):
         for prop, dependentProperties in self.value.items():
             if prop in instance:
                 if not (set(dependentProperties) < set(instance.keys())):

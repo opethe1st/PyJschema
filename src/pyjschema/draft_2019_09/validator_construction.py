@@ -3,7 +3,7 @@ import os
 import typing
 
 from pyjschema.exceptions import SchemaError
-from pyjschema.utils import context
+from pyjschema.utils import context, OUTPUT
 
 from .context import BUILD_VALIDATOR, VOCABULARIES
 from .referencing import resolve_references
@@ -21,15 +21,22 @@ def construct_validator(schema, check_schema=False):
         if not schema_validator(instance=schema):
             raise SchemaError("Schema is invalid according to the meta-schema")
     else:
-        validator = build_validator_and_resolve_references(schema=schema, vocabularies=get_vocabularies(schema=schema), uri_to_validator={})
+        validator = build_validator_and_resolve_references(
+            schema=schema,
+            vocabularies=get_vocabularies(schema=schema),
+            uri_to_validator={},
+        )
         return validator
 
 
-def validate_once(schema: typing.Union[dict, bool], instance: dict, check_schema=False) -> bool:
+def validate_once(
+    schema: typing.Union[dict, bool], instance: dict, check_schema=False
+) -> bool:
     validator = construct_validator(schema=schema, check_schema=check_schema)
-    output: dict = {"errors": []}
-    res = validator(instance=instance, output=output, location="")
-    output["valid"] = res
+    output = {"errors": []}
+    with context(OUTPUT, output):
+        res = validator(instance=instance, location="")
+        output["valid"] = res
     return res
 
 
@@ -44,7 +51,9 @@ def meta_schema_validator(schema):
         # Still not sure on the logic of the METASCHEMA validators.
         # Need to load the schema from a given local location. Be able to load a schema
         # that is spread over several files. nice so I can use the schemas defined directly.
-        validator = build_validator_and_resolve_references(schema=schema, vocabularies=METASCHEMA_VALIDATORS, uri_to_validator={})
+        validator = build_validator_and_resolve_references(
+            schema=schema, vocabularies=METASCHEMA_VALIDATORS, uri_to_validator={}
+        )
         return validator
     else:
         raise SchemaError(f"Unknown meta-schema: {meta_schema}")

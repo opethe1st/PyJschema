@@ -2,6 +2,10 @@ import unittest
 
 from .primitives import AcceptAll, Const, Enum, RejectAll
 
+from pyjschema.utils import OUTPUT
+
+OUTPUT.set({"errors": []})
+
 
 class TestAcceptAll(unittest.TestCase):
     def test(self):

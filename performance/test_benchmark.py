@@ -37,7 +37,7 @@ def test_fastjsonschema(benchmark):
 @pytest.mark.benchmark(group="run", min_time=0.1, max_time=0.5, min_rounds=5)
 def test_pyjschema_compiled(benchmark):
     pyjschema_validate_func = construct_validator(SCHEMA)
-    benchmark(partial(pyjschema_validate_func, INSTANCE, output={"errors":[]}, location=""))
+    benchmark(partial(pyjschema_validate_func, INSTANCE))
 
 
 @pytest.mark.benchmark(group="run", min_time=0.1, max_time=0.5, min_rounds=5)

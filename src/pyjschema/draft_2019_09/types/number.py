@@ -10,7 +10,7 @@ class _MultipleOf(Keyword):
 
     @basic_output(error_message="This instance {instance} is not a multiple of {value}")
     @validate_only(type_=(int, numbers.Number))
-    def __call__(self, instance, output, location=None):
+    def __call__(self, instance, location=None):
         # using this multipier here so that the precision is better
         multiplier = 100000
         instance = instance * multiplier
@@ -25,7 +25,7 @@ class _Minimum(Keyword):
 
     @basic_output("{instance} is less than {value}")
     @validate_only(type_=(int, numbers.Number))
-    def __call__(self, instance, output, location=None):
+    def __call__(self, instance, location=None):
         if instance < self.value:
             return False
         return True
@@ -36,7 +36,7 @@ class _Maximum(Keyword):
 
     @basic_output("{instance} is more than {value}")
     @validate_only(type_=(int, numbers.Number))
-    def __call__(self, instance, output, location=None):
+    def __call__(self, instance, location=None):
         if self.value < instance:
             return False
         return True
@@ -47,7 +47,7 @@ class _ExclusiveMinimum(Keyword):
 
     @basic_output("{instance} is more than or equal to {value}")
     @validate_only(type_=(int, numbers.Number))
-    def __call__(self, instance, output, location=None):
+    def __call__(self, instance, location=None):
         if instance <= self.value:
             return False
         return True
@@ -58,7 +58,7 @@ class _ExclusiveMaximum(Keyword):
 
     @basic_output("{instance} is less than or equal to {value}")
     @validate_only(type_=(int, numbers.Number))
-    def __call__(self, instance, output, location=None):
+    def __call__(self, instance, location=None):
         if self.value <= instance:
             return False
         return True

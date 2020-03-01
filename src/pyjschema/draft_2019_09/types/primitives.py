@@ -6,7 +6,7 @@ class Const(Keyword):
     keyword = "const"
 
     @basic_output("this instance {instance} is not equal to the constant {self.value}")
-    def __call__(self, instance, output, location=None):
+    def __call__(self, instance, location=None):
         ok = equals(self.value, instance)
         return True if ok else False
 
@@ -15,7 +15,7 @@ class Enum(Keyword):
     keyword = "enum"
 
     @basic_output("this instance {instance} is not part of this enum {value}")
-    def __call__(self, instance, output, location=None):
+    def __call__(self, instance, location=None):
         for value in self.value:
             if equals(value, instance):
                 return True
@@ -43,7 +43,7 @@ class AcceptAll(AValidator):
     def __init__(self, schema=None, location=None, parent=None):
         self.location = location
 
-    def __call__(self, instance, output, location=None):
+    def __call__(self, instance, location=""):
         return True
 
     def __repr__(self):
@@ -55,7 +55,7 @@ class RejectAll(AValidator):
         self.location = location
 
     @basic_output("this fails for every instance")
-    def __call__(self, instance, output, location=None):
+    def __call__(self, instance, location=""):
         return False
 
     def __repr__(self):
