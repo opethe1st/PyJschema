@@ -29,7 +29,7 @@ class AValidator(abc.ABC):
         self.anchor = schema.get("$anchor")
 
     @abc.abstractmethod
-    def __call__(self, instance: JsonType, output, location) -> bool:
+    def __call__(self, instance: JsonType, location) -> bool:
         raise NotImplementedError
 
     def sub_validators(self) -> typing.Iterable["AValidator"]:

@@ -33,7 +33,7 @@ def validate_once(
     schema: typing.Union[dict, bool], instance: dict, check_schema=False
 ) -> bool:
     validator = construct_validator(schema=schema, check_schema=check_schema)
-    output = {"errors": []}
+    output: dict = {"errors": []}
     with context(OUTPUT, output):
         res = validator(instance=instance, location="")
         output["valid"] = res
