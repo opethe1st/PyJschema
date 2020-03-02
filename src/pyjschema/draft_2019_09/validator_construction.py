@@ -3,9 +3,9 @@ import os
 import typing
 
 from pyjschema.exceptions import SchemaError
-from pyjschema.utils import context, OUTPUT
+from pyjschema.utils import OUTPUT
 
-from .context import BUILD_VALIDATOR, VOCABULARIES
+from .context import BUILD_VALIDATOR, USE_SHORTCIRCUITING, VOCABULARIES
 from .referencing import resolve_references
 from .types import AcceptAll, RejectAll
 from .validator import Validator
@@ -26,17 +26,21 @@ def construct_validator(schema, check_schema=False):
             vocabularies=get_vocabularies(schema=schema),
             uri_to_validator={},
         )
-        return validator
+
+        def validate(instance):
+            output: dict = {"errors": []}
+            OUTPUT.set(output)
+            USE_SHORTCIRCUITING.set(True)
+            return validator(instance=instance, location="")
+
+        return validate
 
 
 def validate_once(
     schema: typing.Union[dict, bool], instance: dict, check_schema=False
 ) -> bool:
-    validator = construct_validator(schema=schema, check_schema=check_schema)
-    output: dict = {"errors": []}
-    with context(OUTPUT, output):
-        res = validator(instance=instance, location="")
-        output["valid"] = res
+    validate = construct_validator(schema=schema, check_schema=check_schema)
+    res = validate(instance=instance)
     return res
 
 
@@ -64,8 +68,9 @@ BuildValidatorResultType = typing.Union[AcceptAll, RejectAll, Validator]
 
 def build_validator_and_resolve_references(schema, vocabularies, uri_to_validator):
     # challenge here is that contextvars is only supported by python 3.7 upwards
-    with context(VOCABULARIES, vocabularies), context(BUILD_VALIDATOR, build_validator):
-        validator = build_validator(schema=schema)
+    VOCABULARIES.set(vocabularies)
+    BUILD_VALIDATOR.set(build_validator)
+    validator = build_validator(schema=schema)
     resolve_references(root_validator=validator, uri_to_validator=uri_to_validator)
     return validator
 
