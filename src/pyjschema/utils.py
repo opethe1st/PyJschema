@@ -69,7 +69,7 @@ def basic_output(error_message: str):
                     {
                         "keywordLocation": self.location,
                         "instanceLocation": location,
-                        "error": error_message,
+                        "error": error_message.format(value=getattr(self, "value", ""), instance=instance),
                         # "absoluteKeywordLocation": to_canonical_uri(self.base_uri or "", self.location or "")
                     }
                 )
