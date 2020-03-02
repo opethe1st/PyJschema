@@ -1,5 +1,6 @@
 import itertools
 import typing
+from itertools import filterfalse
 
 from pyjschema.common import Keyword, KeywordGroup
 from pyjschema.draft_2019_09.context import BUILD_VALIDATOR
@@ -52,12 +53,21 @@ class _Items(KeywordGroup):
             self._validators = itertools.repeat(self._items_validator)
         elif self._items_validators:
             if self._additional_items_validator:
-                self._validators = itertools.chain(self._items_validators, itertools.repeat(self._additional_items_validator))
+                self._validators = itertools.chain(
+                    self._items_validators,
+                    itertools.repeat(self._additional_items_validator),
+                )
             else:
                 self._validators = self._items_validators
 
-        res = all(validator(instance=item, location=f"{location}/{i}") for i, (item, validator) in enumerate(zip(instance, (self._validators))))
-        return res
+        res = filterfalse(
+            bool,
+            (
+                validator(instance=item, location=f"{location}/{i}")
+                for i, (item, validator) in enumerate(zip(instance, (self._validators)))
+            ),
+        )
+        return all(res)
 
     def sub_validators(self):
         if self._items_validator:
