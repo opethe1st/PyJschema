@@ -59,6 +59,7 @@ class Validator(AValidator):
 def validate_instance_against_all_validators(
     validators: typing.Dict[str, AValidator], instance, location
 ):
+    results: typing.Iterable
     if USE_SHORTCIRCUITING.get():
         results = (
             validator(instance=instance, location=location)
