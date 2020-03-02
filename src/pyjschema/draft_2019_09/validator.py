@@ -1,10 +1,8 @@
-import typing as t
+import typing
 
 from pyjschema.common import AValidator
-from pyjschema.draft_2019_09.context import VOCABULARIES
+from pyjschema.draft_2019_09.context import USE_SHORTCIRCUITING, VOCABULARIES
 from pyjschema.exceptions import SchemaError
-
-from .types.common import validate_instance_against_all_validators
 
 KEYWORDS_THAT_REQUIRE_ANNOTATION_COLLECTION = set(
     ["unevaluatedProperties", "unevaluatedItems"]
@@ -26,7 +24,7 @@ class Validator(AValidator):
                 "Unable to process this Schema because this library doesn't support annotation collection"
                 f" - which is required for these keywords - {unsupported_keywords} present in the schema"
             )
-        self._validators: t.Dict[str, AValidator] = dict()
+        self._validators: typing.Dict[str, AValidator] = dict()
 
         self.recursiveAnchor = schema.get("$recursiveAnchor", False)
 
@@ -42,7 +40,6 @@ class Validator(AValidator):
                 )
 
     def __call__(self, instance, location=""):
-
         errors = validate_instance_against_all_validators(
             validators=self._validators, instance=instance, location=location
         )
@@ -57,3 +54,22 @@ class Validator(AValidator):
 
     def __repr__(self):
         return f"Validator(validators={self._validators})"
+
+
+def validate_instance_against_all_validators(
+    validators: typing.Dict[str, AValidator], instance, location
+):
+    if USE_SHORTCIRCUITING.get():
+        results = (
+            validator(instance=instance, location=location)
+            for key, validator in validators.items()
+        )
+    else:
+        results = [
+            validator(instance=instance, location=location)
+            for key, validator in validators.items()
+        ]
+    yield from filter(
+        lambda res: not res,
+        results,
+    )
