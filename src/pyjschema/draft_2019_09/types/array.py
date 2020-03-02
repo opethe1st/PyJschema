@@ -1,3 +1,4 @@
+import itertools
 import typing
 
 from pyjschema.common import Keyword, KeywordGroup
@@ -29,7 +30,7 @@ class _Items(KeywordGroup):
                     )
                     for i, schema in enumerate(items)
                 ]
-                if items is not None and additionalItems is not None:
+                if additionalItems is not None:
                     self._additional_items_validator = build_validator(
                         schema=additionalItems,
                         location=f"{location}/additionalItems",
@@ -43,42 +44,20 @@ class _Items(KeywordGroup):
     def __repr__(self):
         return f"Items(items_validator(s)={self._items_validator or self._items_validators}, add_item_validator={self._additional_items_validator})"
 
-    @basic_output("this fails for items and additional_item")
+    @basic_output("this fails for items and additional_items")
     @validate_only(type_=list)
     def __call__(self, instance, location=None):
+        self._validators = []
         if self._items_validator:
-            return self._validate_items(instance=instance, location=location)
+            self._validators = itertools.repeat(self._items_validator)
         elif self._items_validators:
-            return self._validate_items_list(instance=instance, location=location)
-        return True
+            if self._additional_items_validator:
+                self._validators = itertools.chain(self._items_validators, itertools.repeat(self._additional_items_validator))
+            else:
+                self._validators = self._items_validators
 
-    def _validate_items(self, instance, location):
-        results = filter(
-            lambda res: not res,
-            (
-                self._items_validator(instance=value, location=f"{location}/{i}")
-                for i, value in enumerate(instance)
-            ),
-        )
-        first_result = next(results, True)
-        if first_result:
-            return True
-        else:
-            return False
-
-    def _validate_items_list(self, instance, location):
-        results = _validate_item_list(
-            items_validators=self._items_validators,
-            additional_items_validator=self._additional_items_validator,
-            instance=instance,
-            location=location,
-        )
-        first_res = next(results, True)
-
-        if first_res:
-            return True
-        else:
-            return False
+        res = all(validator(instance=item, location=f"{location}/{i}") for i, (item, validator) in enumerate(zip(instance, (self._validators))))
+        return res
 
     def sub_validators(self):
         if self._items_validator:
@@ -87,33 +66,6 @@ class _Items(KeywordGroup):
             yield validator
         if self._additional_items_validator:
             yield self._additional_items_validator
-
-
-def _validate_item_list(
-    items_validators, additional_items_validator, instance, location
-):
-
-    i = 0
-    while i < len(items_validators):
-        if i >= len(instance):
-            break
-
-        res = items_validators[i](instance[i], location=f"{location}/{i}")
-
-        if not res:
-            yield res
-
-        i += 1
-
-    # additionalItem for the rest of the items in the instance
-    if additional_items_validator:
-        while i < len(instance):
-            res = additional_items_validator(instance[i], location=f"{location}/{i}")
-
-            if not res:
-                yield res
-
-            i += 1
 
 
 class _Contains(KeywordGroup):
