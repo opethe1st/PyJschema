@@ -47,7 +47,7 @@ def validate_only(type_):
 
     def wrapper(validate):
         @functools.wraps(validate)
-        def wrapped_function(self, instance, location=None):
+        def wrapped_function(self, instance, location):
             if isinstance(instance, type_):
                 return validate(self=self, instance=instance, location=location)
             else:

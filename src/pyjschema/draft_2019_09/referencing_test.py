@@ -7,7 +7,7 @@ from .validator import Validator
 
 class DummyValidator(Validator):
     def __init__(
-        self, id=None, base_uri=None, validators=None, anchor=None, location=None
+        self, id=None, base_uri=None, validators=None, anchor=None, location
     ):
         self.id = id
         self.base_uri = base_uri if base_uri else id
@@ -36,7 +36,7 @@ class Test_GenerateContext(unittest.TestCase):
 
         validator_id = "http://localhost:5000/schema.json"
         validator = DummyValidator(
-            id=validator_id, validators=[sub_validator2, sub_validator3,], location=""
+            id=validator_id, validators=[sub_validator2, sub_validator3,], location
         )
         uri_to_validator = {}
 

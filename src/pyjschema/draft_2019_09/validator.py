@@ -15,7 +15,7 @@ class Validator(AValidator):
     This corresponds to a schema
     """
 
-    def __init__(self, schema, location=None, parent=None):
+    def __init__(self, schema, location, parent):
         super().__init__(schema=schema, location=location, parent=parent)
         unsupported_keywords = KEYWORDS_THAT_REQUIRE_ANNOTATION_COLLECTION & set(
             schema.keys()
@@ -40,7 +40,7 @@ class Validator(AValidator):
                     schema=schema, location=location, parent=self
                 )
 
-    def __call__(self, instance, location=""):
+    def __call__(self, instance, location):
         results = validate_instance_against_all_validators(
             validators=self._validators, instance=instance, location=location
         )
@@ -49,7 +49,10 @@ class Validator(AValidator):
             return True
         else:
             return ValidationResult(
-                message="", location=location, keywordLocation=self.location, sub_results=results
+                message="",
+                location=location,
+                keywordLocation=self.location,
+                sub_results=results,
             )
 
     def sub_validators(self):

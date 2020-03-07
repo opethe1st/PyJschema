@@ -6,7 +6,7 @@ from pyjschema.utils import ValidationResult
 
 
 class IfElseThen(KeywordGroup):
-    def __init__(self, schema: dict, location=None, parent=None):
+    def __init__(self, schema: dict, location, parent):
         super().__init__(schema=schema, location=location, parent=parent)
         build_validator = BUILD_VALIDATOR.get()
 
@@ -30,7 +30,7 @@ class IfElseThen(KeywordGroup):
             else None
         )
 
-    def __call__(self, instance, location=None):
+    def __call__(self, instance, location):
         if not self._if_validator:
             return True
 
@@ -68,7 +68,7 @@ class IfElseThen(KeywordGroup):
 class AllOf(Keyword):
     keyword = "allOf"
 
-    def __init__(self, schema: dict, location=None, parent=None):
+    def __init__(self, schema: dict, location, parent):
         super().__init__(schema=schema, location=location, parent=parent)
         build_validator = BUILD_VALIDATOR.get()
 
@@ -77,7 +77,7 @@ class AllOf(Keyword):
             for item in self.value
         ]
 
-    def __call__(self, instance, location=None):
+    def __call__(self, instance, location):
         results = filterfalse(
             bool,
             (
@@ -104,7 +104,7 @@ class AllOf(Keyword):
 class OneOf(Keyword):
     keyword = "oneOf"
 
-    def __init__(self, schema: dict, location=None, parent=None):
+    def __init__(self, schema: dict, location, parent):
         super().__init__(schema=schema, location=location, parent=parent)
         build_validator = BUILD_VALIDATOR.get()
 
@@ -113,7 +113,7 @@ class OneOf(Keyword):
             for item in self.value
         ]
 
-    def __call__(self, instance, location=None):
+    def __call__(self, instance, location):
         results = list(
             filterfalse(
                 bool,
@@ -138,7 +138,7 @@ class OneOf(Keyword):
 class AnyOf(Keyword):
     keyword = "anyOf"
 
-    def __init__(self, schema: dict, location=None, parent=None):
+    def __init__(self, schema: dict, location, parent):
         super().__init__(schema=schema, location=location, parent=parent)
         build_validator = BUILD_VALIDATOR.get()
 
@@ -147,7 +147,7 @@ class AnyOf(Keyword):
             for item in self.value
         ]
 
-    def __call__(self, instance, location=None):
+    def __call__(self, instance, location):
         results = filterfalse(
             bool,
             (
@@ -174,7 +174,7 @@ class AnyOf(Keyword):
 class Not(Keyword):
     keyword = "not"
 
-    def __init__(self, schema: dict, location=None, parent=None):
+    def __init__(self, schema: dict, location, parent):
         super().__init__(schema=schema, location=location, parent=parent)
         build_validator = BUILD_VALIDATOR.get()
 
@@ -182,7 +182,7 @@ class Not(Keyword):
             schema=self.value, location=f"{self.location}", parent=self
         )
 
-    def __call__(self, instance, location=None):
+    def __call__(self, instance, location):
         # errors populated but not actual error.
         # unset error?
         result = self._validator(instance=instance, location=location)

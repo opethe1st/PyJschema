@@ -9,7 +9,7 @@ class _MultipleOf(Keyword):
     keyword = "multipleOf"
 
     @validate_only(type_=(int, numbers.Number))
-    def __call__(self, instance, location=None):
+    def __call__(self, instance, location):
         # using this multipier here so that the precision is better
         multiplier = 100000
         instance = instance * multiplier
@@ -27,7 +27,7 @@ class _Minimum(Keyword):
     keyword = "minimum"
 
     @validate_only(type_=(int, numbers.Number))
-    def __call__(self, instance, location=None):
+    def __call__(self, instance, location):
         res = self.value <= instance
         return (
             True
@@ -44,7 +44,7 @@ class _Maximum(Keyword):
     keyword = "maximum"
 
     @validate_only(type_=(int, numbers.Number))
-    def __call__(self, instance, location=None):
+    def __call__(self, instance, location):
         res = instance <= self.value
         return (
             True
@@ -61,7 +61,7 @@ class _ExclusiveMinimum(Keyword):
     keyword = "exclusiveMinimum"
 
     @validate_only(type_=(int, numbers.Number))
-    def __call__(self, instance, location=None):
+    def __call__(self, instance, location):
         res = self.value < instance
         return (
             True
@@ -78,7 +78,7 @@ class _ExclusiveMaximum(Keyword):
     keyword = "exclusiveMaximum"
 
     @validate_only(type_=(int, numbers.Number))
-    def __call__(self, instance, location=None):
+    def __call__(self, instance, location):
         res = instance < self.value
         return (
             True

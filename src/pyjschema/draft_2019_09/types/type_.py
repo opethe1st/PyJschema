@@ -26,7 +26,7 @@ class Type(Keyword):
             types = [schema["type"]]
         self._types = types
 
-    def __call__(self, instance, location=None):
+    def __call__(self, instance, location):
         for type_ in self._types:
             if isinstance_(instance, NAME_TO_TYPE[type_]):
                 return True

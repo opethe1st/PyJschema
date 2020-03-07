@@ -6,7 +6,7 @@ from pyjschema.utils import validate_only, ValidationResult
 
 
 class _Property(KeywordGroup):
-    def __init__(self, schema: dict, location=None, parent=None):
+    def __init__(self, schema: dict, location, parent):
         super().__init__(schema=schema, location=location, parent=parent)
         build_validator = BUILD_VALIDATOR.get()
 
@@ -46,7 +46,7 @@ class _Property(KeywordGroup):
         )
 
     @validate_only(type_=dict)
-    def __call__(self, instance, location=None):
+    def __call__(self, instance, location):
 
         results = _validate(
             property_validators=self._validators,
@@ -119,13 +119,13 @@ def _validate(
 class _Required(Keyword):
     keyword = "required"
 
-    def __init__(self, schema: dict, location=None, parent=None):
+    def __init__(self, schema: dict, location, parent):
         super().__init__(schema=schema, location=location, parent=parent)
         required = schema["required"]
         self.value = required
 
     @validate_only(type_=dict)
-    def __call__(self, instance, location=None):
+    def __call__(self, instance, location):
         missing = set(self.value) - set(instance.keys())
         if missing:
             return ValidationResult(
@@ -139,16 +139,14 @@ class _Required(Keyword):
 class _PropertyNames(Keyword):
     keyword = "propertyNames"
 
-    def __init__(self, schema: dict, location=None, parent=None):
+    def __init__(self, schema: dict, location, parent):
         super().__init__(schema=schema, location=location, parent=parent)
-        # add this to make sure that the type is string - I have seen it missing from
-        # examples in the documentation so can only assume it's allowed
         build_validator = BUILD_VALIDATOR.get()
 
-        self._validator = build_validator(schema=self.value, location=self.location)
+        self._validator = build_validator(schema=self.value, location=self.location, parent=parent)
 
     @validate_only(type_=dict)
-    def __call__(self, instance, location=None):
+    def __call__(self, instance, location):
         results = validate_property_names(
             validator=self._validator, instance=instance, location=location
         )
@@ -179,7 +177,7 @@ class _MinProperties(Keyword):
     keyword = "minProperties"
 
     @validate_only(type_=dict)
-    def __call__(self, instance, location=None):
+    def __call__(self, instance, location):
         res = self.value <= len(instance)
         return (
             True
@@ -196,7 +194,7 @@ class _MaxProperties(Keyword):
     keyword = "maxProperties"
 
     @validate_only(type_=dict)
-    def __call__(self, instance, location=None):
+    def __call__(self, instance, location):
         res = len(instance) <= self.value
         return (
             True
@@ -213,7 +211,7 @@ class _DependentRequired(Keyword):
     keyword = "dependentRequired"
 
     @validate_only(type_=dict)
-    def __call__(self, instance, location=None):
+    def __call__(self, instance, location):
         results = []
         for prop, dependentProperties in self.value.items():
             if prop in instance:

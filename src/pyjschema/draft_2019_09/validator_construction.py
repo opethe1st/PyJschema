@@ -67,24 +67,24 @@ def build_validator_and_resolve_references(schema, vocabularies, uri_to_validato
     # challenge here is that contextvars is only supported by python 3.7 upwards
     VOCABULARIES.set(vocabularies)
     BUILD_VALIDATOR.set(build_validator)
-    validator = build_validator(schema=schema)
+    validator = build_validator(schema=schema, location="", parent=None)
     resolve_references(root_validator=validator, uri_to_validator=uri_to_validator)
     return validator
 
 
 def build_validator(
-    schema: typing.Union[bool, dict], location="", parent=None
+    schema: typing.Union[bool, dict], location, parent
 ) -> BuildValidatorResultType:
     if isinstance(schema, dict):
         if schema.items():
             return Validator(schema=schema, location=location, parent=parent)
         else:
-            return AcceptAll(location=location)
+            return AcceptAll(schema=schema, location=location, parent=parent)
     elif isinstance(schema, (bool,)):
         if schema is True:
-            return AcceptAll(location=location)
+            return AcceptAll(schema=schema, location=location, parent=parent)
         else:
-            return RejectAll(location=location)
+            return RejectAll(schema=schema, location=location, parent=parent)
 
     raise SchemaError(
         f"schema must be either a boolean or a dictionary. schema {schema}"

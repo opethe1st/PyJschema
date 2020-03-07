@@ -21,21 +21,21 @@ class TestRejectAll(unittest.TestCase):
 
 class TestConst(unittest.TestCase):
     def test_const_true(self):
-        validator = Const(schema={"const": 5432}, location=None, parent=None)
+        validator = Const(schema={"const": 5432}, location, parent)
         assert validator(instance=5432)
 
     def test_const_false(self):
-        validator = Const(schema={"const": 12434}, location=None, parent=None)
+        validator = Const(schema={"const": 12434}, location, parent)
         assert not validator(instance="astring")
 
 
 class TestEnum(unittest.TestCase):
     def test_const_true(self):
         validator = Enum(
-            schema={"enum": [5432, "a string", [], {}]}, location=None, parent=None
+            schema={"enum": [5432, "a string", [], {}]}, location, parent
         )
         assert validator(instance="a string")
 
     def test_const_false(self):
-        validator = Enum(schema={"enum": [12434]}, location=None, parent=None)
+        validator = Enum(schema={"enum": [12434]}, location, parent)
         assert not validator(instance="astring")

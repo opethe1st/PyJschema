@@ -8,7 +8,7 @@ from pyjschema.utils import validate_only, ValidationResult
 
 
 class _Items(KeywordGroup):
-    def __init__(self, schema: dict, location=None, parent=None):
+    def __init__(self, schema: dict, location, parent):
         super().__init__(schema=schema, location=location, parent=parent)
         build_validator = BUILD_VALIDATOR.get()
         from pyjschema.draft_2019_09.validator_construction import (
@@ -46,7 +46,7 @@ class _Items(KeywordGroup):
         return f"Items(items_validator(s)={self._items_validator or self._items_validators}, add_item_validator={self._additional_items_validator})"
 
     @validate_only(type_=list)
-    def __call__(self, instance, location=None):
+    def __call__(self, instance, location):
         self._validators = []
         if self._items_validator:
             self._validators = itertools.repeat(self._items_validator)
@@ -88,7 +88,7 @@ class _Items(KeywordGroup):
 
 
 class _Contains(KeywordGroup):
-    def __init__(self, schema: dict, location=None, parent=None):
+    def __init__(self, schema: dict, location, parent):
         super().__init__(schema=schema, location=location, parent=parent)
         build_validator = BUILD_VALIDATOR.get()
 
@@ -107,7 +107,7 @@ class _Contains(KeywordGroup):
         self.minContainsValue = minContains if minContains else -float("inf")
 
     @validate_only(type_=list)
-    def __call__(self, instance, location=None):
+    def __call__(self, instance, location):
 
         if self._validator:
             count = 0
@@ -165,7 +165,7 @@ class _MinItems(Keyword):
     keyword = "minItems"
 
     @validate_only(type_=list)
-    def __call__(self, instance, location=None):
+    def __call__(self, instance, location):
         res = self.value <= len(instance)
         return (
             True
@@ -182,7 +182,7 @@ class _MaxItems(Keyword):
     keyword = "maxItems"
 
     @validate_only(type_=list)
-    def __call__(self, instance, location=None):
+    def __call__(self, instance, location):
         res = len(instance) <= self.value
         return (
             True
@@ -199,7 +199,7 @@ class _UniqueItems(Keyword):
     keyword = "uniqueItems"
 
     @validate_only(type_=list)
-    def __call__(self, instance, location=None):
+    def __call__(self, instance, location):
         if self.value:
             itemsset = set([str(value) for value in instance])
 

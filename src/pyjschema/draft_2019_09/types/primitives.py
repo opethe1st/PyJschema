@@ -5,7 +5,7 @@ from pyjschema.utils import ValidationResult
 class Const(Keyword):
     keyword = "const"
 
-    def __call__(self, instance, location=None):
+    def __call__(self, instance, location):
         ok = equals(self.value, instance)
         return (
             True
@@ -21,7 +21,7 @@ class Const(Keyword):
 class Enum(Keyword):
     keyword = "enum"
 
-    def __call__(self, instance, location=None):
+    def __call__(self, instance, location):
         for value in self.value:
             if equals(value, instance):
                 return True
@@ -50,10 +50,10 @@ def equals(a, b):
 
 
 class AcceptAll(AValidator):
-    def __init__(self, schema=None, location=None, parent=None):
+    def __init__(self, schema, location, parent):
         self.location = location
 
-    def __call__(self, instance, location=""):
+    def __call__(self, instance, location):
         return True
 
     def __repr__(self):
@@ -61,10 +61,10 @@ class AcceptAll(AValidator):
 
 
 class RejectAll(AValidator):
-    def __init__(self, schema=None, location=None, parent=None):
+    def __init__(self, schema, location, parent):
         self.location = location
 
-    def __call__(self, instance, location=""):
+    def __call__(self, instance, location):
         return ValidationResult(
             message="this fails for every instance",
             location=location,
