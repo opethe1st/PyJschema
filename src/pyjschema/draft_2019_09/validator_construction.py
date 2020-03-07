@@ -10,7 +10,7 @@ from .types import AcceptAll, RejectAll
 from .validator import Validator
 from .vocabularies import METASCHEMA_VALIDATORS, get_vocabularies
 
-__all__ = ["validate_once", "Validator", "construct_validator"]
+__all__ = ["validate", "Validator", "construct_validator"]
 
 
 def construct_validator(schema, check_schema=False):
@@ -33,8 +33,11 @@ def construct_validator(schema, check_schema=False):
         return validate
 
 
-def validate_once(
-    schema: typing.Union[dict, bool], instance: dict, check_schema=False
+def validate(
+    schema: typing.Union[dict, bool],
+    instance: dict,
+    check_schema=False,
+    raise_exceptions=False,
 ) -> bool:
     validate = construct_validator(schema=schema, check_schema=check_schema)
     res = validate(instance=instance)

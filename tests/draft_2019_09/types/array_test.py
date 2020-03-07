@@ -2,7 +2,7 @@ import unittest
 
 import parameterized
 
-from pyjschema.draft_2019_09 import validate_once
+from pyjschema.draft_2019_09 import validate
 
 
 class TestArrayValidation(unittest.TestCase):
@@ -136,7 +136,7 @@ class TestArrayValidation(unittest.TestCase):
         ]
     )
     def test_true(self, name, schema, instance):
-        res = validate_once(schema=schema, instance=instance)
+        res = validate(schema=schema, instance=instance)
         self.assertTrue(res)
 
     @parameterized.parameterized.expand(
@@ -252,4 +252,4 @@ class TestArrayValidation(unittest.TestCase):
         ]
     )
     def test_false(self, name, schema, instance):
-        self.assertFalse(validate_once(schema=schema, instance=instance))
+        self.assertFalse(validate(schema=schema, instance=instance))

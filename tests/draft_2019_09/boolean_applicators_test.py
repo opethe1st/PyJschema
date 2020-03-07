@@ -2,7 +2,7 @@ import unittest
 
 import parameterized
 
-from pyjschema.draft_2019_09 import validate_once
+from pyjschema.draft_2019_09 import validate
 
 
 class TestBooleanLogic(unittest.TestCase):
@@ -31,7 +31,7 @@ class TestBooleanLogic(unittest.TestCase):
         ]
     )
     def test_true(self, name, schema, instance):
-        res = validate_once(schema, instance)
+        res = validate(schema, instance)
         self.assertTrue(res)
 
     @parameterized.parameterized.expand(
@@ -59,5 +59,5 @@ class TestBooleanLogic(unittest.TestCase):
         ]
     )
     def test_false(self, name, schema, instance):
-        res = validate_once(schema, instance)
+        res = validate(schema, instance)
         self.assertFalse(res)

@@ -5,7 +5,7 @@ import parameterized
 from pyjschema.exceptions import SchemaError
 
 from .validator import Validator
-from .validator_construction import validate_once
+from .validator_construction import validate
 
 
 class TestValidator(unittest.TestCase):
@@ -34,7 +34,7 @@ class TestValidator(unittest.TestCase):
         }
 
         self.assertEqual(
-            result, bool(validate_once(schema=schema, instance=instance)),
+            result, bool(validate(schema=schema, instance=instance)),
         )
 
     @parameterized.parameterized.expand(
@@ -76,5 +76,5 @@ class TestRecursiveRef(unittest.TestCase):
         }
 
         self.assertEqual(
-            result, bool(validate_once(schema=schema, instance=instance)),
+            result, bool(validate(schema=schema, instance=instance)),
         )

@@ -1,6 +1,6 @@
 import unittest
 
-from pyjschema.draft_2019_09 import validate_once
+from pyjschema.draft_2019_09 import validate
 
 
 class Test(unittest.TestCase):
@@ -25,4 +25,4 @@ class Test(unittest.TestCase):
             "items": [{"$ref": "#/$defs/item"},],
         }
 
-        self.assertEqual(bool(validate_once(schema=schema, instance=instance)), False)
+        self.assertEqual(bool(validate(schema=schema, instance=instance)), False)

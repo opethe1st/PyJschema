@@ -2,7 +2,7 @@ import unittest
 
 import parameterized
 
-from pyjschema.draft_2019_09 import validate_once
+from pyjschema.draft_2019_09 import validate
 
 # TODO: Ope do these tests make sense
 
@@ -27,7 +27,7 @@ class TestValidatorWithRef(unittest.TestCase):
         ]
     )
     def test_true(self, name, schema, instance):
-        res = validate_once(schema, instance)
+        res = validate(schema, instance)
         self.assertTrue(res)
 
     @parameterized.parameterized.expand(
@@ -49,7 +49,7 @@ class TestValidatorWithRef(unittest.TestCase):
         ]
     )
     def test_false(self, name, schema, instance):
-        res = validate_once(schema, instance)
+        res = validate(schema, instance)
         self.assertFalse(res)
 
 
@@ -87,7 +87,7 @@ class TestTypes(unittest.TestCase):
         ]
     )
     def test_true(self, name, schema, instance):
-        res = validate_once(schema, instance)
+        res = validate(schema, instance)
         self.assertTrue(res)
 
     @parameterized.parameterized.expand(
@@ -123,7 +123,7 @@ class TestTypes(unittest.TestCase):
         ]
     )
     def test_false(self, name, schema, instance):
-        res = validate_once(schema, instance)
+        res = validate(schema, instance)
         self.assertFalse(res)
 
 
@@ -150,7 +150,7 @@ class TestCanonicalId(unittest.TestCase):
         ]
     )
     def test_true(self, name, schema, instance):
-        res = validate_once(schema, instance)
+        res = validate(schema, instance)
         self.assertTrue(res)
 
 
@@ -171,5 +171,5 @@ class TestKeywordValidationWithoutType(unittest.TestCase):
         ]
     )
     def test_true(self, name, schema, instance):
-        res = validate_once(schema, instance)
+        res = validate(schema, instance)
         self.assertTrue(res)
