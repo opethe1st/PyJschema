@@ -2,9 +2,7 @@ import json
 import os
 import typing
 
-from pyjschema.common import ValidationError
 from pyjschema.exceptions import SchemaError
-from pyjschema.utils import context
 
 from .context import BUILD_VALIDATOR, VOCABULARIES
 from .referencing import resolve_references
@@ -22,13 +20,25 @@ def construct_validator(schema, check_schema=False):
         if not schema_validator(instance=schema):
             raise SchemaError("Schema is invalid according to the meta-schema")
     else:
-        validator = build_validator_and_resolve_references(schema=schema, vocabularies=get_vocabularies(schema=schema), uri_to_validator={})
-        return validator
+        validator = build_validator_and_resolve_references(
+            schema=schema,
+            vocabularies=get_vocabularies(schema=schema),
+            uri_to_validator={},
+        )
+
+        def validate(instance):
+            # USE_SHORTCIRCUITING.set(True)
+            return bool(validator(instance=instance, location="/"))
+
+        return validate
 
 
-def validate_once(schema: typing.Union[dict, bool], instance: dict, check_schema=False) -> ValidationError:
-    validator = construct_validator(schema=schema, check_schema=check_schema)
-    return validator(instance=instance)
+def validate_once(
+    schema: typing.Union[dict, bool], instance: dict, check_schema=False
+) -> bool:
+    validate = construct_validator(schema=schema, check_schema=check_schema)
+    res = validate(instance=instance)
+    return res
 
 
 def meta_schema_validator(schema):
@@ -42,7 +52,9 @@ def meta_schema_validator(schema):
         # Still not sure on the logic of the METASCHEMA validators.
         # Need to load the schema from a given local location. Be able to load a schema
         # that is spread over several files. nice so I can use the schemas defined directly.
-        validator = build_validator_and_resolve_references(schema=schema, vocabularies=METASCHEMA_VALIDATORS, uri_to_validator={})
+        validator = build_validator_and_resolve_references(
+            schema=schema, vocabularies=METASCHEMA_VALIDATORS, uri_to_validator={}
+        )
         return validator
     else:
         raise SchemaError(f"Unknown meta-schema: {meta_schema}")
@@ -53,25 +65,26 @@ BuildValidatorResultType = typing.Union[AcceptAll, RejectAll, Validator]
 
 def build_validator_and_resolve_references(schema, vocabularies, uri_to_validator):
     # challenge here is that contextvars is only supported by python 3.7 upwards
-    with context(VOCABULARIES, vocabularies), context(BUILD_VALIDATOR, build_validator):
-        validator = build_validator(schema=schema)
+    VOCABULARIES.set(vocabularies)
+    BUILD_VALIDATOR.set(build_validator)
+    validator = build_validator(schema=schema, location="", parent=None)
     resolve_references(root_validator=validator, uri_to_validator=uri_to_validator)
     return validator
 
 
 def build_validator(
-    schema: typing.Union[bool, dict], location="", parent=None
+    schema: typing.Union[bool, dict], location, parent
 ) -> BuildValidatorResultType:
     if isinstance(schema, dict):
         if schema.items():
             return Validator(schema=schema, location=location, parent=parent)
         else:
-            return AcceptAll(location=location)
+            return AcceptAll(schema=schema, location=location, parent=parent)
     elif isinstance(schema, (bool,)):
         if schema is True:
-            return AcceptAll(location=location)
+            return AcceptAll(schema=schema, location=location, parent=parent)
         else:
-            return RejectAll(location=location)
+            return RejectAll(schema=schema, location=location, parent=parent)
 
     raise SchemaError(
         f"schema must be either a boolean or a dictionary. schema {schema}"

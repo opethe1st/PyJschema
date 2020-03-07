@@ -3,6 +3,7 @@ import unittest
 import parameterized
 
 from pyjschema.utils import to_canonical_uri
+from pyjschema.utils import SchemaLoader
 
 
 class TestToCanonicalURI(unittest.TestCase):
@@ -55,3 +56,21 @@ class TestToCanonicalURI(unittest.TestCase):
     def test(self, description, current_base_uri, uri, expected_uri):
         uri = to_canonical_uri(current_base_uri=current_base_uri, uri=uri)
         self.assertEqual(uri, expected_uri)
+
+
+class TestSchemaLoader(unittest.TestCase):
+    def setUp(self):
+        self.schema_loader = SchemaLoader({"json-schema.org": "schemas/json_schema"})
+
+
+class TestGetSchemaLoader(TestSchemaLoader):
+    @parameterized.parameterized.expand(
+        [
+            ("https://json-schema.org/draft/2019-09/schema.json",),
+            ("https://json-schema.org/draft/2019-09/meta/applicator.json",),
+            ("https://json-schema.org/draft/2019-09/meta/validator.json",),
+        ]
+    )
+    def test(self, uri):
+        schema = self.schema_loader.get(uri)
+        assert schema

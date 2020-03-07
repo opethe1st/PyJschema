@@ -6,8 +6,6 @@ from collections.abc import Mapping, Sequence
 from pyjschema.utils import to_canonical_uri
 from pyjschema.exceptions import ProgrammerError
 
-from .validation_error import ValidationError
-
 JsonType = typing.Union[str, numbers.Number, bool, None, Mapping, Sequence]
 
 
@@ -16,7 +14,7 @@ class AValidator(abc.ABC):
     base_uri = None
     anchor = None
 
-    def __init__(self, schema: typing.Dict, location=None, parent=None):
+    def __init__(self, schema: typing.Dict, location, parent):
         schema = {} if isinstance(schema, bool) else schema
         self.schema = schema
         if "$id" in schema:
@@ -31,7 +29,7 @@ class AValidator(abc.ABC):
         self.anchor = schema.get("$anchor")
 
     @abc.abstractmethod
-    def __call__(self, instance: JsonType) -> ValidationError:
+    def __call__(self, instance: JsonType, location) -> bool:
         raise NotImplementedError
 
     def sub_validators(self) -> typing.Iterable["AValidator"]:

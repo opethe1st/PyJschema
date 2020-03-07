@@ -1,9 +1,12 @@
-from pyjschema.common import KeywordGroup, ValidationError, Keyword
+from itertools import filterfalse
+
+from pyjschema.common import Keyword, KeywordGroup
 from pyjschema.draft_2019_09.context import BUILD_VALIDATOR
+from pyjschema.utils import ValidationResult
 
 
 class IfElseThen(KeywordGroup):
-    def __init__(self, schema: dict, location=None, parent=None):
+    def __init__(self, schema: dict, location, parent):
         super().__init__(schema=schema, location=location, parent=parent)
         build_validator = BUILD_VALIDATOR.get()
 
@@ -27,16 +30,31 @@ class IfElseThen(KeywordGroup):
             else None
         )
 
-    def __call__(self, instance):
+    def __call__(self, instance, location):
         if not self._if_validator:
             return True
-        if self._if_validator(instance=instance):
+
+        res = True
+        if self._if_validator(instance=instance, location=location):
             if self._then_validator:
-                return self._then_validator(instance=instance)
+                res = self._then_validator(
+                    instance=instance, location=location
+                )  # this location is wrong
         else:
             if self._else_validator:
-                return self._else_validator(instance=instance)
-        return True
+                res = self._else_validator(
+                    instance=instance, location=location
+                )  # this location is wrong
+        return (
+            True
+            if res
+            else ValidationResult(
+                message="failed if then else",
+                keywordLocation=self.location,
+                location=location,
+                sub_results=[res],
+            )
+        )
 
     def sub_validators(self):
         if self._if_validator:
@@ -50,7 +68,7 @@ class IfElseThen(KeywordGroup):
 class AllOf(Keyword):
     keyword = "allOf"
 
-    def __init__(self, schema: dict, location=None, parent=None):
+    def __init__(self, schema: dict, location, parent):
         super().__init__(schema=schema, location=location, parent=parent)
         build_validator = BUILD_VALIDATOR.get()
 
@@ -59,9 +77,25 @@ class AllOf(Keyword):
             for item in self.value
         ]
 
-    def __call__(self, instance):
-        ok = all(validator(instance=instance) for validator in self._validators)
-        return True if ok else ValidationError()
+    def __call__(self, instance, location):
+        results = filterfalse(
+            bool,
+            (
+                validator(instance=instance, location=location)
+                for validator in self._validators
+            ),
+        )  # this location is probably wrong
+        results = list(results)
+        return (
+            True
+            if not results
+            else ValidationResult(
+                message="failed allOf",
+                keywordLocation=self.location,
+                location=location,
+                sub_results=[results],
+            )
+        )
 
     def sub_validators(self):
         yield from self._validators
@@ -70,7 +104,7 @@ class AllOf(Keyword):
 class OneOf(Keyword):
     keyword = "oneOf"
 
-    def __init__(self, schema: dict, location=None, parent=None):
+    def __init__(self, schema: dict, location, parent):
         super().__init__(schema=schema, location=location, parent=parent)
         build_validator = BUILD_VALIDATOR.get()
 
@@ -79,20 +113,32 @@ class OneOf(Keyword):
             for item in self.value
         ]
 
-    def __call__(self, instance):
-        oks = list(
-            filter(
-                lambda res: res,
-                (validator(instance=instance) for validator in self._validators),
+    def __call__(self, instance, location):
+        results = list(
+            filterfalse(
+                bool,
+                (
+                    validator(instance=instance, location=location)
+                    for validator in self._validators
+                ),  # this location is probably wrong
             )
         )
-        return True if len(oks) == 1 else ValidationError()
+        return (
+            True
+            if len(results) == (len(self._validators) - 1)
+            else ValidationResult(
+                message="failed oneOf",
+                keywordLocation=self.location,
+                location=location,
+                sub_results=results,
+            )
+        )
 
 
 class AnyOf(Keyword):
     keyword = "anyOf"
 
-    def __init__(self, schema: dict, location=None, parent=None):
+    def __init__(self, schema: dict, location, parent):
         super().__init__(schema=schema, location=location, parent=parent)
         build_validator = BUILD_VALIDATOR.get()
 
@@ -101,9 +147,25 @@ class AnyOf(Keyword):
             for item in self.value
         ]
 
-    def __call__(self, instance):
-        ok = any(validator(instance=instance) for validator in self._validators)
-        return True if ok else ValidationError()
+    def __call__(self, instance, location):
+        results = filterfalse(
+            bool,
+            (
+                validator(instance=instance, location=location)
+                for validator in self._validators
+            ),
+        )  # this location is probably wrong
+        results = list(results)
+        return (
+            True
+            if len(results) < len(self._validators)
+            else ValidationResult(
+                message="failed AnyOf",
+                keywordLocation=self.location,
+                location=location,
+                sub_results=results,
+            )
+        )
 
     def sub_validators(self):
         yield from self._validators
@@ -112,7 +174,7 @@ class AnyOf(Keyword):
 class Not(Keyword):
     keyword = "not"
 
-    def __init__(self, schema: dict, location=None, parent=None):
+    def __init__(self, schema: dict, location, parent):
         super().__init__(schema=schema, location=location, parent=parent)
         build_validator = BUILD_VALIDATOR.get()
 
@@ -120,9 +182,20 @@ class Not(Keyword):
             schema=self.value, location=f"{self.location}", parent=self
         )
 
-    def __call__(self, instance):
-        result = self._validator(instance=instance)
-        return ValidationError(messages=["not {self._validator}"]) if result else True
+    def __call__(self, instance, location):
+        # errors populated but not actual error.
+        # unset error?
+        result = self._validator(instance=instance, location=location)
+        return (
+            ValidationResult(
+                message="failed Not validation",
+                location=location,
+                keywordLocation=self.location,
+                sub_results=[result],
+            )
+            if result
+            else True
+        )
 
     def sub_validators(self):
         if self._validator:

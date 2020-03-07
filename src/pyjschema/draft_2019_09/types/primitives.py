@@ -1,22 +1,35 @@
-from pyjschema.common import AValidator, Keyword, ValidationError
+from pyjschema.common import AValidator, Keyword
+from pyjschema.utils import ValidationResult
 
 
 class Const(Keyword):
     keyword = "const"
 
-    def __call__(self, instance):
+    def __call__(self, instance, location):
         ok = equals(self.value, instance)
-        return True if ok else ValidationError()
+        return (
+            True
+            if ok
+            else ValidationResult(
+                message=f"{instance!r} is not equal to the constant {self.value!r}",
+                location=location,
+                keywordLocation=self.location,
+            )
+        )
 
 
 class Enum(Keyword):
     keyword = "enum"
 
-    def __call__(self, instance):
+    def __call__(self, instance, location):
         for value in self.value:
             if equals(value, instance):
                 return True
-        return ValidationError()
+        return ValidationResult(
+            message=f"{instance!r} is not one of the values in this enum {self.value!r}",
+            location=location,
+            keywordLocation=self.location,
+        )
 
 
 def equals(a, b):
@@ -37,10 +50,10 @@ def equals(a, b):
 
 
 class AcceptAll(AValidator):
-    def __init__(self, schema=None, location=None, parent=None):
+    def __init__(self, schema, location, parent):
         self.location = location
 
-    def __call__(self, instance):
+    def __call__(self, instance, location):
         return True
 
     def __repr__(self):
@@ -48,11 +61,15 @@ class AcceptAll(AValidator):
 
 
 class RejectAll(AValidator):
-    def __init__(self, schema=None, location=None, parent=None):
+    def __init__(self, schema, location, parent):
         self.location = location
 
-    def __call__(self, instance):
-        return ValidationError(messages=["This fails for every value"])
+    def __call__(self, instance, location):
+        return ValidationResult(
+            message="this fails for every instance",
+            location=location,
+            keywordLocation=self.location,
+        )
 
     def __repr__(self):
         return "RejectAll()"

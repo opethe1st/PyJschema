@@ -1,14 +1,12 @@
-import itertools
 import re
 
-from pyjschema.common import Keyword, KeywordGroup, ValidationError
+from pyjschema.common import Keyword, KeywordGroup
 from pyjschema.draft_2019_09.context import BUILD_VALIDATOR
-
-from .common import validate_max, validate_min, validate_only
+from pyjschema.utils import validate_only, ValidationResult
 
 
 class _Property(KeywordGroup):
-    def __init__(self, schema: dict, location=None, parent=None):
+    def __init__(self, schema: dict, location, parent):
         super().__init__(schema=schema, location=location, parent=parent)
         build_validator = BUILD_VALIDATOR.get()
 
@@ -48,19 +46,25 @@ class _Property(KeywordGroup):
         )
 
     @validate_only(type_=dict)
-    def __call__(self, instance):
+    def __call__(self, instance, location):
 
-        errors = _validate(
+        results = _validate(
             property_validators=self._validators,
             additional_validator=self._additional_validator,
             pattern_validators=self._pattern_validators,
             instance=instance,
+            location=location,
         )
-        first_result = next(errors, True)
-        if first_result:
+        results = list(results)
+        if all(results):
             return True
         else:
-            return ValidationError(children=itertools.chain([first_result], errors))
+            return ValidationResult(
+                message=f"This instance fails the combination of properties, patternProperties and additionalProperties",
+                location=location,
+                keywordLocation=self.location,
+                sub_results=results,
+            )
 
     def __repr__(self):
         return f"Property(properties={self._validators}, additionalProperties={self._additional_validator}, patternProperties={self._pattern_validators})"
@@ -72,11 +76,15 @@ class _Property(KeywordGroup):
         yield from self._pattern_validators.values()
 
 
-def _validate(property_validators, additional_validator, pattern_validators, instance):
+def _validate(
+    property_validators, additional_validator, pattern_validators, instance, location,
+):
 
     for key in property_validators:
         if key in instance:
-            result = property_validators[key](instance[key])
+            result = property_validators[key](
+                instance=instance[key], location=f"{location}/{key}"
+            )
 
             if not result:
                 yield result
@@ -88,7 +96,9 @@ def _validate(property_validators, additional_validator, pattern_validators, ins
         for key in remaining_properties:
             if regex.search(key):
                 properties_validated_by_pattern.add(key)
-                result = pattern_validators[regex](instance[key])
+                result = pattern_validators[regex](
+                    instance=instance[key], location=location
+                )  # this is wrong. should be location/regex fix later
                 if not result:
                     yield result
 
@@ -99,7 +109,9 @@ def _validate(property_validators, additional_validator, pattern_validators, ins
 
     if additional_validator:
         for key in additionalProperties:
-            result = additional_validator(instance[key])
+            result = additional_validator(
+                instance=instance[key], location=f"{location}/{key}"
+            )
             if not result:
                 yield result
 
@@ -107,52 +119,55 @@ def _validate(property_validators, additional_validator, pattern_validators, ins
 class _Required(Keyword):
     keyword = "required"
 
-    def __init__(self, schema: dict, location=None, parent=None):
+    def __init__(self, schema: dict, location, parent):
         super().__init__(schema=schema, location=location, parent=parent)
         required = schema["required"]
         self.value = required
 
     @validate_only(type_=dict)
-    def __call__(self, instance):
-        messages = []
-        if set(self.value) - set(instance.keys()):
-            messages.append(
-                f"There are some missing required fields: {set(self.value) - set(instance.keys())}"
+    def __call__(self, instance, location):
+        missing = set(self.value) - set(instance.keys())
+        if missing:
+            return ValidationResult(
+                message=f"This instance is missing these required keys: {missing}",
+                location=location,
+                keywordLocation=self.location,
             )
-
-        if not messages:
-            return True
-        else:
-            return ValidationError(messages=messages)
+        return True
 
 
 class _PropertyNames(Keyword):
     keyword = "propertyNames"
 
-    def __init__(self, schema: dict, location=None, parent=None):
+    def __init__(self, schema: dict, location, parent):
         super().__init__(schema=schema, location=location, parent=parent)
-        # add this to make sure that the type is string - I have seen it missing from
-        # examples in the documentation so can only assume it's allowed
         build_validator = BUILD_VALIDATOR.get()
 
-        self._validator = build_validator(schema=self.value, location=self.location)
+        self._validator = build_validator(schema=self.value, location=self.location, parent=parent)
 
     @validate_only(type_=dict)
-    def __call__(self, instance):
-        errors = validate_property_names(validator=self._validator, instance=instance)
-        first_result = next(errors, True)
-        if first_result:
+    def __call__(self, instance, location):
+        results = validate_property_names(
+            validator=self._validator, instance=instance, location=location
+        )
+        results = list(results)
+        if all(results):
             return True
         else:
-            return ValidationError(children=itertools.chain([first_result], errors))
+            return ValidationResult(
+                message="Not all property names match this schema",
+                location=location,
+                keywordLocation=self.location,
+                sub_results=results,
+            )
 
     def sub_validators(self):
         yield self._validator
 
 
-def validate_property_names(validator, instance):
+def validate_property_names(validator, instance, location):
     for propertyName in instance:
-        res = validator(propertyName)
+        res = validator(instance=propertyName, location=f"{location}/{propertyName}")
 
         if not res:
             yield res
@@ -162,25 +177,57 @@ class _MinProperties(Keyword):
     keyword = "minProperties"
 
     @validate_only(type_=dict)
-    def __call__(self, instance):
-        return validate_min(instance=instance, value=self.value)
+    def __call__(self, instance, location):
+        res = self.value <= len(instance)
+        return (
+            True
+            if res
+            else ValidationResult(
+                message=f"this {instance} has less than minProperties: {self.value}",
+                keywordLocation=self.location,
+                location=location,
+            )
+        )
 
 
 class _MaxProperties(Keyword):
     keyword = "maxProperties"
 
     @validate_only(type_=dict)
-    def __call__(self, instance):
-        return validate_max(instance=instance, value=self.value)
+    def __call__(self, instance, location):
+        res = len(instance) <= self.value
+        return (
+            True
+            if res
+            else ValidationResult(
+                message=f"this {instance} has more than maxProperties: {self.value}",
+                keywordLocation=self.location,
+                location=location,
+            )
+        )
 
 
 class _DependentRequired(Keyword):
     keyword = "dependentRequired"
 
     @validate_only(type_=dict)
-    def __call__(self, instance):
+    def __call__(self, instance, location):
+        results = []
         for prop, dependentProperties in self.value.items():
             if prop in instance:
                 if not (set(dependentProperties) < set(instance.keys())):
-                    return ValidationError()
-        return True
+                    # need to fill in the message
+                    results.append(
+                        ValidationResult(
+                            message="", location=location, keywordLocation=self.location
+                        )
+                    )
+
+        # need to fill in message
+        return (
+            True
+            if not results
+            else ValidationResult(
+                message="", keywordLocation=self.location, location=location
+            )
+        )

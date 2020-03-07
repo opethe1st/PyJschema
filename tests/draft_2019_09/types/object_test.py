@@ -127,11 +127,6 @@ class TestObject(unittest.TestCase):
                 "not an object",
             ),
             (
-                "object with non-string keys",
-                {"$id": "https://example.com/ope", "type": "object"},
-                {123: "value"},
-            ),
-            (
                 "object with properties",
                 {
                     "$id": "https://example.com/ope",

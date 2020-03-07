@@ -4,8 +4,7 @@ from uritools import uridecode
 
 from pyjschema.common import Keyword
 from pyjschema.exceptions import ProgrammerError, SchemaError
-
-from pyjschema.utils import to_canonical_uri
+from pyjschema.utils import ValidationResult, to_canonical_uri
 
 
 def raise_if_not_ready(func):
@@ -34,8 +33,18 @@ class Ref(Keyword):
         return all([self.abs_uri is not None, self._validator is not None])
 
     @raise_if_not_ready
-    def __call__(self, instance):
-        return self._validator(instance)
+    def __call__(self, instance, location):
+        res = self._validator(instance=instance, location=location)
+        return (
+            True
+            if res
+            else ValidationResult(
+                message="failed ref",
+                keywordLocation=self.location,
+                location=location,
+                sub_results=[res],
+            )
+        )
 
     def resolve(self, uri_to_validator):
         abs_uri = self._get_abs_uri()
@@ -95,8 +104,18 @@ class RecursiveRef(Keyword):
         self._validator = parent_validator
 
     @raise_if_not_ready
-    def __call__(self, instance):
-        return self._validator(instance)
+    def __call__(self, instance, location):
+        res = self._validator(instance=instance, location=location)
+        return (
+            True
+            if res
+            else ValidationResult(
+                message="failed recursiveRef",
+                keywordLocation=self.location,
+                location=location,
+                sub_results=[res],
+            )
+        )
 
     def __repr__(self):
         return f"RecursiveRef({self._validator})"

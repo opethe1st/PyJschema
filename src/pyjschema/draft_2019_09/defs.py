@@ -6,7 +6,7 @@ class Defs(Keyword):
 
     keyword = "$defs"
 
-    def __init__(self, schema: dict, location=None, parent=None):
+    def __init__(self, schema: dict, location, parent):
         super().__init__(schema=schema, location=location, parent=parent)
         build_validator = BUILD_VALIDATOR.get()
 
@@ -17,7 +17,7 @@ class Defs(Keyword):
             for key, value in self.value.items()
         }
 
-    def __call__(self, instance):
+    def __call__(self, instance, location):
         return True
 
     def sub_validators(self):
