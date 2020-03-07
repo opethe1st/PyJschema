@@ -1,8 +1,9 @@
 import typing
 
 from pyjschema.common import AValidator
-from pyjschema.draft_2019_09.context import USE_SHORTCIRCUITING, VOCABULARIES
+from pyjschema.draft_2019_09.context import VOCABULARIES
 from pyjschema.exceptions import SchemaError
+from pyjschema.utils import ValidationResult
 
 KEYWORDS_THAT_REQUIRE_ANNOTATION_COLLECTION = set(
     ["unevaluatedProperties", "unevaluatedItems"]
@@ -40,14 +41,16 @@ class Validator(AValidator):
                 )
 
     def __call__(self, instance, location=""):
-        errors = validate_instance_against_all_validators(
+        results = validate_instance_against_all_validators(
             validators=self._validators, instance=instance, location=location
         )
-        first_result = next(errors, True)
-        if first_result:
+        results = list(results)
+        if not results:
             return True
         else:
-            return False
+            return ValidationResult(
+                message="", location=location, keywordLocation=self.location, sub_results=results
+            )
 
     def sub_validators(self):
         yield from self._validators.values()
@@ -60,17 +63,16 @@ def validate_instance_against_all_validators(
     validators: typing.Dict[str, AValidator], instance, location
 ):
     results: typing.Iterable
-    if USE_SHORTCIRCUITING.get():
-        results = (
-            validator(instance=instance, location=location)
-            for key, validator in validators.items()
-        )
-    else:
-        results = [
-            validator(instance=instance, location=location)
-            for key, validator in validators.items()
-        ]
+    # if USE_SHORTCIRCUITING.get():
+    #     results = (
+    #         validator(instance=instance, location=location)
+    #         for key, validator in validators.items()
+    #     )
+    # else:
+    results = [
+        validator(instance=instance, location=location)
+        for key, validator in validators.items()
+    ]
     yield from filter(
-        lambda res: not res,
-        results,
+        lambda res: not res, results,
     )

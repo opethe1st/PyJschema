@@ -2,7 +2,7 @@ import re
 
 from pyjschema.common import Keyword, KeywordGroup
 from pyjschema.draft_2019_09.context import BUILD_VALIDATOR
-from pyjschema.utils import basic_output, validate_only
+from pyjschema.utils import validate_only, ValidationResult
 
 
 class _Property(KeywordGroup):
@@ -45,24 +45,26 @@ class _Property(KeywordGroup):
             else {}
         )
 
-    @basic_output(
-        "This instance: {instance} fails the combination of properties, patternProperties and additionalProperties"
-    )
     @validate_only(type_=dict)
     def __call__(self, instance, location=None):
 
-        errors = _validate(
+        results = _validate(
             property_validators=self._validators,
             additional_validator=self._additional_validator,
             pattern_validators=self._pattern_validators,
             instance=instance,
             location=location,
         )
-        first_result = next(errors, True)
-        if first_result:
+        results = list(results)
+        if all(results):
             return True
         else:
-            return False
+            return ValidationResult(
+                message=f"This instance fails the combination of properties, patternProperties and additionalProperties",
+                location=location,
+                keywordLocation=self.location,
+                sub_results=results,
+            )
 
     def __repr__(self):
         return f"Property(properties={self._validators}, additionalProperties={self._additional_validator}, patternProperties={self._pattern_validators})"
@@ -75,11 +77,7 @@ class _Property(KeywordGroup):
 
 
 def _validate(
-    property_validators,
-    additional_validator,
-    pattern_validators,
-    instance,
-    location,
+    property_validators, additional_validator, pattern_validators, instance, location,
 ):
 
     for key in property_validators:
@@ -126,11 +124,15 @@ class _Required(Keyword):
         required = schema["required"]
         self.value = required
 
-    @basic_output("This instance fails required")
     @validate_only(type_=dict)
     def __call__(self, instance, location=None):
-        if set(self.value) - set(instance.keys()):
-            return False
+        missing = set(self.value) - set(instance.keys())
+        if missing:
+            return ValidationResult(
+                message=f"This instance is missing these required keys: {missing}",
+                location=location,
+                keywordLocation=self.location,
+            )
         return True
 
 
@@ -145,17 +147,21 @@ class _PropertyNames(Keyword):
 
         self._validator = build_validator(schema=self.value, location=self.location)
 
-    @basic_output("Some propertyNames fails")
     @validate_only(type_=dict)
     def __call__(self, instance, location=None):
-        errors = validate_property_names(
+        results = validate_property_names(
             validator=self._validator, instance=instance, location=location
         )
-        first_result = next(errors, True)
-        if first_result:
+        results = list(results)
+        if all(results):
             return True
         else:
-            return False
+            return ValidationResult(
+                message="Not all property names match this schema",
+                location=location,
+                keywordLocation=self.location,
+                sub_results=results,
+            )
 
     def sub_validators(self):
         yield self._validator
@@ -172,29 +178,58 @@ def validate_property_names(validator, instance, location):
 class _MinProperties(Keyword):
     keyword = "minProperties"
 
-    @basic_output("fails minProperties")
     @validate_only(type_=dict)
     def __call__(self, instance, location=None):
-        return self.value <= len(instance)
+        res = self.value <= len(instance)
+        return (
+            True
+            if res
+            else ValidationResult(
+                message=f"this {instance} has less than minProperties: {self.value}",
+                keywordLocation=self.location,
+                location=location,
+            )
+        )
 
 
 class _MaxProperties(Keyword):
     keyword = "maxProperties"
 
-    @basic_output("fails maxProperties")
     @validate_only(type_=dict)
     def __call__(self, instance, location=None):
-        return len(instance) <= self.value
+        res = len(instance) <= self.value
+        return (
+            True
+            if res
+            else ValidationResult(
+                message=f"this {instance} has more than maxProperties: {self.value}",
+                keywordLocation=self.location,
+                location=location,
+            )
+        )
 
 
 class _DependentRequired(Keyword):
     keyword = "dependentRequired"
 
-    @basic_output("fails dependentRequired")
     @validate_only(type_=dict)
     def __call__(self, instance, location=None):
+        results = []
         for prop, dependentProperties in self.value.items():
             if prop in instance:
                 if not (set(dependentProperties) < set(instance.keys())):
-                    return False
-        return True
+                    # need to fill in the message
+                    results.append(
+                        ValidationResult(
+                            message="", location=location, keywordLocation=self.location
+                        )
+                    )
+
+        # need to fill in message
+        return (
+            True
+            if not results
+            else ValidationResult(
+                message="", keywordLocation=self.location, location=location
+            )
+        )

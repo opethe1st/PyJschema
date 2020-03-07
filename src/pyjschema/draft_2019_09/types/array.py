@@ -4,7 +4,7 @@ from itertools import filterfalse
 
 from pyjschema.common import Keyword, KeywordGroup
 from pyjschema.draft_2019_09.context import BUILD_VALIDATOR
-from pyjschema.utils import basic_output, validate_only
+from pyjschema.utils import validate_only, ValidationResult
 
 
 class _Items(KeywordGroup):
@@ -45,7 +45,6 @@ class _Items(KeywordGroup):
     def __repr__(self):
         return f"Items(items_validator(s)={self._items_validator or self._items_validators}, add_item_validator={self._additional_items_validator})"
 
-    @basic_output("this fails for items and additional_items")
     @validate_only(type_=list)
     def __call__(self, instance, location=None):
         self._validators = []
@@ -60,14 +59,24 @@ class _Items(KeywordGroup):
             else:
                 self._validators = self._items_validators
 
-        res = filterfalse(
+        results = filterfalse(
             bool,
             (
                 validator(instance=item, location=f"{location}/{i}")
                 for i, (item, validator) in enumerate(zip(instance, (self._validators)))
             ),
         )
-        return all(res)
+        results = list(results)
+        return (
+            True
+            if not results
+            else ValidationResult(
+                message="this fails for items and additional_items",
+                keywordLocation="",  # since this is a virtual keyword
+                location=location,
+                sub_results=results,
+            )
+        )
 
     def sub_validators(self):
         if self._items_validator:
@@ -97,7 +106,6 @@ class _Contains(KeywordGroup):
         self.maxContainsValue = maxContains if maxContains else float("inf")
         self.minContainsValue = minContains if minContains else -float("inf")
 
-    @basic_output("this instance: {instance} does not contain ")
     @validate_only(type_=list)
     def __call__(self, instance, location=None):
 
@@ -109,9 +117,42 @@ class _Contains(KeywordGroup):
                 if res:
                     count += 1
 
-            if count and (self.minContainsValue <= count <= self.maxContainsValue):
+            sub_results = []
+            if count == 0:
+                sub_results.append(
+                    ValidationResult(
+                        message="This doesnt contain an item that matches this",
+                        keywordLocation=f"{self.location}/contains",
+                        location=location,
+                    )
+                )
+
+            else:
+                if not (self.minContainsValue <= count):
+                    sub_results.append(
+                        ValidationResult(
+                            message=f"This contains less than {self.minContainsValue} matches",
+                            keywordLocation=f"{self.location}/minContains",
+                            location=location,
+                        )
+                    )
+                if not (count <= self.maxContainsValue):
+                    sub_results.append(
+                        ValidationResult(
+                            message=f"This contains more than {self.maxContainsValue} matches",
+                            keywordLocation=f"{self.location}/maxContains",
+                            location=location,
+                        )
+                    )
+            if sub_results:
+                return ValidationResult(  # this is technically wrong since it combines more than one result
+                    message="",
+                    location=location,
+                    keywordLocation="",  # since this is a virtual keyword
+                    sub_results=sub_results,
+                )
+            else:
                 return True
-            return False
         else:
             return True
 
@@ -123,25 +164,40 @@ class _Contains(KeywordGroup):
 class _MinItems(Keyword):
     keyword = "minItems"
 
-    @basic_output("This has less than {value} items")
     @validate_only(type_=list)
     def __call__(self, instance, location=None):
-        return self.value <= len(instance)
+        res = self.value <= len(instance)
+        return (
+            True
+            if res
+            else ValidationResult(
+                message=f"This has less than {self.value} items",
+                keywordLocation=self.location,
+                location=location,
+            )
+        )
 
 
 class _MaxItems(Keyword):
     keyword = "maxItems"
 
-    @basic_output("This has more than {value} items")
     @validate_only(type_=list)
     def __call__(self, instance, location=None):
-        return len(instance) <= self.value
+        res = len(instance) <= self.value
+        return (
+            True
+            if res
+            else ValidationResult(
+                message=f"This has more than {self.value} items",
+                keywordLocation=self.location,
+                location=location,
+            )
+        )
 
 
 class _UniqueItems(Keyword):
     keyword = "uniqueItems"
 
-    @basic_output("This doesnt have unique items")
     @validate_only(type_=list)
     def __call__(self, instance, location=None):
         if self.value:
@@ -149,6 +205,10 @@ class _UniqueItems(Keyword):
 
             # TODO(ope) - actually make sure the values are unique - is this even possible?
             if len(itemsset) != len(instance):
-                return False
+                return ValidationResult(
+                    message="This doesnt have unique items",
+                    location=location,
+                    keywordLocation=self.location,
+                )
 
         return True

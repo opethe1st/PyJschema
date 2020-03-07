@@ -1,25 +1,35 @@
 from pyjschema.common import AValidator, Keyword
-from pyjschema.utils import basic_output
+from pyjschema.utils import ValidationResult
 
 
 class Const(Keyword):
     keyword = "const"
 
-    @basic_output("{instance!r} is not equal to the constant {value!r}")
     def __call__(self, instance, location=None):
         ok = equals(self.value, instance)
-        return True if ok else False
+        return (
+            True
+            if ok
+            else ValidationResult(
+                message=f"{instance!r} is not equal to the constant {self.value!r}",
+                location=location,
+                keywordLocation=self.location,
+            )
+        )
 
 
 class Enum(Keyword):
     keyword = "enum"
 
-    @basic_output("{instance!r} is not one of the values in this enum {value!r}")
     def __call__(self, instance, location=None):
         for value in self.value:
             if equals(value, instance):
                 return True
-        return False
+        return ValidationResult(
+            message=f"{instance!r} is not one of the values in this enum {self.value!r}",
+            location=location,
+            keywordLocation=self.location,
+        )
 
 
 def equals(a, b):
@@ -54,9 +64,12 @@ class RejectAll(AValidator):
     def __init__(self, schema=None, location=None, parent=None):
         self.location = location
 
-    @basic_output("this fails for every instance")
     def __call__(self, instance, location=""):
-        return False
+        return ValidationResult(
+            message="this fails for every instance",
+            location=location,
+            keywordLocation=self.location,
+        )
 
     def __repr__(self):
         return "RejectAll()"

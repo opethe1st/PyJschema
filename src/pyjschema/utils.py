@@ -3,6 +3,8 @@ import contextvars
 import functools
 import json
 import os
+from dataclasses import dataclass, field
+from typing import List
 
 from uritools import urijoin, urisplit
 
@@ -56,25 +58,12 @@ def validate_only(type_):
     return wrapper
 
 
-def basic_output(error_message: str):
-    "if this __call__ function evaluates to false, add this message to errors"
+@dataclass
+class ValidationResult:
+    message: str
+    keywordLocation: str
+    location: str
+    sub_results: List["ValidationResult"] = field(default_factory=list)
 
-    def wrapper(validate):
-        @functools.wraps(validate)
-        def wrapped_funct(self, instance, location=None):
-            res = validate(self=self, instance=instance, location=location)
-            if res is False:
-                output = OUTPUT.get()
-                output["errors"].append(
-                    {
-                        "keywordLocation": self.location,
-                        "instanceLocation": location,
-                        "error": error_message.format(value=getattr(self, "value", ""), instance=instance),
-                        # "absoluteKeywordLocation": to_canonical_uri(self.base_uri or "", self.location or "")
-                    }
-                )
-            return res
-
-        return wrapped_funct
-
-    return wrapper
+    def __bool__(self):
+        return False

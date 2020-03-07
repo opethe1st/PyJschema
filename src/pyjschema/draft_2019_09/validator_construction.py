@@ -3,9 +3,8 @@ import os
 import typing
 
 from pyjschema.exceptions import SchemaError
-from pyjschema.utils import OUTPUT
 
-from .context import BUILD_VALIDATOR, USE_SHORTCIRCUITING, VOCABULARIES
+from .context import BUILD_VALIDATOR, VOCABULARIES
 from .referencing import resolve_references
 from .types import AcceptAll, RejectAll
 from .validator import Validator
@@ -28,10 +27,8 @@ def construct_validator(schema, check_schema=False):
         )
 
         def validate(instance):
-            output: dict = {"errors": []}
-            OUTPUT.set(output)
-            USE_SHORTCIRCUITING.set(True)
-            return validator(instance=instance, location="")
+            # USE_SHORTCIRCUITING.set(True)
+            return bool(validator(instance=instance, location="/"))
 
         return validate
 
