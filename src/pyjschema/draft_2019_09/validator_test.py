@@ -42,7 +42,7 @@ class TestValidator(unittest.TestCase):
     )
     def test_unsupported_keywords(self, keyword):
         with self.assertRaises(SchemaError):
-            Validator(schema={keyword: True})
+            Validator(schema={keyword: True}, location="", parent=None)
 
 
 class TestRecursiveRef(unittest.TestCase):

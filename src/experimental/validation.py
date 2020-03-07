@@ -60,7 +60,7 @@ class Pattern(IValidator):
         self.value = value
         self.regex = re.compile(self.value)
 
-    def __call__(self, instance: str):
+    def __call__(self, instance: str, location=None):
         # needs to be a string else error
         return bool(self.regex.match(instance))
 
