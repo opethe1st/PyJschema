@@ -1,9 +1,20 @@
+from typing import Optional
+
+
 class SchemaError(Exception):
-    pass
+    def __init__(self, message, details: Optional[dict] = None):
+        super().__init__()
+        details = details if details else {}
+        self.message = message
+        self.details = details
 
 
-class InstanceError(Exception):
-    pass
+class ValidationError(Exception):
+    def __init__(self, message, details: Optional[dict] = None):
+        super().__init__()
+        details = details if details else {}
+        self.message = message
+        self.details = details
 
 
 class ProgrammerError(Exception):
