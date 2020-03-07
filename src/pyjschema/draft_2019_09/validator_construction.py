@@ -1,8 +1,7 @@
 import json
 import os
 import typing
-
-from pyjschema.exceptions import SchemaError
+from pyjschema.exceptions import SchemaError, ValidationError
 
 from .context import BUILD_VALIDATOR, VOCABULARIES
 from .referencing import resolve_references
@@ -10,7 +9,7 @@ from .types import AcceptAll, RejectAll
 from .validator import Validator
 from .vocabularies import METASCHEMA_VALIDATORS, get_vocabularies
 
-__all__ = ["validate_once", "Validator", "construct_validator"]
+__all__ = ["validate", "Validator", "construct_validator"]
 
 
 def construct_validator(schema, check_schema=False):
@@ -18,7 +17,7 @@ def construct_validator(schema, check_schema=False):
         schema_validator = meta_schema_validator(schema=schema)
         # Need to wrap schema errors here and reraisr as SchemaErrors
         if not schema_validator(instance=schema):
-            raise SchemaError("Schema is invalid according to the meta-schema")
+            raise SchemaError(message="Schema is invalid according to the meta-schema")
     else:
         validator = build_validator_and_resolve_references(
             schema=schema,
@@ -28,16 +27,21 @@ def construct_validator(schema, check_schema=False):
 
         def validate(instance):
             # USE_SHORTCIRCUITING.set(True)
-            return bool(validator(instance=instance, location="/"))
+            return validator(instance=instance, location="/")
 
         return validate
 
 
-def validate_once(
-    schema: typing.Union[dict, bool], instance: dict, check_schema=False
+def validate(
+    schema: typing.Union[dict, bool],
+    instance: dict,
+    check_schema=False,
+    raise_exceptions=False,
 ) -> bool:
     validate = construct_validator(schema=schema, check_schema=check_schema)
     res = validate(instance=instance)
+    if not res and raise_exceptions:
+        raise ValidationError(message="This instance doesnt conform to this schema")
     return res
 
 

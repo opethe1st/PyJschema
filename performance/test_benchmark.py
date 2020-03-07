@@ -5,7 +5,7 @@ import jsonschema
 import pytest
 
 from performance.large_schema import SCHEMA
-from pyjschema.draft_2019_09 import construct_validator, validate_once
+from pyjschema.draft_2019_09 import construct_validator, validate
 
 INSTANCE = [9, "hello", [1, "a", True], {"a": "a", "b": "b", "d": "d"}, 42, 3]
 
@@ -13,7 +13,7 @@ INSTANCE = [9, "hello", [1, "a", True], {"a": "a", "b": "b", "d": "d"}, 42, 3]
 @pytest.mark.benchmark(group="compile+run", min_time=0.1, max_time=0.5, min_rounds=5)
 def test_pyjschema(benchmark):
     def validate_pyjschema():
-        validate_once(SCHEMA, INSTANCE)
+        validate(SCHEMA, INSTANCE)
 
     benchmark(validate_pyjschema)
 

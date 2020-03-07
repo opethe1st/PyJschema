@@ -2,7 +2,7 @@ import unittest
 
 import parameterized
 
-from pyjschema.draft_2019_09 import validate_once
+from pyjschema.draft_2019_09 import validate
 
 
 class TestRejectAll(unittest.TestCase):
@@ -17,4 +17,4 @@ class TestRejectAll(unittest.TestCase):
         ]
     )
     def test_true(self, name, schema, instance):
-        self.assertFalse(validate_once(schema=schema, instance=instance))
+        self.assertFalse(validate(schema=schema, instance=instance))

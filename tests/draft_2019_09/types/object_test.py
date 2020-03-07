@@ -2,7 +2,7 @@ import unittest
 
 import parameterized
 
-from pyjschema.draft_2019_09 import validate_once
+from pyjschema.draft_2019_09 import validate
 
 
 class TestObject(unittest.TestCase):
@@ -117,7 +117,7 @@ class TestObject(unittest.TestCase):
         ]
     )
     def test_true(self, name, schema, instance):
-        self.assertTrue(validate_once(schema=schema, instance=instance))
+        self.assertTrue(validate(schema=schema, instance=instance))
 
     @parameterized.parameterized.expand(
         [
@@ -225,4 +225,4 @@ class TestObject(unittest.TestCase):
         ]
     )
     def test_false(self, name, schema, instance):
-        self.assertFalse(validate_once(schema=schema, instance=instance))
+        self.assertFalse(validate(schema=schema, instance=instance))

@@ -1,11 +1,11 @@
 import unittest
 
-from pyjschema.draft_2019_09 import validate_once
+from pyjschema.draft_2019_09 import validate
 
 
 class TestRand(unittest.TestCase):
     def test(self):
-        res = validate_once(
+        res = validate(
             schema={
                 "$schema": "https://json-schema.org/draft/2019-09/schema",
                 "$id": "http://example.com/product.schema.json",

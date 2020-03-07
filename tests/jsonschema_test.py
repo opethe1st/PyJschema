@@ -5,7 +5,7 @@ import unittest
 
 import parameterized
 
-from pyjschema.draft_2019_09 import validate_once
+from pyjschema.draft_2019_09 import validate
 
 STRING_KEYWORDS = [
     "minLength",
@@ -85,5 +85,5 @@ class Test(unittest.TestCase):
         for test in testcase["tests"]:
             with self.subTest(test["description"]):
                 self.assertEqual(
-                    bool(validate_once(schema, instance=test["data"])), test["valid"]
+                    bool(validate(schema, instance=test["data"])), test["valid"]
                 )
