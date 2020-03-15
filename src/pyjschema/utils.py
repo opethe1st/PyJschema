@@ -35,7 +35,7 @@ class SchemaLoader:
                     BASE,
                     self.authority_to_local_location[res.authority],
                     res.path.lstrip("/"),
-                )
+                )+".json"
             ) as file:
                 return json.load(file)
         else:

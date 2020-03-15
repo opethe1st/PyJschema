@@ -66,9 +66,9 @@ class TestSchemaLoader(unittest.TestCase):
 class TestGetSchemaLoader(TestSchemaLoader):
     @parameterized.parameterized.expand(
         [
-            ("https://json-schema.org/draft/2019-09/schema.json",),
-            ("https://json-schema.org/draft/2019-09/meta/applicator.json",),
-            ("https://json-schema.org/draft/2019-09/meta/validator.json",),
+            ("https://json-schema.org/draft/2019-09/schema",),
+            ("https://json-schema.org/draft/2019-09/meta/applicator",),
+            ("https://json-schema.org/draft/2019-09/meta/validator",),
         ]
     )
     def test(self, uri):

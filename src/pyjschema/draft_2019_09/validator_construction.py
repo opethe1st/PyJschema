@@ -1,5 +1,3 @@
-import json
-import os
 import typing
 from pyjschema.exceptions import SchemaError, ValidationError
 
@@ -8,28 +6,29 @@ from .referencing import resolve_references
 from .types import AcceptAll, RejectAll
 from .validator import Validator
 from .vocabularies import METASCHEMA_VALIDATORS, get_vocabularies
+from pyjschema.utils import SchemaLoader
 
 __all__ = ["validate", "Validator", "construct_validator"]
 
 
-def construct_validator(schema, check_schema=False):
+def construct_validator(schema, check_schema=True):
     if check_schema:
         schema_validator = meta_schema_validator(schema=schema)
         # Need to wrap schema errors here and reraisr as SchemaErrors
         if not schema_validator(instance=schema):
             raise SchemaError(message="Schema is invalid according to the meta-schema")
-    else:
-        validator = build_validator_and_resolve_references(
-            schema=schema,
-            vocabularies=get_vocabularies(schema=schema),
-            uri_to_validator={},
-        )
 
-        def validate(instance):
-            # USE_SHORTCIRCUITING.set(True)
-            return validator(instance=instance, location="/")
+    validator = build_validator_and_resolve_references(
+        schema=schema,
+        vocabularies=get_vocabularies(schema=schema),
+        uri_to_validator={},
+    )
 
-        return validate
+    def validate(instance):
+        # USE_SHORTCIRCUITING.set(True)
+        return validator(instance=instance, location="/")
+
+    return validate
 
 
 def validate(
@@ -48,20 +47,13 @@ def validate(
 def meta_schema_validator(schema):
     schema = schema if isinstance(schema, dict) else {}
     meta_schema = schema.get("$schema", "https://json-schema.org/draft/2019-09/schema")
-    if meta_schema == "https://json-schema.org/draft/2019-09/schema":
-        base_dir = os.path.dirname(__file__)
-        with open(os.path.join(base_dir, "validator-schema.json"), "r") as file:
-            schema = json.load(file)
+    schemaLoader = SchemaLoader({"json-schema.org": "schemas/json_schema"})
+    schema = schemaLoader.get(meta_schema)
 
-        # Still not sure on the logic of the METASCHEMA validators.
-        # Need to load the schema from a given local location. Be able to load a schema
-        # that is spread over several files. nice so I can use the schemas defined directly.
-        validator = build_validator_and_resolve_references(
-            schema=schema, vocabularies=METASCHEMA_VALIDATORS, uri_to_validator={}
-        )
-        return validator
-    else:
-        raise SchemaError(f"Unknown meta-schema: {meta_schema}")
+    validator = build_validator_and_resolve_references(
+        schema=schema, vocabularies=METASCHEMA_VALIDATORS, uri_to_validator={}
+    )
+    return validator
 
 
 BuildValidatorResultType = typing.Union[AcceptAll, RejectAll, Validator]

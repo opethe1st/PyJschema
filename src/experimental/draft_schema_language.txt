@@ -79,3 +79,38 @@ string takes these assertions -
 
 integer/number takes these assertions -
 * maximum
+
+
+{
+    "string": {
+        "maxLength": 3,
+        "minLength": 1
+    },
+    "number": {
+        "minimum": 1,
+        "maximum": 10,
+        "multipleOf": 3
+    },
+}
+
+{
+    "Or": [
+        {
+        "string": {
+            "maxLength": 3,
+            "minLength": 1
+        },
+        {"number": {
+            "minimum": 1,
+            "maximum": 10,
+            "multipleOf": 3
+        },
+    ]
+}
+
+{
+    "or": [
+        {"string": {}},
+        {"number": {}}
+    ]
+}
