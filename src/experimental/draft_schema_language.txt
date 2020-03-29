@@ -114,3 +114,22 @@ integer/number takes these assertions -
         {"number": {}}
     ]
 }
+
+
+Latest iteration + syntatic sugar
+
+Profile = {
+    name: string, # should this also be abbreviated to ""?
+    age: integer(range="[0,)")  # this needs to be such that it is alright for either end to be missing
+    email: Email,
+}
+
+Package = {
+    name: string,
+    price: Money,
+    items: [PackageItem*, range="[0,10)"]
+}
+
+PackageItem = {
+    name: string,
+}
